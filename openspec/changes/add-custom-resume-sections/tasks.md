@@ -1,0 +1,42 @@
+# Tasks: Custom Resume Sections
+
+## 1. Custom resume sections
+
+- [x] Create CustomSectionLayoutType type.
+- [x] Create CustomSectionItem type.
+- [x] Create CustomSection type.
+- [x] Add customSections to ResumeData.
+- [x] Add "Add Custom Section" button in resume builder.
+- [x] Allow user to enter custom section title.
+- [x] Allow user to choose custom section layout type.
+- [x] Support free text custom section layout.
+- [x] Support bullet custom section layout.
+- [x] Support two-column bullet custom section layout.
+- [x] Support category/value custom section layout.
+- [x] Allow adding items one by one in bullet layouts.
+- [x] Allow editing custom section items.
+- [x] Allow removing custom section items.
+- [x] Allow moving custom section items up/down.
+- [x] Allow selecting bullet style for bullet-based custom sections.
+- [x] Allow editing custom section title.
+- [x] Allow changing custom section layout type.
+- [x] Allow deleting custom section.
+- [x] Allow hiding/showing custom section.
+- [x] Allow collapsing/expanding custom section card.
+- [x] Include custom sections in section ordering.
+- [x] Moving custom section changes builder order.
+- [x] Moving custom section changes live preview order.
+- [x] Moving custom section changes PDF export order.
+- [x] Moving custom section changes DOCX export order.
+- [x] Moving custom section changes PPTX export order.
+- [x] Save customSections in resumes.json.
+- [x] Load customSections from resumes.json.
+- [x] Render custom sections in Modern template.
+- [x] Render custom sections in Classic template.
+- [x] Render custom sections in Minimal template.
+- [x] Render custom sections in Custom template.
+- [x] Render custom sections in CTS template.
+- [x] Apply selected font and colors to custom sections.
+- [x] Export custom sections to PDF.
+- [x] Export custom sections to DOCX as much as possible.
+- [x] Export custom sections to PPTX as much as possible.

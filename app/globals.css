@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900 antialiased;
+}
+
+/* Adjustable gap between consecutive list / row items in a resume. The gap is
+   driven by the --rf-bullet-gap CSS variable set on the template root (from the
+   per-version line-spacing setting); falls back to the previous fixed spacing. */
+.rf-spaced > * + * {
+  margin-top: var(--rf-bullet-gap, 0.125rem);
+}
+
+/* Print: isolate the resume sheet, hide everything else. */
+@media print {
+  body {
+    background: #fff;
+  }
+
+  /* Force backgrounds/images (incl. the Base64 profile photo) into the PDF. */
+  .print-area,
+  .print-area * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .print-area img {
+    display: block;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-area {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  @page {
+    margin: 12mm;
+  }
+}

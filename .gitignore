@@ -1,0 +1,12 @@
+/node_modules
+/.next
+/out
+/build
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+.env*.local
+
+# Local-dev JSON data store — contains real resume PII (names, emails, phone,
+# embedded photos). Never commit. Keep the folder out of version control.
+/data
