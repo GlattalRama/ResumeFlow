@@ -19,21 +19,25 @@ export const TEMPLATES: TemplateMeta[] = [
     id: "modern",
     name: "Modern",
     description: "Accent sidebar header, bold name, clean section rules.",
+    hidden: true,
   },
   {
     id: "classic",
     name: "Classic",
     description: "Traditional serif, centered header, timeless layout.",
+    hidden: true,
   },
   {
     id: "minimal",
     name: "Minimal",
     description: "Lots of whitespace, light type, understated.",
+    hidden: true,
   },
   {
     id: "custom",
     name: "Custom",
     description: "Two-column accented layout with skill chips.",
+    hidden: true,
   },
   {
     id: "ats-corporate",
@@ -43,6 +47,16 @@ export const TEMPLATES: TemplateMeta[] = [
 ];
 
 export const TEMPLATE_IDS: TemplateId[] = TEMPLATES.map((t) => t.id);
+
+// Templates offered in the picker (hidden ones are kept in TEMPLATES so existing
+// resumes still render and show their name, but are not selectable for now).
+export const VISIBLE_TEMPLATES: TemplateMeta[] = TEMPLATES.filter(
+  (t) => !t.hidden
+);
+
+// Default template for new resume versions: the first visible template.
+export const DEFAULT_TEMPLATE_ID: TemplateId =
+  VISIBLE_TEMPLATES[0]?.id ?? "ats-corporate";
 
 export function isTemplateId(value: string): value is TemplateId {
   return TEMPLATE_IDS.includes(value as TemplateId);

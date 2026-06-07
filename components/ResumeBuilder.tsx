@@ -21,6 +21,7 @@ import type {
 import {
   BULLET_STYLE_OPTIONS,
   CUSTOM_LAYOUT_OPTIONS,
+  DEFAULT_TEMPLATE_ID,
   FONT_OPTIONS,
   customSectionLabel,
   defaultTemplateStyle,
@@ -53,7 +54,7 @@ export default function ResumeBuilder({ mode, initial }: Props) {
   const [versionName, setVersionName] = useState(initial?.versionName ?? "");
   const [targetRole, setTargetRole] = useState(initial?.targetRole ?? "");
   const [template, setTemplate] = useState<TemplateId>(
-    normalizeTemplateId(initial?.selectedTemplate)
+    initial ? normalizeTemplateId(initial.selectedTemplate) : DEFAULT_TEMPLATE_ID
   );
   const [data, setData] = useState<ResumeData>(() => {
     // Shallow-merge with defaults so resumes saved before a field existed

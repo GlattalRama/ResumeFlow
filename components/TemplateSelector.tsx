@@ -1,6 +1,6 @@
 "use client";
 
-import { TEMPLATES } from "@/lib/constants";
+import { VISIBLE_TEMPLATES } from "@/lib/constants";
 import type { TemplateId } from "@/lib/types";
 
 // Template selector cards. Clicking a card switches the live preview.
@@ -13,7 +13,7 @@ export default function TemplateSelector({
 }) {
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-      {TEMPLATES.map((t) => {
+      {VISIBLE_TEMPLATES.map((t) => {
         const active = t.id === value;
         return (
           <button

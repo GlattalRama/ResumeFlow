@@ -12,6 +12,9 @@ export interface TemplateMeta {
   id: TemplateId;
   name: string;
   description: string;
+  // When true, the template stays in the data model (existing resumes still
+  // render) but is hidden from the template picker.
+  hidden?: boolean;
 }
 
 // ---- Resume data (template-agnostic) ----

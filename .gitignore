@@ -10,3 +10,4 @@ next-env.d.ts
 # Local-dev JSON data store — contains real resume PII (names, emails, phone,
 # embedded photos). Never commit. Keep the folder out of version control.
 /data
+.vercel
