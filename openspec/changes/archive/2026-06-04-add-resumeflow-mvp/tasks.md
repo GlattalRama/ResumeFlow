@@ -35,10 +35,10 @@
 - [x] Create ClassicTemplate component.
 - [x] Create MinimalTemplate component.
 - [x] Create CustomTemplate component.
-- [x] Create CtsTemplate component.
+- [x] Create AtsCorporateTemplate component.
 - [x] Create ResumeTemplateRenderer component.
 - [x] Add template selector cards.
-- [x] Show templates: Modern, Classic, Minimal, Custom, CTS.
+- [x] Show templates: Modern, Classic, Minimal, Custom, ATS Corporate Style.
 - [x] Update live preview when template changes.
 - [x] Store selected template in resumes.json.
 - [x] Use selected template when printing/downloading PDF.
@@ -128,12 +128,12 @@
 - [x] Test Q&A.
 - [x] Confirm npm run dev works.
 
-## 15. CTS Areas of Expertise
+## 15. ATS Corporate Style Areas of Expertise
 
 - [x] Add areasOfExpertise field to ResumeData.
 - [x] Add Areas of Expertise input section in resume form.
-- [x] Render Areas of Expertise in CTS template.
-- [x] Render Areas of Expertise as two-column bullet list in CTS template.
+- [x] Render Areas of Expertise in ATS Corporate Style template.
+- [x] Render Areas of Expertise as two-column bullet list in ATS Corporate Style template.
 - [x] Hide Areas of Expertise section when no data exists.
 - [x] Save areasOfExpertise in resumes.json.
 - [x] Load areasOfExpertise from resumes.json.
@@ -148,7 +148,7 @@
 - [x] Add remove photo option.
 - [x] Save profilePhoto in resumes.json.
 - [x] Load profilePhoto from resumes.json.
-- [x] Render profile photo in CTS template header.
+- [x] Render profile photo in ATS Corporate Style template header.
 - [x] Hide photo area or show placeholder when no photo exists.
 - [x] Ensure print/download PDF includes the selected profile photo.
 
@@ -157,7 +157,7 @@
 
 - [x] Add TemplateStyleSettings type.
 - [x] Add templateStyle field to ResumeVersion.
-- [x] Add default style settings for CTS template.
+- [x] Add default style settings for ATS Corporate Style template.
 - [x] Add font selector in resume builder.
 - [x] Add primary color selector.
 - [x] Add body color selector.
@@ -166,7 +166,7 @@
 - [x] Apply selected font and colors to live preview.
 - [x] Save templateStyle in resumes.json.
 - [x] Load templateStyle from resumes.json.
-- [x] Ensure CTS template uses selected font and colors.
+- [x] Ensure ATS Corporate Style template uses selected font and colors.
 - [x] Make style settings reusable for other templates.
 
 ## 18. Export resume in PDF, DOCX, and PPTX
@@ -185,7 +185,7 @@
 - [x] Ensure exports work for Classic template.
 - [x] Ensure exports work for Minimal template.
 - [x] Ensure exports work for Custom template.
-- [x] Ensure exports work for CTS template.
+- [x] Ensure exports work for ATS Corporate Style template.
 
 ## 19. Collapsible and rearrangeable resume form cards
 
@@ -218,7 +218,7 @@
 - [x] Save areasOfExpertiseBulletStyle in resumes.json.
 - [x] Load areasOfExpertiseBulletStyle from resumes.json.
 - [x] Render Areas of Expertise as balanced two-column layout.
-- [x] Ensure two-column layout works in CTS template.
+- [x] Ensure two-column layout works in ATS Corporate Style template.
 - [x] Ensure two-column layout works in all templates where Areas of Expertise is shown.
 - [x] Ensure PDF export preserves bullet style and two-column layout.
 - [x] Ensure DOCX export uses bullet style as much as possible.

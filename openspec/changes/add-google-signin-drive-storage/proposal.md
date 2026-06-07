@@ -35,4 +35,4 @@ ResumeFlow currently stores resume data locally in JSON files. This is useful fo
 - Resume data is saved to Google Drive.
 - Profile photos are saved to Google Drive.
 - ResumeFlow loads user data from Google Drive after sign-in.
-- Existing resume builder and CTS template continue working.
+- Existing resume builder and ATS Corporate Style template continue working.

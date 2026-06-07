@@ -64,10 +64,10 @@ Given the photo upload succeeded
 When the resume is saved
 Then the resume JSON shall store the photo driveFileId, fileName, mimeType, and createdAt.
 
-#### Scenario: CTS template displays Drive photo
+#### Scenario: ATS Corporate Style template displays Drive photo
 Given a resume has profile photo metadata
-When the user previews the CTS template
-Then the CTS template shall display the profile photo.
+When the user previews the ATS Corporate Style template
+Then the ATS Corporate Style template shall display the profile photo.
 
 ### Requirement: Secure token handling
 

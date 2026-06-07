@@ -26,6 +26,7 @@ import {
   defaultTemplateStyle,
   emptyResumeData,
   newCustomSection,
+  normalizeTemplateId,
   orderedDocSections,
   resolveFormCardState,
   resolveSectionState,
@@ -52,7 +53,7 @@ export default function ResumeBuilder({ mode, initial }: Props) {
   const [versionName, setVersionName] = useState(initial?.versionName ?? "");
   const [targetRole, setTargetRole] = useState(initial?.targetRole ?? "");
   const [template, setTemplate] = useState<TemplateId>(
-    initial?.selectedTemplate ?? "modern"
+    normalizeTemplateId(initial?.selectedTemplate)
   );
   const [data, setData] = useState<ResumeData>(() => {
     // Shallow-merge with defaults so resumes saved before a field existed
@@ -261,7 +262,7 @@ export default function ResumeBuilder({ mode, initial }: Props) {
   const photoSrc = data.profilePhotoMeta?.driveFileId
     ? `/api/drive/photos/${data.profilePhotoMeta.driveFileId}`
     : data.profilePhoto || "";
-  // Selected photo shape (CTS template); older records default to "square".
+  // Selected photo shape (ATS Corporate Style template); older records default to "square".
   const photoShape = data.profilePhotoShape ?? "square";
 
   // ----- Profile photo -----
@@ -724,8 +725,8 @@ export default function ResumeBuilder({ mode, initial }: Props) {
           <p className="mt-2 text-xs text-gray-400">
             Applied live to the preview and saved with this version. Margins set
             the printed A4 page margins (and the on-screen sheet padding). The
-            CTS template uses every setting; other templates use the font and
-            primary color.
+            ATS Corporate Style template uses every setting; other templates use
+            the font and primary color.
           </p>
         </>
       ),
@@ -820,7 +821,7 @@ export default function ResumeBuilder({ mode, initial }: Props) {
                 )}
               </div>
             </div>
-            {/* Shape choice (CTS template). Shown once a photo is present. */}
+            {/* Shape choice (ATS Corporate Style template). Shown once a photo is present. */}
             {photoSrc && (
               <div className="mt-2 flex items-center gap-2">
                 <span className="text-xs text-gray-500">Shape:</span>
@@ -846,8 +847,8 @@ export default function ResumeBuilder({ mode, initial }: Props) {
             )}
             <p className="mt-1 text-xs text-gray-400">
               Saved as an image in your Google Drive app data (only the file
-              reference is kept in the resume). Shown in the CTS template
-              header. In local dev mode it is embedded as Base64.
+              reference is kept in the resume). Shown in the ATS Corporate Style
+              template header. In local dev mode it is embedded as Base64.
             </p>
           </div>
         </>
@@ -1371,8 +1372,8 @@ function AreasOfExpertiseEditor({
         </button>
       </div>
       <p className="mt-1 text-xs text-gray-400">
-        Rendered as a balanced two-column list on the CTS template, using the
-        selected bullet style.
+        Rendered as a balanced two-column list on the ATS Corporate Style
+        template, using the selected bullet style.
       </p>
     </div>
   );
@@ -1478,7 +1479,7 @@ function SectionLayoutEditor({
         Reorder and show/hide the sections of the resume document. This order
         applies to the live preview and to the PDF, DOCX, and PPTX exports. Empty
         sections are hidden automatically. “Break after” forces the next section
-        onto a new A4 page (CTS template, preview + PDF).
+        onto a new A4 page (ATS Corporate Style template, preview + PDF).
       </p>
       <div className="space-y-2">
         {entries.map((e, i) => (

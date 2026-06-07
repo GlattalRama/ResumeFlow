@@ -41,7 +41,7 @@ They also need one place to store:
 ## Success Criteria
 
 - User can create and edit resume versions.
-- User can choose resume templates: Modern, Classic, Minimal, Custom, CTS.
+- User can choose resume templates: Modern, Classic, Minimal, Custom, ATS Corporate Style.
 - User can preview resume live.
 - User can print/download resume using selected template.
 - User can add job applications.

@@ -14,10 +14,10 @@ import {
 } from "@/lib/constants";
 import CustomSectionContent, { CategoryValueRows } from "./CustomSectionContent";
 
-// CTS: ATS-friendly, single column, plain headings, no columns. Fully honors
+// ATS Corporate Style: ATS-friendly, single column, plain headings, no columns. Fully honors
 // the per-version style settings (font + colors) and the user-chosen document
 // section order/visibility.
-export default function CtsTemplate({
+export default function AtsCorporateTemplate({
   data,
   style,
   sectionState,
@@ -283,7 +283,7 @@ export default function CtsTemplate({
 }
 
 // Renders Areas of Expertise as two balanced columns (left column fills first)
-// with the selected bullet marker. Used by the CTS template and any other
+// with the selected bullet marker. Used by the ATS Corporate Style template and any other
 // template that shows Areas of Expertise.
 function AreasTwoColumns({
   items,
