@@ -53,7 +53,7 @@
 - [x] Upload profile photo to Google Drive appDataFolder. (`app/api/drive/photos/upload`)
 - [x] Save photo metadata in resume JSON. (`ProfilePhotoMeta` in `lib/types.ts`)
 - [x] Render photo in resume form preview. (`components/ResumeBuilder.tsx`)
-- [x] Render photo in CTS template. (`components/templates/CtsTemplate.tsx`)
+- [x] Render photo in ATS Corporate Style template. (`components/templates/AtsCorporateTemplate.tsx`)
 - [x] Add remove/replace photo support. (`components/ResumeBuilder.tsx`)
 
 ## 8. UI protection
@@ -71,7 +71,7 @@
 - [x] Test save resume to Google Drive. (Drive write path implemented; requires live OAuth credentials to exercise end-to-end)
 - [x] Test reload resume after browser refresh. (server reads from Drive on each request; `dynamic = "force-dynamic"`)
 - [x] Test upload profile photo. (upload route returns Drive metadata / local Base64)
-- [x] Test CTS template with photo. (renders `/api/drive/photos/{id}` or Base64)
+- [x] Test ATS Corporate Style template with photo. (renders `/api/drive/photos/{id}` or Base64)
 - [x] Test application tracking data save/load. (same store facade as resumes)
 - [x] Confirm local JSON mode does not accidentally overwrite Drive data. (backend chosen by `hasGoogleCredentials()`; Drive and local never run together)
 

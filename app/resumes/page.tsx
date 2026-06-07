@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { readAll } from "@/lib/store";
-import { TEMPLATES } from "@/lib/constants";
+import { TEMPLATES, normalizeTemplateId } from "@/lib/constants";
 import { Card, EmptyState, PageHeader, buttonClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
 function templateName(id: string) {
-  return TEMPLATES.find((t) => t.id === id)?.name ?? id;
+  const normalized = normalizeTemplateId(id);
+  return TEMPLATES.find((t) => t.id === normalized)?.name ?? normalized;
 }
 
 export default async function ResumesPage() {

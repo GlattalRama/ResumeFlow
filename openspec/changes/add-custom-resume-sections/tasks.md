@@ -35,7 +35,7 @@
 - [x] Render custom sections in Classic template.
 - [x] Render custom sections in Minimal template.
 - [x] Render custom sections in Custom template.
-- [x] Render custom sections in CTS template.
+- [x] Render custom sections in ATS Corporate Style template.
 - [x] Apply selected font and colors to custom sections.
 - [x] Export custom sections to PDF.
 - [x] Export custom sections to DOCX as much as possible.

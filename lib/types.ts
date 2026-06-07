@@ -1,7 +1,12 @@
 // Core domain types for ResumeFlow MVP.
 // The same ResumeData shape renders across every template.
 
-export type TemplateId = "modern" | "classic" | "minimal" | "custom" | "cts";
+export type TemplateId =
+  | "modern"
+  | "classic"
+  | "minimal"
+  | "custom"
+  | "ats-corporate";
 
 export interface TemplateMeta {
   id: TemplateId;
@@ -53,11 +58,11 @@ export interface ProfilePhotoMeta {
   createdAt: string;
 }
 
-// How the profile photo is masked in templates that render it (currently CTS):
+// How the profile photo is masked in templates that render it (currently ATS Corporate Style):
 // "square" = rounded rectangle, "circle" = circular (square frame).
 export type ProfilePhotoShape = "square" | "circle";
 
-// Marker style for the Areas of Expertise list. Honored by the CTS template
+// Marker style for the Areas of Expertise list. Honored by the ATS Corporate Style template
 // (and any template that renders Areas of Expertise) plus the DOCX/PPTX
 // exporters as closely as each format allows.
 export type ResumeBulletStyle = "bullet" | "dash" | "check" | "arrow" | "none";
@@ -94,7 +99,7 @@ export interface CustomSection {
   order: number;
   // Whether the section appears in the preview and exports.
   visible: boolean;
-  // Force a page break after this section in the preview and PDF (CTS template).
+  // Force a page break after this section in the preview and PDF (ATS Corporate Style template).
   pageBreakAfter?: boolean;
   // Builder-side affordance: whether the section's editor card is collapsed.
   collapsed: boolean;
@@ -113,7 +118,7 @@ export interface ResumeData {
   // Drive-backed profile photo metadata (driveFileId, fileName, mimeType,
   // createdAt). Null/undefined when there is no Drive photo.
   profilePhotoMeta?: ProfilePhotoMeta | null;
-  // Shape the profile photo is rendered with in templates that show it (CTS):
+  // Shape the profile photo is rendered with in templates that show it (ATS Corporate Style):
   // "square" is a rounded rectangle (default), "circle" is circular. Older
   // records may not have this; consumers default to "square".
   profilePhotoShape?: ProfilePhotoShape;
@@ -140,7 +145,7 @@ export interface ResumeData {
 // ---- Template style settings ----
 
 // Per-resume-version font and color customization. The same shape is reusable
-// across every template; CTS is the first template fully wired to honor it.
+// across every template; ATS Corporate Style is the first template fully wired to honor it.
 // All color fields are CSS color strings (hex), fontFamily is a CSS
 // font-family stack.
 // Page margins for the rendered resume, in millimeters. Applied as the printed
@@ -241,7 +246,7 @@ export interface ResumeSectionState {
   collapsed: boolean;
   order: number;
   visible: boolean;
-  // Force a page break after this section in the preview and PDF (CTS template).
+  // Force a page break after this section in the preview and PDF (ATS Corporate Style template).
   pageBreakAfter?: boolean;
 }
 

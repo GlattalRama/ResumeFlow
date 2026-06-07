@@ -52,7 +52,7 @@ Initial templates:
 - Classic
 - Minimal
 - Custom
-- CTS
+- ATS Corporate Style
 
 Each resume version must store selectedTemplate.
 
@@ -64,7 +64,7 @@ Create:
 - /components/templates/ClassicTemplate.tsx
 - /components/templates/MinimalTemplate.tsx
 - /components/templates/CustomTemplate.tsx
-- /components/templates/CtsTemplate.tsx
+- /components/templates/AtsCorporateTemplate.tsx
 - /components/ResumeTemplateRenderer.tsx
 
 ResumeTemplateRenderer receives resumeData and selectedTemplate, then renders the correct template.
@@ -112,15 +112,15 @@ Add placeholder buttons:
 
 No real AI API in MVP.
 
-## CTS Template Areas of Expertise
+## ATS Corporate Style Template Areas of Expertise
 
-The CTS template must show Areas of Expertise below Summary and above Work Experience.
+The ATS Corporate Style template must show Areas of Expertise below Summary and above Work Experience.
 
 The resumeData object must include:
 
 - areasOfExpertise: string[]
 
-The CTS template shall display Areas of Expertise as a two-column bullet list.
+The ATS Corporate Style template shall display Areas of Expertise as a two-column bullet list.
 
 If areasOfExpertise is empty, hide the section.
 
@@ -146,7 +146,7 @@ The resume form shall allow the user to:
 
 Templates may use the profile photo differently.
 
-The CTS template must display the profile photo in the header area, similar to the existing CTS screenshot.
+The ATS Corporate Style template must display the profile photo in the header area, similar to the existing ATS Corporate Style screenshot.
 
 If no profile photo exists, the template should either:
 - hide the photo area
@@ -171,7 +171,7 @@ it otherwise. The DOCX and PPTX exports shall include the languages.
 
 ResumeFlow shall allow users to customize font and colors for resume templates.
 
-This customization is especially required for the CTS template, but the design should be reusable for other templates later.
+This customization is especially required for the ATS Corporate Style template, but the design should be reusable for other templates later.
 
 Each resume version shall store template style settings.
 
@@ -200,7 +200,7 @@ The resume form shall allow the user to:
 
 Each template shall define its own default TemplateStyleSettings. If a resume version has no templateStyle, the template falls back to those defaults.
 
-The CTS template must apply templateStyle to:
+The ATS Corporate Style template must apply templateStyle to:
 - fontFamily for all text
 - primaryColor for the name and section headings
 - bodyColor for body text
@@ -326,7 +326,7 @@ Export should work for all templates:
 
 - Custom
 
-- CTS
+- ATS Corporate Style
 
 
 ## Collapsible and Rearrangeable Resume Form Cards

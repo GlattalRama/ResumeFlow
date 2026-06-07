@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getItem } from "@/lib/store";
-import { TEMPLATES } from "@/lib/constants";
+import { TEMPLATES, normalizeTemplateId } from "@/lib/constants";
 import ResumePreviewPane from "@/components/ResumePreviewPane";
 
 export const dynamic = "force-dynamic";
@@ -15,9 +15,10 @@ export default async function ResumePreviewPage({
   const resume = await getItem("resumes", id);
   if (!resume) notFound();
 
+  const normalizedTemplate = normalizeTemplateId(resume.selectedTemplate);
   const templateName =
-    TEMPLATES.find((t) => t.id === resume.selectedTemplate)?.name ??
-    resume.selectedTemplate;
+    TEMPLATES.find((t) => t.id === normalizedTemplate)?.name ??
+    normalizedTemplate;
 
   return (
     <div>

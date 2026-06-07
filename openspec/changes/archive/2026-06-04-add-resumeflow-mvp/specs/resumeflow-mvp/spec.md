@@ -26,7 +26,7 @@ The system SHALL allow users to select different resume templates for the same r
 
 #### Scenario: User selects a resume template
 Given the user is editing a resume version
-When the user selects Modern, Classic, Minimal, Custom, or CTS template
+When the user selects Modern, Classic, Minimal, Custom, or ATS Corporate Style template
 Then the live preview shall update using the selected template.
 
 #### Scenario: User saves selected template
@@ -117,23 +117,23 @@ Given the user opens ResumeFlow
 When the user moves between dashboard, resumes, and applications
 Then the navigation shall be clear and the UI shall remain simple and responsive.
 
-### Requirement: CTS template Areas of Expertise
+### Requirement: ATS Corporate Style template Areas of Expertise
 
-The CTS resume template SHALL display an Areas of Expertise section using resume JSON data.
+The ATS Corporate Style resume template SHALL display an Areas of Expertise section using resume JSON data.
 
 #### Scenario: User has areas of expertise
 Given a resume version has areasOfExpertise values
-When the user selects the CTS template
-Then the CTS preview shall display an Areas of Expertise section.
+When the user selects the ATS Corporate Style template
+Then the ATS Corporate Style preview shall display an Areas of Expertise section.
 
 #### Scenario: Areas of Expertise has many items
 Given a resume version has multiple areasOfExpertise values
-When the CTS template is rendered
+When the ATS Corporate Style template is rendered
 Then the system shall display the items as a clean two-column bullet list.
 
 #### Scenario: User has no areas of expertise
 Given a resume version has no areasOfExpertise values
-When the CTS template is rendered
+When the ATS Corporate Style template is rendered
 Then the system shall hide the Areas of Expertise section.
 
 ### Requirement: Profile photo support
@@ -150,10 +150,10 @@ Given the user selected a profile photo
 When the user saves the resume version
 Then the system shall store the photo data in resumes.json.
 
-#### Scenario: CTS template displays profile photo
+#### Scenario: ATS Corporate Style template displays profile photo
 Given a resume version has a profilePhoto value
-When the user selects the CTS template
-Then the CTS template shall display the profile photo in the header area.
+When the user selects the ATS Corporate Style template
+Then the ATS Corporate Style template shall display the profile photo in the header area.
 
 #### Scenario: User removes profile photo
 Given a resume version has a profile photo
@@ -209,7 +209,7 @@ When the user clicks Download PPTX
 Then the system shall generate a PowerPoint presentation using the selected resume data, template, and style settings.
 
 #### Scenario: Export works for all templates
-Given the user selected Modern, Classic, Minimal, Custom, or CTS template
+Given the user selected Modern, Classic, Minimal, Custom, or ATS Corporate Style template
 When the user exports the resume
 Then the system shall support PDF, DOCX, and PPTX export for the selected template.
 

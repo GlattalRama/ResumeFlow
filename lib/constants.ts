@@ -36,8 +36,8 @@ export const TEMPLATES: TemplateMeta[] = [
     description: "Two-column accented layout with skill chips.",
   },
   {
-    id: "cts",
-    name: "CTS",
+    id: "ats-corporate",
+    name: "ATS Corporate Style",
     description: "ATS-friendly, single column, plain headings.",
   },
 ];
@@ -46,6 +46,20 @@ export const TEMPLATE_IDS: TemplateId[] = TEMPLATES.map((t) => t.id);
 
 export function isTemplateId(value: string): value is TemplateId {
   return TEMPLATE_IDS.includes(value as TemplateId);
+}
+
+// Legacy template ids that have since been renamed. Existing saved resumes may
+// still store these, so we map them to the current id when loading/displaying.
+const LEGACY_TEMPLATE_IDS: Record<string, TemplateId> = {
+  cts: "ats-corporate",
+};
+
+// Normalizes a stored template id: applies legacy renames and falls back to
+// "modern" for anything unrecognized.
+export function normalizeTemplateId(value: string | null | undefined): TemplateId {
+  if (value && value in LEGACY_TEMPLATE_IDS) return LEGACY_TEMPLATE_IDS[value];
+  if (value && isTemplateId(value)) return value;
+  return "modern";
 }
 
 export const APPLICATION_STATUSES: ApplicationStatus[] = [
@@ -109,11 +123,11 @@ export const FONT_OPTIONS: {
 ];
 
 // Default name / heading size multipliers (× the base body size). These match
-// the CTS template's original visual proportions and are also the reference the
+// the ATS Corporate Style template's original visual proportions and are also the reference the
 // DOCX/PPTX exporters scale against. Exported so every output stays in sync.
 export const DEFAULT_FONT_SCALE = { name: 1.85, heading: 1.08 };
 
-// Default style settings. These reproduce the CTS template's original look
+// Default style settings. These reproduce the ATS Corporate Style template's original look
 // (black headings/body, plain section rules) so existing resumes render
 // unchanged until a user customizes them.
 export function defaultTemplateStyle(): TemplateStyleSettings {
