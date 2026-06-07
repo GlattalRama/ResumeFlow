@@ -31,7 +31,11 @@ import {
   resolveTemplateStyle,
   splitIntoBalancedColumns,
 } from "./constants";
-import { blocksToPlainText, parseSummaryToBlocks } from "./richText";
+import {
+  blocksToPlainText,
+  parseInlineRuns,
+  parseSummaryToBlocks,
+} from "./richText";
 
 // Map an Areas of Expertise bullet style to a pptxgenjs `bullet` text option:
 // native disc for "bullet", no bullet for "none", and a Unicode glyph
@@ -219,6 +223,17 @@ export async function exportResumeDocx(
       children: [new TextRun({ text, size: fs(20), color: body, font })],
     });
   }
+  // A bulleted item whose text may carry inline marks (e.g. a highlight).
+  function bulletRich(value: string) {
+    const runs = parseInlineRuns(value);
+    return new Paragraph({
+      bullet: { level: 0 },
+      spacing: itemSpacing,
+      children: runs.length
+        ? runs.map(richRun)
+        : [new TextRun({ text: "", size: fs(20), color: body, font })],
+    });
+  }
   // A rich-text run (bold/italic/underline/strike) -> docx TextRun.
   function richRun(r: {
     text: string;
@@ -380,7 +395,7 @@ export async function exportResumeDocx(
           .filter(Boolean)
           .join("  |  ");
         if (meta) out.push(bodyPara(meta, { color: muted }));
-        exp.highlights.forEach((h) => out.push(bullet(h)));
+        exp.highlights.forEach((h) => out.push(bulletRich(h)));
       });
       return out;
     },
@@ -769,7 +784,21 @@ export async function exportResumePptx(
       }
       if (exp.highlights.length > 0) {
         sl.addText(
-          exp.highlights.map((h) => ({ text: h, options: { bullet: true } })),
+          exp.highlights.flatMap((h) => {
+            const runs = parseInlineRuns(h);
+            const list = runs.length ? runs : [{ text: "" }];
+            return list.map((r, ri) => ({
+              text: r.text,
+              options: {
+                bullet: true,
+                bold: r.bold,
+                italic: r.italic,
+                underline: r.underline ? { style: "sng" as const } : undefined,
+                strike: r.strike,
+                breakLine: ri === list.length - 1,
+              },
+            }));
+          }),
           {
             x: MARGIN,
             y,

@@ -13,7 +13,7 @@ import {
   splitIntoBalancedColumns,
 } from "@/lib/constants";
 import CustomSectionContent, { CategoryValueRows } from "./CustomSectionContent";
-import RichText from "../RichText";
+import RichText, { InlineRichText } from "../RichText";
 
 // ATS Corporate Style: ATS-friendly, single column, plain headings, no columns. Fully honors
 // the per-version style settings (font + colors) and the user-chosen document
@@ -103,7 +103,7 @@ export default function AtsCorporateTemplate({
             {exp.highlights.length > 0 && (
               <ul className="rf-spaced mt-1 list-disc pl-5">
                 {exp.highlights.map((h, j) => (
-                  <li key={j}>{h}</li>
+                  <li key={j}><InlineRichText value={h} /></li>
                 ))}
               </ul>
             )}

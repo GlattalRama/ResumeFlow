@@ -12,7 +12,7 @@ import {
   resolveTemplateStyle,
 } from "@/lib/constants";
 import CustomSectionContent, { CategoryValueRows } from "./CustomSectionContent";
-import RichText from "../RichText";
+import RichText, { InlineRichText } from "../RichText";
 
 export default function MinimalTemplate({
   data,
@@ -54,7 +54,7 @@ export default function MinimalTemplate({
               <ul className="mt-1 space-y-0.5">
                 {exp.highlights.map((h, j) => (
                   <li key={j} className="text-gray-600">
-                    {h}
+                    <InlineRichText value={h} />
                   </li>
                 ))}
               </ul>

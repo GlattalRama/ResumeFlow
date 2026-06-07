@@ -3,29 +3,39 @@
 import { useEffect, useRef } from "react";
 import { sanitizeSummaryHtml } from "@/lib/richText";
 
-// A small contentEditable rich-text editor supporting paragraphs, bold, and
-// italic. Emits a sanitized, constrained-HTML string via onChange. The editor
-// is uncontrolled after mount (we never write `value` back into the DOM, which
-// would reset the caret) — it is the source of truth while focused.
+// A small contentEditable rich-text editor supporting paragraphs, bold, italic,
+// underline, strikethrough, and (optionally) bullet/numbered lists. Emits a
+// sanitized, constrained-HTML string via onChange. While the user types it is
+// the source of truth (we don't rewrite the DOM, which would reset the caret),
+// but it re-syncs when `value` changes externally (e.g. a list is reordered).
 export default function RichTextEditor({
   value,
   onChange,
   placeholder,
   className = "",
+  showLists = true,
+  hint = "Enter for a new paragraph",
 }: {
   value: string;
   onChange: (html: string) => void;
   placeholder?: string;
   className?: string;
+  showLists?: boolean;
+  hint?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  // The last value we emitted, so we can tell self-edits (skip) from external
+  // value changes (re-sync the DOM).
+  const lastEmitted = useRef<string | null>(null);
 
   // Initialize content once from the incoming value and prefer tag-based
   // formatting (<b>/<i>) + <p> paragraphs over inline-CSS spans.
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    el.innerHTML = sanitizeSummaryHtml(value);
+    const html = sanitizeSummaryHtml(value);
+    el.innerHTML = html;
+    lastEmitted.current = html;
     try {
       document.execCommand("styleWithCSS", false, "false");
       document.execCommand("defaultParagraphSeparator", false, "p");
@@ -36,9 +46,25 @@ export default function RichTextEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Re-sync when `value` changes from outside (not from our own onChange), e.g.
+  // when the parent reorders or removes an item that shares this component slot.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const incoming = sanitizeSummaryHtml(value);
+    if (incoming === lastEmitted.current) return; // our own edit — ignore
+    if (incoming === sanitizeSummaryHtml(el.innerHTML)) return; // already in sync
+    el.innerHTML = incoming;
+    lastEmitted.current = incoming;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
   function emit() {
     const el = ref.current;
-    if (el) onChange(sanitizeSummaryHtml(el.innerHTML));
+    if (!el) return;
+    const html = sanitizeSummaryHtml(el.innerHTML);
+    lastEmitted.current = html;
+    onChange(html);
   }
 
   function format(
@@ -77,22 +103,26 @@ export default function RichTextEditor({
         <ToolbarButton label="Strikethrough" onClick={() => format("strikeThrough")}>
           <span className="line-through">S</span>
         </ToolbarButton>
-        <span className="mx-1 h-4 w-px bg-gray-200" aria-hidden="true" />
-        <ToolbarButton
-          label="Bulleted list"
-          onClick={() => format("insertUnorderedList")}
-        >
-          <ListIcon ordered={false} />
-        </ToolbarButton>
-        <ToolbarButton
-          label="Numbered list"
-          onClick={() => format("insertOrderedList")}
-        >
-          <ListIcon ordered />
-        </ToolbarButton>
-        <span className="ml-1 text-[11px] text-gray-400">
-          Enter for a new paragraph
-        </span>
+        {showLists && (
+          <>
+            <span className="mx-1 h-4 w-px bg-gray-200" aria-hidden="true" />
+            <ToolbarButton
+              label="Bulleted list"
+              onClick={() => format("insertUnorderedList")}
+            >
+              <ListIcon ordered={false} />
+            </ToolbarButton>
+            <ToolbarButton
+              label="Numbered list"
+              onClick={() => format("insertOrderedList")}
+            >
+              <ListIcon ordered />
+            </ToolbarButton>
+          </>
+        )}
+        {hint && (
+          <span className="ml-1 text-[11px] text-gray-400">{hint}</span>
+        )}
       </div>
       <div className="relative">
         {isEmpty && placeholder && (

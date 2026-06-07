@@ -1,5 +1,9 @@
 import { Fragment } from "react";
-import { parseSummaryToBlocks, type RichRun } from "@/lib/richText";
+import {
+  parseInlineRuns,
+  parseSummaryToBlocks,
+  type RichRun,
+} from "@/lib/richText";
 
 // Renders a stored rich-text value (constrained HTML or legacy plain text) as
 // styled paragraphs and lists. Used by every resume template (preview + PDF) so
@@ -45,6 +49,14 @@ export default function RichText({
       })}
     </>
   );
+}
+
+// Renders an inline rich-text value (no block wrapper) — used for single-line
+// fields like work-experience highlights, inside the template's own <li>.
+export function InlineRichText({ value }: { value: string | null | undefined }) {
+  const runs = parseInlineRuns(value);
+  if (runs.length === 0) return null;
+  return <>{runs.map(renderRun)}</>;
 }
 
 function renderRun(r: RichRun, j: number) {

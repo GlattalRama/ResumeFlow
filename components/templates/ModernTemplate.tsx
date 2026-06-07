@@ -12,7 +12,7 @@ import {
   resolveTemplateStyle,
 } from "@/lib/constants";
 import CustomSectionContent, { CategoryValueRows } from "./CustomSectionContent";
-import RichText from "../RichText";
+import RichText, { InlineRichText } from "../RichText";
 
 export default function ModernTemplate({
   data,
@@ -58,7 +58,7 @@ export default function ModernTemplate({
             {exp.highlights.length > 0 && (
               <ul className="mt-1 list-disc space-y-0.5 pl-5">
                 {exp.highlights.map((h, j) => (
-                  <li key={j}>{h}</li>
+                  <li key={j}><InlineRichText value={h} /></li>
                 ))}
               </ul>
             )}

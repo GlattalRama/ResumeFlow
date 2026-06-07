@@ -207,6 +207,41 @@ export function sanitizeSummaryHtml(input: string | null | undefined): string {
   return blocksToHtml(parseSummaryToBlocks(input));
 }
 
+// ---- Inline rich text (single-line values, e.g. each work-experience
+// highlight). These hold only inline marks; block structure is flattened. ----
+
+// Serialize runs to inline HTML (no <p>/<li> wrapper).
+export function runsToHtml(runs: RichRun[]): string {
+  return runs.map(runToHtml).join("");
+}
+
+// Parse an inline value (inline HTML or plain text) into a flat run list,
+// flattening any block structure.
+export function parseInlineRuns(value: string | null | undefined): RichRun[] {
+  return parseSummaryToBlocks(value).flatMap((b) =>
+    b.type === "paragraph" ? b.runs : b.items.flat()
+  );
+}
+
+// Split a block value into per-line inline-HTML strings (one per paragraph or
+// list item), e.g. for the highlights editor. Empty lines are dropped.
+export function htmlToLines(value: string | null | undefined): string[] {
+  const lines = parseSummaryToBlocks(value).flatMap((b) =>
+    b.type === "paragraph" ? [b.runs] : b.items
+  );
+  return lines
+    .map(runsToHtml)
+    .filter((line) => parseInlineRuns(line).some((r) => r.text.trim() !== ""));
+}
+
+// Join per-line inline-HTML strings back into block HTML (one <p> per line) for
+// seeding the editor.
+export function linesToHtml(lines: string[]): string {
+  return blocksToHtml(
+    lines.map((l) => ({ type: "paragraph" as const, runs: parseInlineRuns(l) }))
+  );
+}
+
 // Flatten blocks to plain text. Used for height estimation and plain-text-only
 // consumers. List items are prefixed with a bullet glyph.
 export function blocksToPlainText(blocks: RichBlock[]): string {

@@ -38,6 +38,7 @@ import ResumeTemplateRenderer from "./ResumeTemplateRenderer";
 import A4Preview from "./A4Preview";
 import TemplateSelector from "./TemplateSelector";
 import RichTextEditor from "./RichTextEditor";
+import { htmlToLines, linesToHtml } from "@/lib/richText";
 import { buttonClass } from "./ui";
 
 const inputClass =
@@ -901,14 +902,15 @@ export default function ResumeBuilder({ mode, initial }: Props) {
                 </div>
               </div>
               <div className="mt-2">
-                <label className={labelClass}>Highlights (one per line)</label>
-                <textarea
-                  className={inputClass}
-                  rows={3}
-                  value={exp.highlights.join("\n")}
-                  onChange={(e) =>
-                    updateExperience(i, { highlights: linesToArray(e.target.value) })
+                <label className={labelClass}>Highlights (one bullet per line)</label>
+                <RichTextEditor
+                  value={linesToHtml(exp.highlights)}
+                  onChange={(html) =>
+                    updateExperience(i, { highlights: htmlToLines(html) })
                   }
+                  showLists={false}
+                  hint="One bullet per line — Enter adds a bullet"
+                  placeholder="Key achievements, one per line"
                 />
               </div>
             </ItemCard>
