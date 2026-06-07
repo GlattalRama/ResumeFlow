@@ -12,6 +12,7 @@ import {
   resolveTemplateStyle,
 } from "@/lib/constants";
 import CustomSectionContent, { CategoryValueRows } from "./CustomSectionContent";
+import RichText from "../RichText";
 
 export default function MinimalTemplate({
   data,
@@ -31,7 +32,9 @@ export default function MinimalTemplate({
     // Summary keeps its understated, heading-less treatment, so it has no
     // renamable label in this template.
     summary: (
-      <p className="mt-6 max-w-prose text-gray-600">{basics.summary}</p>
+      <div className="mt-6 max-w-prose text-gray-600">
+        <RichText value={basics.summary} />
+      </div>
     ),
     experience: (
       <Section title={labels.experience} style={s}>

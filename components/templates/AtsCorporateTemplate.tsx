@@ -13,6 +13,7 @@ import {
   splitIntoBalancedColumns,
 } from "@/lib/constants";
 import CustomSectionContent, { CategoryValueRows } from "./CustomSectionContent";
+import RichText from "../RichText";
 
 // ATS Corporate Style: ATS-friendly, single column, plain headings, no columns. Fully honors
 // the per-version style settings (font + colors) and the user-chosen document
@@ -51,7 +52,7 @@ export default function AtsCorporateTemplate({
   const sections: Partial<Record<ResumeSectionId, React.ReactNode>> = {
     summary: (
       <Section title={labels.summary} style={s}>
-        <p>{basics.summary}</p>
+        <RichText value={basics.summary} />
       </Section>
     ),
     areas: (

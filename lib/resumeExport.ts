@@ -31,6 +31,7 @@ import {
   resolveTemplateStyle,
   splitIntoBalancedColumns,
 } from "./constants";
+import { blocksToPlainText, parseSummaryToBlocks } from "./richText";
 
 // Map an Areas of Expertise bullet style to a pptxgenjs `bullet` text option:
 // native disc for "bullet", no bullet for "none", and a Unicode glyph
@@ -218,6 +219,63 @@ export async function exportResumeDocx(
       children: [new TextRun({ text, size: fs(20), color: body, font })],
     });
   }
+  // A rich-text run (bold/italic/underline/strike) -> docx TextRun.
+  function richRun(r: {
+    text: string;
+    bold?: boolean;
+    italic?: boolean;
+    underline?: boolean;
+    strike?: boolean;
+  }) {
+    return new TextRun({
+      text: r.text,
+      bold: r.bold,
+      italics: r.italic,
+      underline: r.underline ? {} : undefined,
+      strike: r.strike,
+      size: fs(20),
+      color: body,
+      font,
+    });
+  }
+  // Rich-text value (e.g. Summary) -> docx paragraphs, preserving paragraphs,
+  // bullet/numbered lists, and inline marks. Falls back to one empty paragraph.
+  function richTextParas(value: string) {
+    const blocks = parseSummaryToBlocks(value);
+    if (blocks.length === 0) return [bodyPara("")];
+    const out: ReturnType<typeof bodyPara>[] = [];
+    for (const b of blocks) {
+      if (b.type === "paragraph") {
+        out.push(
+          new Paragraph({ spacing: bodySpacing, children: b.runs.map(richRun) })
+        );
+      } else {
+        b.items.forEach((item, i) => {
+          out.push(
+            b.ordered
+              ? new Paragraph({
+                  spacing: itemSpacing,
+                  children: [
+                    new TextRun({
+                      text: `${i + 1}. `,
+                      size: fs(20),
+                      color: body,
+                      font,
+                    }),
+                    ...item.map(richRun),
+                  ],
+                })
+              : new Paragraph({
+                  bullet: { level: 0 },
+                  spacing: itemSpacing,
+                  children: item.map(richRun),
+                })
+          );
+        });
+      }
+    }
+    return out;
+  }
   // Areas of Expertise honor the selected marker style as closely as Word
   // allows: a native bullet list for "bullet", a plain paragraph for "none",
   // and a glyph-prefixed paragraph (•/–/✓/→) for the other styles.
@@ -264,7 +322,7 @@ export async function exportResumeDocx(
   // a flat child list. orderedVisibleDocSections decides which run, in what
   // order, and interleaves the custom sections below.
   const sectionBuilders: Record<ResumeSectionId, () => DocxChild[]> = {
-    summary: () => [heading(labels.summary), bodyPara(basics.summary)],
+    summary: () => [heading(labels.summary), ...richTextParas(basics.summary)],
     areas: () => {
       const items = data.areasOfExpertise ?? [];
       // ATS-safe: a single-column bulleted list (no table) for clean parsing.
@@ -560,9 +618,61 @@ export async function exportResumePptx(
   // ---- Section renderers (one per section id) ----
   function renderSummary() {
     sectionTitle(labels.summary);
-    const h = textHeight(basics.summary, pf(14));
+    const blocks = parseSummaryToBlocks(basics.summary);
+    const plain = blocksToPlainText(blocks) || basics.summary;
+    const h = textHeight(plain, pf(14));
     const sl = ensure(h);
-    sl.addText(basics.summary, {
+
+    // Build pptx text runs. Each paragraph/list-item ends with a line break;
+    // list items carry a bullet (disc or number). Inline marks per run.
+    type PptxRun = { text: string; options: Record<string, unknown> };
+    const runs: PptxRun[] = [];
+    const inline = (r: {
+      bold?: boolean;
+      italic?: boolean;
+      underline?: boolean;
+      strike?: boolean;
+    }) => ({
+      bold: r.bold,
+      italic: r.italic,
+      underline: r.underline ? { style: "sng" as const } : undefined,
+      strike: r.strike,
+    });
+
+    if (blocks.length > 0) {
+      blocks.forEach((block, bi) => {
+        const lastBlock = bi === blocks.length - 1;
+        if (block.type === "paragraph") {
+          block.runs.forEach((r, ri) => {
+            runs.push({
+              text: r.text,
+              options: {
+                ...inline(r),
+                breakLine: ri === block.runs.length - 1 && !lastBlock,
+              },
+            });
+          });
+        } else {
+          block.items.forEach((item, ii) => {
+            const lastItem = ii === block.items.length - 1;
+            item.forEach((r, ri) => {
+              runs.push({
+                text: r.text,
+                options: {
+                  ...inline(r),
+                  bullet: block.ordered ? { type: "number" } : true,
+                  breakLine: ri === item.length - 1 && !(lastBlock && lastItem),
+                },
+              });
+            });
+          });
+        }
+      });
+    } else {
+      runs.push({ text: basics.summary, options: {} });
+    }
+
+    sl.addText(runs, {
       x: MARGIN,
       y,
       w: WIDTH,

@@ -37,6 +37,7 @@ import {
 import ResumeTemplateRenderer from "./ResumeTemplateRenderer";
 import A4Preview from "./A4Preview";
 import TemplateSelector from "./TemplateSelector";
+import RichTextEditor from "./RichTextEditor";
 import { buttonClass } from "./ui";
 
 const inputClass =
@@ -859,11 +860,9 @@ export default function ResumeBuilder({ mode, initial }: Props) {
       body: (
         <div>
           <label className={labelClass}>Professional summary</label>
-          <textarea
-            className={inputClass}
-            rows={4}
+          <RichTextEditor
             value={data.basics.summary}
-            onChange={(e) => patchBasics("summary", e.target.value)}
+            onChange={(html) => patchBasics("summary", html)}
             placeholder="2-3 sentences summarizing your experience and strengths."
           />
         </div>

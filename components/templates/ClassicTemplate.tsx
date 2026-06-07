@@ -12,6 +12,7 @@ import {
   resolveTemplateStyle,
 } from "@/lib/constants";
 import CustomSectionContent, { CategoryValueRows } from "./CustomSectionContent";
+import RichText from "../RichText";
 
 export default function ClassicTemplate({
   data,
@@ -30,7 +31,7 @@ export default function ClassicTemplate({
   const sections: Partial<Record<ResumeSectionId, React.ReactNode>> = {
     summary: (
       <Section title={labels.summary} style={s}>
-        <p>{basics.summary}</p>
+        <RichText value={basics.summary} />
       </Section>
     ),
     experience: (

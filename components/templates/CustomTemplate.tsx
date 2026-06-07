@@ -12,6 +12,7 @@ import {
   resolveTemplateStyle,
 } from "@/lib/constants";
 import CustomSectionContent, { CategoryValueRows } from "./CustomSectionContent";
+import RichText from "../RichText";
 
 // Two-column accented layout: left rail for contact/skills, right for content.
 // The left rail background uses the selected primary color. Section ordering is
@@ -74,7 +75,7 @@ export default function CustomTemplate({
   const mainSections: Partial<Record<ResumeSectionId, React.ReactNode>> = {
     summary: (
       <Section title={labels.summary} style={s}>
-        <p>{basics.summary}</p>
+        <RichText value={basics.summary} />
       </Section>
     ),
     experience: (

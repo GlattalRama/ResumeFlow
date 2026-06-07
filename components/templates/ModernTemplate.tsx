@@ -12,6 +12,7 @@ import {
   resolveTemplateStyle,
 } from "@/lib/constants";
 import CustomSectionContent, { CategoryValueRows } from "./CustomSectionContent";
+import RichText from "../RichText";
 
 export default function ModernTemplate({
   data,
@@ -33,7 +34,7 @@ export default function ModernTemplate({
   const sections: Partial<Record<ResumeSectionId, React.ReactNode>> = {
     summary: (
       <Section title={labels.summary} style={s}>
-        <p>{basics.summary}</p>
+        <RichText value={basics.summary} />
       </Section>
     ),
     experience: (
