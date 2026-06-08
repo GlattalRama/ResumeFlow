@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import SignInButton from "@/components/SignInButton";
-import { getSession } from "@/lib/serverSession";
+import { getSession, getAccessToken } from "@/lib/serverSession";
 import { hasGoogleCredentials } from "@/lib/googleConfig";
 
 export const dynamic = "force-dynamic";
@@ -19,10 +19,13 @@ export default async function SignInPage({
   // Already signed in with a valid session — go straight to the app.
   // A session whose token refresh has failed carries an `error`; we must NOT
   // redirect in that case, or middleware will bounce the user right back here
-  // (infinite loop). Instead fall through and show the button to re-authenticate.
+  // (infinite loop). We also require a readable access token via the SAME
+  // reader the layout guard uses — otherwise a session that decodes here but
+  // not in a page would ping-pong between /signin and the target page.
   if (credsConfigured) {
     const session = (await getSession()) as { error?: string } | null;
-    if (session && !session.error) redirect(target);
+    const token = await getAccessToken();
+    if (session && !session.error && token) redirect(target);
   }
 
   return (

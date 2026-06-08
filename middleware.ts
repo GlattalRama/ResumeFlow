@@ -35,7 +35,13 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  // Surface the current path to the root layout (Server Components cannot read
+  // it otherwise) so the layout can run a final auth guard that matches
+  // getAccessToken — catching the rare case where the edge-runtime token read
+  // here succeeds but the node-runtime read in a page comes back empty.
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-pathname", req.nextUrl.pathname);
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 // Run on every route except NextAuth endpoints, the sign-in page, and static

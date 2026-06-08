@@ -61,16 +61,21 @@ export const authOptions: NextAuthOptions = {
           expiresAt: account.expires_at, // unix seconds, from Google
         };
       }
-      // Still valid (with a 60s safety margin) — reuse it.
+      // Still valid (with a 60s safety margin), or expiry unknown — reuse it.
       const expiresAt = token.expiresAt as number | undefined;
-      if (expiresAt && Date.now() < expiresAt * 1000 - 60_000) {
+      if (!expiresAt || Date.now() < expiresAt * 1000 - 60_000) {
         return token;
       }
       // Expired — try to refresh.
       if (token.refreshToken) {
         return await refreshAccessToken(token as Record<string, unknown>);
       }
-      return token;
+      // Expired and no refresh token to recover with (the first consent did not
+      // return one). Flag the session and drop the stale access token so
+      // middleware + getAccessToken treat it as logged-out and route the user
+      // back to sign-in, instead of handing out an expired token that then
+      // fails at the Google Drive API and crashes into the error boundary.
+      return { ...token, accessToken: undefined, error: "RefreshAccessTokenError" };
     },
     async session({ session, token }) {
       // SECURITY: never copy accessToken/refreshToken onto the session — the
