@@ -19,6 +19,10 @@ export default function SettingsForm() {
   const [apiKey, setApiKey] = useState("");
   const [maskedKey, setMaskedKey] = useState<string | null>(null);
   const [hasKey, setHasKey] = useState(false);
+  const [builtIn, setBuiltIn] = useState(false);
+  const [dailyLimit, setDailyLimit] = useState(30);
+  const [usedToday, setUsedToday] = useState(0);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<
     { kind: "idle" | "saving" | "testing" | "ok" | "error"; message?: string }
@@ -31,6 +35,10 @@ export default function SettingsForm() {
         if (s.model) setModel(s.model);
         setHasKey(!!s.hasKey);
         setMaskedKey(s.maskedKey ?? null);
+        setBuiltIn(!!s.builtInAvailable);
+        if (typeof s.dailyLimit === "number") setDailyLimit(s.dailyLimit);
+        if (typeof s.usedToday === "number") setUsedToday(s.usedToday);
+        if (s.hasKey) setShowAdvanced(true);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -87,8 +95,44 @@ export default function SettingsForm() {
 
   return (
     <div className="space-y-6">
+      {builtIn ? (
+        <div className="rounded-md border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+          <p className="font-medium">✓ AI suggestions are built in — no setup needed.</p>
+          <p className="mt-1">
+            Open any resume, then click{" "}
+            <span className="font-medium">✦ Improve with AI</span> on the
+            Summary or a Work Experience entry. You get{" "}
+            <strong>{dailyLimit} free suggestions per day</strong>
+            {usedToday > 0 ? ` (${usedToday} used today)` : ""}.
+          </p>
+        </div>
+      ) : (
+        <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          Built-in AI isn’t configured on this deployment yet. You can still use
+          AI by adding your own key below.
+        </div>
+      )}
+
+      <div>
+        <button
+          type="button"
+          onClick={() => setShowAdvanced((v) => !v)}
+          className="text-sm font-medium text-brand-700 hover:underline"
+        >
+          {showAdvanced ? "▾" : "▸"} Advanced: use your own API key (optional)
+        </button>
+        <p className="mt-1 text-xs text-gray-500">
+          {builtIn
+            ? "Optional — only if you want unlimited suggestions on your own account, bypassing the daily limit."
+            : "Add a key to enable AI suggestions."}
+        </p>
+      </div>
+
+      {!showAdvanced ? null : (
+      <div className="space-y-6 rounded-lg border border-gray-200 p-4">
       <div className="rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
-        ResumeFlow uses <strong>your own</strong> AI key (BYOK). Create a key at{" "}
+        Bring your <strong>own</strong> AI key (BYOK) for unlimited use on your
+        own account. Create a key at{" "}
         <a
           href="https://openrouter.ai/keys"
           target="_blank"
@@ -194,6 +238,8 @@ export default function SettingsForm() {
         >
           {status.message}
         </p>
+      )}
+      </div>
       )}
     </div>
   );

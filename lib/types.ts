@@ -390,6 +390,9 @@ export interface UserSettings {
   provider: AiProvider;
   model: string; // OpenRouter model slug, e.g. "openai/gpt-4o-mini"
   apiKeyEnc: string; // encrypted; "" when no key is configured
+  // Per-user daily usage of the shared (app-provided) AI key. Reset when the
+  // UTC day rolls over. Users on their own key (BYOK) are not metered.
+  usage?: { day: string; count: number };
   updatedAt: string;
 }
 

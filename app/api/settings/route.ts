@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
-import { loadSettings, saveSettings, maskKey } from "@/lib/aiSettings";
+import {
+  loadSettings,
+  saveSettings,
+  maskKey,
+  DEFAULT_MODEL,
+  DAILY_LIMIT,
+} from "@/lib/aiSettings";
 import type { AiProvider } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -9,11 +15,18 @@ export const dynamic = "force-dynamic";
 // key is configured.
 export async function GET() {
   const s = await loadSettings();
+  const today = new Date().toISOString().slice(0, 10);
+  const usedToday =
+    s?.usage && s.usage.day === today ? s.usage.count : 0;
   return NextResponse.json({
     provider: s?.provider ?? "openrouter",
-    model: s?.model ?? "openai/gpt-4o-mini",
+    model: s?.model ?? DEFAULT_MODEL,
     hasKey: !!s?.apiKeyEnc,
     maskedKey: maskKey(s),
+    // Whether the app provides a shared key, so AI works with zero setup.
+    builtInAvailable: !!process.env.OPENROUTER_API_KEY,
+    dailyLimit: DAILY_LIMIT,
+    usedToday,
   });
 }
 

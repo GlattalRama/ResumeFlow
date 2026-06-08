@@ -8,6 +8,17 @@ import type { UserSettings, AiProvider } from "./types";
 
 const SINGLETON = "singleton";
 
+// Default model used with the shared app key (cheap + good enough for resume
+// edits). Overridable via the AI_MODEL env var.
+export const DEFAULT_MODEL = process.env.AI_MODEL || "openai/gpt-4o-mini";
+
+// Per-user daily cap on the shared key (BYOK users aren't metered).
+export const DAILY_LIMIT = Number(process.env.AI_DAILY_LIMIT || "30");
+
+function utcDay(): string {
+  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD (UTC)
+}
+
 export async function loadSettings(): Promise<UserSettings | null> {
   const all = await readAll("settings");
   return all.find((s) => s.id === SINGLETON) ?? all[0] ?? null;
@@ -30,9 +41,38 @@ export async function saveSettings(input: {
       provider: input.provider,
       model: input.model,
       apiKeyEnc,
+      usage: existing?.usage, // preserve today's usage counter
       updatedAt: new Date().toISOString(),
     },
   ]);
+}
+
+// Enforce + increment the per-user daily limit on the shared key. Returns
+// whether the call is allowed and how many remain today. Counts reset at UTC
+// midnight. Increments optimistically before the AI call (a failed call still
+// counts — acceptable for a generous limit).
+export async function checkAndBumpDailyUsage(
+  limit: number
+): Promise<{ ok: boolean; remaining: number }> {
+  const s = await loadSettings();
+  const today = utcDay();
+  const current =
+    s?.usage && s.usage.day === today ? s.usage.count : 0;
+
+  if (current >= limit) return { ok: false, remaining: 0 };
+
+  const next = { day: today, count: current + 1 };
+  await writeAll("settings", [
+    {
+      id: SINGLETON,
+      provider: s?.provider ?? "openrouter",
+      model: s?.model ?? DEFAULT_MODEL,
+      apiKeyEnc: s?.apiKeyEnc ?? "",
+      usage: next,
+      updatedAt: new Date().toISOString(),
+    },
+  ]);
+  return { ok: true, remaining: limit - next.count };
 }
 
 // Decrypt the stored API key. Returns null when none is configured or the
