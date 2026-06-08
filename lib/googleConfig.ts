@@ -19,6 +19,7 @@ const DRIVE_FILE_NAMES: Record<CollectionName, string> = {
   qna: "resumeflow-qna.json",
   statusHistory: "resumeflow-statusHistory.json",
   documents: "resumeflow-documents.json",
+  settings: "resumeflow-settings.json",
 };
 
 export function driveFileName(name: CollectionName): string {

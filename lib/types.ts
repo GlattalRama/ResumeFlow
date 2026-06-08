@@ -376,6 +376,23 @@ export interface DocumentMeta {
   createdAt: string;
 }
 
+// ---- AI / user settings ----
+
+// Per-user AI configuration for the "Improve with AI" feature. Stored as a
+// singleton (id === "singleton") in the user's own Google Drive appData so the
+// app server never persists it. `apiKeyEnc` is the AES-256-GCM encrypted API
+// key (see lib/crypto.ts) — the raw key is never stored or returned to the
+// browser after it is saved.
+export type AiProvider = "openrouter";
+
+export interface UserSettings {
+  id: string; // always "singleton"
+  provider: AiProvider;
+  model: string; // OpenRouter model slug, e.g. "openai/gpt-4o-mini"
+  apiKeyEnc: string; // encrypted; "" when no key is configured
+  updatedAt: string;
+}
+
 // Map collection name -> stored entity type.
 export interface Collections {
   resumes: ResumeVersion;
@@ -384,6 +401,7 @@ export interface Collections {
   qna: QnaItem;
   statusHistory: StatusHistoryEntry;
   documents: DocumentMeta;
+  settings: UserSettings;
 }
 
 export type CollectionName = keyof Collections;

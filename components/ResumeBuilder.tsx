@@ -38,6 +38,7 @@ import ResumeTemplateRenderer from "./ResumeTemplateRenderer";
 import A4Preview from "./A4Preview";
 import TemplateSelector from "./TemplateSelector";
 import RichTextEditor from "./RichTextEditor";
+import ImproveButton from "./ImproveButton";
 import { htmlToLines, linesToHtml } from "@/lib/richText";
 import { buttonClass } from "./ui";
 
@@ -866,6 +867,11 @@ export default function ResumeBuilder({ mode, initial }: Props) {
             onChange={(html) => patchBasics("summary", html)}
             placeholder="2-3 sentences summarizing your experience and strengths."
           />
+          <ImproveButton
+            sectionType="summary"
+            text={htmlToLines(data.basics.summary).join(" ")}
+            onAccept={(v) => patchBasics("summary", v)}
+          />
         </div>
       ),
     },
@@ -911,6 +917,18 @@ export default function ResumeBuilder({ mode, initial }: Props) {
                   showLists={false}
                   hint="One bullet per line — Enter adds a bullet"
                   placeholder="Key achievements, one per line"
+                />
+                <ImproveButton
+                  sectionType="highlights"
+                  text={exp.highlights.join("\n")}
+                  onAccept={(v) =>
+                    updateExperience(i, {
+                      highlights: v
+                        .split("\n")
+                        .map((s) => s.trim())
+                        .filter(Boolean),
+                    })
+                  }
                 />
               </div>
             </ItemCard>
