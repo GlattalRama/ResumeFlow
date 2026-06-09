@@ -739,9 +739,12 @@ export default function ResumeBuilder({ mode, initial }: Props) {
       body: (
         <SectionLayoutEditor
           entries={orderedDocSections(data, sectionState)}
+          sectionById={sectionById}
           onMove={moveDocSection}
           onToggleVisible={toggleDocVisible}
           onTogglePageBreak={togglePageBreak}
+          onRename={renameSection}
+          onResetLabel={resetSectionLabel}
         />
       ),
     },
@@ -1082,14 +1085,7 @@ export default function ResumeBuilder({ mode, initial }: Props) {
               onMoveUp={() => moveCard(card.cardId, -1)}
               onMoveDown={() => moveCard(card.cardId, 1)}
               displayTitle={sec ? sectionLabel(sec) : undefined}
-              defaultTitle={sec?.defaultTitle}
               hasCustomLabel={Boolean(sec?.customTitle)}
-              onRename={
-                sec ? (value) => renameSection(card.cardId, value) : undefined
-              }
-              onResetLabel={
-                sec ? () => resetSectionLabel(card.cardId) : undefined
-              }
             >
               {content.body}
             </CollapsibleCard>
@@ -1156,10 +1152,7 @@ function CollapsibleCard({
   onMoveUp,
   onMoveDown,
   displayTitle,
-  defaultTitle,
   hasCustomLabel,
-  onRename,
-  onResetLabel,
   children,
 }: {
   card: ResumeFormCardState;
@@ -1171,33 +1164,16 @@ function CollapsibleCard({
   onMoveUp: () => void;
   onMoveDown: () => void;
   // For content-section cards: the resolved label shown in the header
-  // (customTitle || defaultTitle), the canonical default, whether a custom label
-  // is set, and rename/reset callbacks. Absent for configuration cards.
+  // (customTitle || defaultTitle) and whether a custom label is set, so the
+  // header reflects renames done in the Document Sections card. Absent for
+  // configuration cards. Renaming itself lives in SectionLayoutEditor.
   displayTitle?: string;
-  defaultTitle?: string;
   hasCustomLabel?: boolean;
-  onRename?: (value: string) => void;
-  onResetLabel?: () => void;
   children: React.ReactNode;
 }) {
-  const [editingLabel, setEditingLabel] = useState(false);
-  const [draft, setDraft] = useState("");
   // Section cards show their (possibly custom) label; other cards keep the
   // canonical card title.
   const title = displayTitle ?? card.title;
-
-  function startEdit() {
-    setDraft(displayTitle ?? "");
-    setEditingLabel(true);
-  }
-  function commit() {
-    onRename?.(draft);
-    setEditingLabel(false);
-  }
-  function reset() {
-    onResetLabel?.();
-    setEditingLabel(false);
-  }
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -1231,11 +1207,6 @@ function CollapsibleCard({
         </button>
         <div className="flex shrink-0 items-center gap-1">
           {headerRight}
-          {onRename && (
-            <IconButton label="Rename section" onClick={startEdit}>
-              ✎
-            </IconButton>
-          )}
           <IconButton label="Move card up" disabled={isFirst} onClick={onMoveUp}>
             ↑
           </IconButton>
@@ -1248,49 +1219,6 @@ function CollapsibleCard({
           </IconButton>
         </div>
       </div>
-      {/* Inline label editor — available even while the card is collapsed. */}
-      {editingLabel && onRename && (
-        <div className="flex flex-wrap items-center gap-2 border-t border-gray-100 px-4 py-2">
-          <input
-            autoFocus
-            className={`${inputClass} flex-1`}
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                commit();
-              } else if (e.key === "Escape") {
-                setEditingLabel(false);
-              }
-            }}
-            placeholder={defaultTitle ? `Default: ${defaultTitle}` : "Section label"}
-          />
-          <button
-            type="button"
-            onClick={commit}
-            className="rounded-md border border-gray-300 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50"
-          >
-            Save
-          </button>
-          {hasCustomLabel && (
-            <button
-              type="button"
-              onClick={reset}
-              className="text-xs text-gray-400 hover:text-brand-600"
-            >
-              Reset to default
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => setEditingLabel(false)}
-            className="text-xs text-gray-400 hover:text-gray-700"
-          >
-            Cancel
-          </button>
-        </div>
-      )}
       {!card.collapsed && <div className="px-4 pb-4">{children}</div>}
     </div>
   );
@@ -1482,79 +1410,177 @@ function SkillCategoryEditor({
 // Default and custom sections live in one ordered list and reorder together.
 function SectionLayoutEditor({
   entries,
+  sectionById,
   onMove,
   onToggleVisible,
   onTogglePageBreak,
+  onRename,
+  onResetLabel,
 }: {
   entries: DocSectionEntry[];
+  sectionById: Record<string, ResumeSectionState>;
   onMove: (kind: DocSectionEntry["kind"], id: string, dir: -1 | 1) => void;
   onToggleVisible: (kind: DocSectionEntry["kind"], id: string) => void;
   onTogglePageBreak: (kind: DocSectionEntry["kind"], id: string) => void;
+  // Rename one of the fixed document sections. A blank value resets it to the
+  // default. Custom sections rename via their own card, so they are not editable
+  // here.
+  onRename: (sectionId: string, value: string) => void;
+  onResetLabel: (sectionId: string) => void;
 }) {
   const entryId = (e: DocSectionEntry) =>
     e.kind === "default" ? e.sectionId : e.id;
+  // Which fixed section (by id) is currently being renamed, and the draft label.
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
+
+  function startEdit(sectionId: string, current: string) {
+    setDraft(current);
+    setEditingId(sectionId);
+  }
+  function commit(sectionId: string) {
+    onRename(sectionId, draft);
+    setEditingId(null);
+  }
+
   return (
     <div>
       <p className="mb-3 text-xs text-gray-400">
-        Reorder and show/hide the sections of the resume document. This order
-        applies to the live preview and to the PDF, DOCX, and PPTX exports. Empty
-        sections are hidden automatically. “Break after” forces the next section
-        onto a new A4 page (ATS Corporate Style template, preview + PDF).
+        Reorder, rename, and show/hide the sections of the resume document. This
+        order and these names apply to the live preview and to the PDF, DOCX, and
+        PPTX exports. Empty sections are hidden automatically. “Break after”
+        forces the next section onto a new A4 page (ATS Corporate Style template,
+        preview + PDF).
       </p>
       <div className="space-y-2">
-        {entries.map((e, i) => (
-          <div
-            key={`${e.kind}:${entryId(e)}`}
-            className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2"
-          >
-            <span
-              className={`truncate text-sm font-medium ${
-                e.visible ? "text-gray-700" : "text-gray-400 line-through"
-              }`}
+        {entries.map((e, i) => {
+          const id = entryId(e);
+          // Only the fixed sections rename here; custom-section titles are edited
+          // in the Custom Sections card.
+          const renamable = e.kind === "default";
+          const sec = renamable ? sectionById[id] : undefined;
+          const hasCustomLabel = Boolean(sec?.customTitle);
+          const isEditing = editingId === id;
+          return (
+            <div
+              key={`${e.kind}:${id}`}
+              className="rounded-lg border border-gray-200 bg-gray-50"
             >
-              {e.label}
-              {e.kind === "custom" && (
-                <span className="ml-1 text-xs font-normal text-gray-400">
-                  (custom)
+              <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+                <span
+                  className={`truncate text-sm font-medium ${
+                    e.visible ? "text-gray-700" : "text-gray-400 line-through"
+                  }`}
+                >
+                  {e.label}
+                  {e.kind === "custom" && (
+                    <span className="ml-1 text-xs font-normal text-gray-400">
+                      (custom)
+                    </span>
+                  )}
+                  {hasCustomLabel && (
+                    <span className="ml-1 text-xs font-normal text-gray-400">
+                      (renamed)
+                    </span>
+                  )}
                 </span>
+                <div className="flex shrink-0 items-center gap-1">
+                  <label className="mr-1 flex items-center gap-1 text-xs text-gray-500">
+                    <input
+                      type="checkbox"
+                      checked={e.visible}
+                      onChange={() => onToggleVisible(e.kind, id)}
+                      className="h-3.5 w-3.5"
+                    />
+                    Show
+                  </label>
+                  <label className="mr-1 flex items-center gap-1 text-xs text-gray-500">
+                    <input
+                      type="checkbox"
+                      checked={e.pageBreakAfter}
+                      onChange={() => onTogglePageBreak(e.kind, id)}
+                      className="h-3.5 w-3.5"
+                    />
+                    Break after
+                  </label>
+                  {renamable && (
+                    <IconButton
+                      label={`Rename “${e.label}” section`}
+                      onClick={() =>
+                        isEditing ? setEditingId(null) : startEdit(id, e.label)
+                      }
+                    >
+                      ✎
+                    </IconButton>
+                  )}
+                  <IconButton
+                    label="Move section up"
+                    disabled={i === 0}
+                    onClick={() => onMove(e.kind, id, -1)}
+                  >
+                    ↑
+                  </IconButton>
+                  <IconButton
+                    label="Move section down"
+                    disabled={i === entries.length - 1}
+                    onClick={() => onMove(e.kind, id, 1)}
+                  >
+                    ↓
+                  </IconButton>
+                </div>
+              </div>
+              {isEditing && renamable && (
+                <div className="flex flex-wrap items-center gap-2 border-t border-gray-200 px-3 py-2">
+                  <input
+                    autoFocus
+                    className={`${inputClass} flex-1`}
+                    value={draft}
+                    onChange={(ev) => setDraft(ev.target.value)}
+                    onKeyDown={(ev) => {
+                      if (ev.key === "Enter") {
+                        ev.preventDefault();
+                        commit(id);
+                      } else if (ev.key === "Escape") {
+                        setEditingId(null);
+                      }
+                    }}
+                    placeholder={
+                      sec?.defaultTitle
+                        ? `Default: ${sec.defaultTitle}`
+                        : "Section name"
+                    }
+                  />
+                  <button
+                    type="button"
+                    onClick={() => commit(id)}
+                    className="rounded-md border border-gray-300 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                  >
+                    Save
+                  </button>
+                  {hasCustomLabel && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onResetLabel(id);
+                        setEditingId(null);
+                      }}
+                      className="text-xs text-gray-400 hover:text-brand-600"
+                    >
+                      Reset to default
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setEditingId(null)}
+                    className="text-xs text-gray-400 hover:text-gray-700"
+                  >
+                    Cancel
+                  </button>
+                </div>
               )}
-            </span>
-            <div className="flex shrink-0 items-center gap-1">
-              <label className="mr-1 flex items-center gap-1 text-xs text-gray-500">
-                <input
-                  type="checkbox"
-                  checked={e.visible}
-                  onChange={() => onToggleVisible(e.kind, entryId(e))}
-                  className="h-3.5 w-3.5"
-                />
-                Show
-              </label>
-              <label className="mr-1 flex items-center gap-1 text-xs text-gray-500">
-                <input
-                  type="checkbox"
-                  checked={e.pageBreakAfter}
-                  onChange={() => onTogglePageBreak(e.kind, entryId(e))}
-                  className="h-3.5 w-3.5"
-                />
-                Break after
-              </label>
-              <IconButton
-                label="Move section up"
-                disabled={i === 0}
-                onClick={() => onMove(e.kind, entryId(e), -1)}
-              >
-                ↑
-              </IconButton>
-              <IconButton
-                label="Move section down"
-                disabled={i === entries.length - 1}
-                onClick={() => onMove(e.kind, entryId(e), 1)}
-              >
-                ↓
-              </IconButton>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
