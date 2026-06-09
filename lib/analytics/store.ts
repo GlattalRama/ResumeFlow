@@ -59,25 +59,28 @@ const localStore: AnalyticsStore = {
 const BLOB_PATH = "analytics/counters.json";
 
 async function readBlob(): Promise<CounterDoc> {
-  const { list } = await import("@vercel/blob");
-  const { blobs } = await list({ prefix: BLOB_PATH });
-  const match = blobs.find((b) => b.pathname === BLOB_PATH);
-  if (!match) return {};
-  // downloadUrl is the non-cached read URL for private/public blobs.
-  const res = await fetch(match.downloadUrl ?? match.url, { cache: "no-store" });
-  if (!res.ok) return {};
-  const parsed = await res.json().catch(() => ({}));
-  return parsed && typeof parsed === "object" ? (parsed as CounterDoc) : {};
+  // Private read: get() authenticates with BLOB_READ_WRITE_TOKEN and streams the
+  // content directly (no public URL). Returns null when the doc doesn't exist
+  // yet (first event hasn't been written) — treat that as empty counters.
+  const { get } = await import("@vercel/blob");
+  const result = await get(BLOB_PATH, { access: "private" });
+  if (!result || result.statusCode !== 200 || !result.stream) return {};
+  try {
+    const text = await new Response(result.stream).text();
+    const parsed = JSON.parse(text || "{}");
+    return parsed && typeof parsed === "object" ? (parsed as CounterDoc) : {};
+  } catch {
+    return {};
+  }
 }
 
 async function writeBlob(doc: CounterDoc): Promise<void> {
   const { put } = await import("@vercel/blob");
   await put(BLOB_PATH, JSON.stringify(doc), {
-    access: "public", // gated by an unguessable URL; never linked from the app
+    access: "private", // owner-only; readable only with the store token
     contentType: "application/json",
     addRandomSuffix: false, // stable path -> overwrite, not a new file each time
     allowOverwrite: true,
-    cacheControlMaxAge: 0,
   });
 }
 
