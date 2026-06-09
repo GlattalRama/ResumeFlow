@@ -276,6 +276,40 @@ export type DocSectionEntry =
       section: CustomSection;
     };
 
+// ---- AI tailoring metadata ----
+
+// One section's outcome from an AI tailoring run, used to render the change
+// summary the user reviews before saving. `rejected` means the model's output
+// for that section failed truth-preservation verification and the source
+// content was kept instead.
+export interface SectionChange {
+  // e.g. "summary", "experience", "skills", "areasOfExpertise".
+  section: string;
+  changeType:
+    | "rephrased"
+    | "reordered"
+    | "emphasized"
+    | "unchanged"
+    | "rejected";
+  // Short human-readable explanation for the review/summary UI.
+  note: string;
+}
+
+// Recorded on a resume version produced by AI tailoring. The job description is
+// SNAPSHOTTED at generation time — the source application's JD may change later,
+// but this records what the version was actually tailored against.
+export interface TailoredResumeMetadata {
+  sourceResumeId: string;
+  applicationId?: string;
+  company: string;
+  jobTitle: string;
+  jobId: string;
+  jobDescriptionSnapshot: string;
+  model: string; // model that produced the tailoring
+  generatedAt: string; // ISO timestamp
+  sectionChanges: SectionChange[];
+}
+
 // ---- Resume version ----
 
 export interface ResumeVersion {
@@ -294,6 +328,13 @@ export interface ResumeVersion {
   // preview and all exports (PDF/DOCX/PPTX). Older records may not have this;
   // renderers fall back to the canonical default section order (all visible).
   sectionState?: ResumeSectionState[];
+  // How this version was produced. Older records have no value; consumers
+  // default to "manual".
+  origin?: "manual" | "tailored";
+  // For tailored versions: the version this one was derived from.
+  sourceResumeId?: string;
+  // Present only on tailored versions (origin === "tailored").
+  tailoredMetadata?: TailoredResumeMetadata;
   createdAt: string;
   updatedAt: string;
   resumeData: ResumeData;
@@ -393,6 +434,12 @@ export interface UserSettings {
   // Per-user daily usage of the shared (app-provided) AI key. Reset when the
   // UTC day rolls over. Users on their own key (BYOK) are not metered.
   usage?: { day: string; count: number };
+  // Id of the resume version designated as the Base Resume (the clean master,
+  // like git `main`). A single pointer rather than a per-version flag, so
+  // "exactly one base" falls out of the data shape. May be undefined (no base
+  // set) or dangling (points at a deleted version) — consumers resolve it via
+  // lib/baseResume.resolveBaseResumeId, which treats a dangling pointer as none.
+  baseResumeId?: string;
   updatedAt: string;
 }
 

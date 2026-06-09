@@ -4,7 +4,11 @@ import type {
   TemplateId,
   TemplateStyleSettings,
 } from "@/lib/types";
-import { normalizeTemplateId, resolveTemplateStyle } from "@/lib/constants";
+import {
+  normalizeResumeData,
+  normalizeTemplateId,
+  resolveTemplateStyle,
+} from "@/lib/constants";
 import ModernTemplate from "./templates/ModernTemplate";
 import ClassicTemplate from "./templates/ClassicTemplate";
 import MinimalTemplate from "./templates/MinimalTemplate";
@@ -32,7 +36,12 @@ export default function ResumeTemplateRenderer({
   atsSafe?: boolean;
 }) {
   const resolved = resolveTemplateStyle(style);
-  const props = { data: resumeData, style: resolved, sectionState };
+  // Backfill missing arrays so legacy/partial records don't crash templates.
+  const props = {
+    data: normalizeResumeData(resumeData),
+    style: resolved,
+    sectionState,
+  };
   switch (normalizeTemplateId(selectedTemplate)) {
     case "classic":
       return <ClassicTemplate {...props} />;

@@ -1,12 +1,5 @@
 import { streamText } from "ai";
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import {
-  loadSettings,
-  decryptApiKey,
-  checkAndBumpDailyUsage,
-  DEFAULT_MODEL,
-  DAILY_LIMIT,
-} from "@/lib/aiSettings";
+import { resolveAiAccess, openrouterModel } from "@/lib/aiServer";
 import { isCreditsError, notifyOwnerCreditsExhausted } from "@/lib/aiNotify";
 
 export const dynamic = "force-dynamic";
@@ -33,42 +26,18 @@ export async function POST(req: Request) {
     });
   }
 
-  const settings = await loadSettings();
-  const userKey = decryptApiKey(settings); // BYOK power users
-  const appKey = process.env.OPENROUTER_API_KEY; // shared, app-provided
-
-  // Prefer the user's own key (unlimited, their bill); otherwise fall back to
-  // the shared app key (metered by a per-user daily cap).
-  const usingUserKey = !!userKey;
-  const apiKey = userKey || appKey;
-  if (!apiKey) {
-    return new Response(
-      "AI suggestions aren't available right now. Please try again later.",
-      { status: 503 }
-    );
+  const access = await resolveAiAccess();
+  if (!access.ok) {
+    return new Response(access.message, { status: access.status });
   }
-
-  if (!usingUserKey) {
-    const cap = await checkAndBumpDailyUsage(DAILY_LIMIT);
-    if (!cap.ok) {
-      return new Response(
-        `You've used today's ${DAILY_LIMIT} free AI suggestions. They reset tomorrow — or add your own API key in Settings for unlimited use.`,
-        { status: 429 }
-      );
-    }
-  }
+  const { usingUserKey } = access;
 
   const system =
     SYSTEM_PROMPTS[sectionType as string] ?? SYSTEM_PROMPTS.generic;
-  // With the shared key we control the model; BYOK users pick their own.
-  const model = usingUserKey
-    ? settings?.model || DEFAULT_MODEL
-    : DEFAULT_MODEL;
 
   try {
-    const openrouter = createOpenRouter({ apiKey });
     const result = streamText({
-      model: openrouter.chat(model),
+      model: openrouterModel(access.apiKey, access.model),
       system,
       prompt: text,
       maxOutputTokens: 800,

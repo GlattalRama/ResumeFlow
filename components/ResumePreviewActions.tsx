@@ -17,6 +17,7 @@ export default function ResumePreviewActions({
   templateStyle,
   sectionState,
   atsSafe = false,
+  isBase = false,
 }: {
   id: string;
   resumeData: ResumeData;
@@ -25,10 +26,26 @@ export default function ResumePreviewActions({
   // When true, DOCX/PDF exports use the ATS-safe layout. The PDF (window.print)
   // prints the currently-rendered preview, so it follows the same toggle.
   atsSafe?: boolean;
+  // Whether this version is the designated Base Resume.
+  isBase?: boolean;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [exporting, setExporting] = useState<"docx" | "pptx" | null>(null);
+
+  async function setBase() {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/base-resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resumeId: id }),
+      });
+      if (res.ok) router.refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function duplicate() {
     setBusy(true);
@@ -43,7 +60,26 @@ export default function ResumePreviewActions({
   }
 
   async function remove() {
-    if (!confirm("Delete this resume version? This cannot be undone.")) return;
+    // The Base Resume is the user's clean master copy — require a stronger,
+    // two-step confirmation before deleting it (and note the base is cleared).
+    if (isBase) {
+      if (
+        !confirm(
+          "This is your BASE RESUME — your clean master copy. Deleting it removes it and clears the Base Resume designation. This cannot be undone."
+        )
+      )
+        return;
+      if (
+        !confirm(
+          "Are you absolutely sure? You'll need to designate a new Base Resume afterward."
+        )
+      )
+        return;
+    } else if (
+      !confirm("Delete this resume version? This cannot be undone.")
+    ) {
+      return;
+    }
     setBusy(true);
     const res = await fetch(`/api/resumes/${id}`, { method: "DELETE" });
     if (res.ok) {
@@ -114,6 +150,20 @@ export default function ResumePreviewActions({
       >
         Duplicate
       </button>
+      {isBase ? (
+        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-emerald-200">
+          ★ Base Resume
+        </span>
+      ) : (
+        <button
+          onClick={setBase}
+          disabled={busy}
+          className={buttonClass("secondary")}
+          type="button"
+        >
+          Set as Base Resume
+        </button>
+      )}
       <button
         onClick={remove}
         disabled={busy}

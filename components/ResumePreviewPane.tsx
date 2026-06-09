@@ -21,12 +21,14 @@ export default function ResumePreviewPane({
   selectedTemplate,
   templateStyle,
   sectionState,
+  isBase = false,
 }: {
   id: string;
   resumeData: ResumeData;
   selectedTemplate: TemplateId;
   templateStyle?: TemplateStyleSettings;
   sectionState?: ResumeSectionState[] | null;
+  isBase?: boolean;
 }) {
   const [atsSafe, setAtsSafe] = useState(false);
   const margins = resolveTemplateStyle(templateStyle).pageMargins;
@@ -52,6 +54,7 @@ export default function ResumePreviewPane({
           templateStyle={templateStyle}
           sectionState={sectionState}
           atsSafe={atsSafe}
+          isBase={isBase}
         />
       </div>
 
