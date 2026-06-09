@@ -24,6 +24,14 @@ const DEFAULT_RANGE: Record<Period, number> = {
   all: 1,
 };
 
+// 2-letter ISO country code -> flag emoji (regional indicator symbols).
+function flagEmoji(cc: string): string {
+  if (!/^[A-Z]{2}$/.test(cc)) return "🏳️";
+  return String.fromCodePoint(
+    ...[...cc].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65)
+  );
+}
+
 function Bars({ values, labels }: { values: number[]; labels: string[] }) {
   const max = Math.max(1, ...values);
   return (
@@ -86,7 +94,7 @@ export default async function AnalyticsDashboard({
       : DEFAULT_RANGE[period];
 
   const report = await getReport(period, range);
-  const { buckets, series, totals } = report;
+  const { buckets, series, totals, countries } = report;
 
   return (
     <div className="space-y-6">
@@ -120,6 +128,12 @@ export default async function AnalyticsDashboard({
           title="Logins"
           total={totals.login}
           values={series.login}
+          labels={buckets}
+        />
+        <MetricCard
+          title="Active users"
+          total={totals.activeUsers}
+          values={series.activeUsers}
           labels={buckets}
         />
         <MetricCard
@@ -162,6 +176,27 @@ export default async function AnalyticsDashboard({
               </li>
             ))}
           </ul>
+        </div>
+        <div className="rounded-lg border border-gray-200 bg-white p-4">
+          <h3 className="text-sm font-medium text-gray-600">Logins by country</h3>
+          <p className="mb-3 text-xs text-gray-400">all-time, where known</p>
+          {countries.length === 0 ? (
+            <p className="text-sm text-gray-400">No data yet.</p>
+          ) : (
+            <ul className="space-y-2">
+              {countries.slice(0, 12).map((c) => (
+                <li
+                  key={c.code}
+                  className="flex items-center justify-between text-sm"
+                >
+                  <span className="text-gray-600">
+                    {flagEmoji(c.code)} {c.code}
+                  </span>
+                  <span className="font-semibold text-gray-900">{c.count}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>
