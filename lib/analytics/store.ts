@@ -21,6 +21,9 @@ export type CounterDoc = Record<string, number>;
 export interface AnalyticsStore {
   increment(keys: string[]): Promise<void>;
   read(keys: string[]): Promise<Record<string, number>>;
+  // Full counter document — used by the report to count prefix-keyed families
+  // (unique-user tokens, country codes) that can't be read by exact key.
+  snapshot(): Promise<CounterDoc>;
 }
 
 // ---- local JSON file store ------------------------------------------------
@@ -51,6 +54,9 @@ const localStore: AnalyticsStore = {
   async read(keys) {
     const doc = await readLocal();
     return Object.fromEntries(keys.map((k) => [k, doc[k] ?? 0]));
+  },
+  async snapshot() {
+    return readLocal();
   },
 };
 
@@ -93,6 +99,9 @@ const blobStore: AnalyticsStore = {
   async read(keys) {
     const doc = await readBlob();
     return Object.fromEntries(keys.map((k) => [k, doc[k] ?? 0]));
+  },
+  async snapshot() {
+    return readBlob();
   },
 };
 

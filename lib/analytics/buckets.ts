@@ -61,12 +61,23 @@ export function storageKey(
   return `${eventType}|${period}|${bucket}|${dimension}`;
 }
 
+const ALL_PERIODS: Period[] = ["day", "week", "month", "year", "all"];
+
 // Every counter key a single event should increment: one per period, in the
 // event's own bucket.
 export function bucketKeysForEvent(event: AnalyticsEvent, date: Date): string[] {
   const dimension = event.type === "resume_exported" ? event.format : "";
-  const periods: Period[] = ["day", "week", "month", "year", "all"];
-  return periods.map((p) => storageKey(event.type, p, bucketKey(p, date), dimension));
+  return ALL_PERIODS.map((p) => storageKey(event.type, p, bucketKey(p, date), dimension));
+}
+
+// Generic per-period keys for a custom metric + dimension (used for the
+// `uu` unique-user tokens and the `country` breakdown).
+export function periodKeys(
+  metric: string,
+  dimension: string,
+  date: Date
+): string[] {
+  return ALL_PERIODS.map((p) => storageKey(metric, p, bucketKey(p, date), dimension));
 }
 
 // ---- reading recent buckets (for the dashboard) ---------------------------

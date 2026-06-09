@@ -1,20 +1,22 @@
-// Dashboard aggregation: read counter series for a period + all-time totals.
+// Dashboard aggregation: read counter series for a period + all-time totals,
+// plus active-user counts and a country breakdown.
 
 import { recentBucketKeys, storageKey } from "./buckets";
-import { getStore } from "./store";
+import { getStore, type CounterDoc } from "./store";
 import {
-  ANALYTICS_EVENT_TYPES,
   EXPORT_FORMATS,
   type AnalyticsEventType,
   type ExportFormat,
   type Period,
 } from "./types";
 
-// Per-period series for one simple (no-dimension) event.
 export type SimpleSeries = number[];
-
-// resume_exported is split by format, plus a `total` across formats.
 export type ExportSeries = { total: number[] } & Record<ExportFormat, number[]>;
+
+export interface CountryCount {
+  code: string;
+  count: number;
+}
 
 export interface AnalyticsReport {
   period: Period;
@@ -25,6 +27,7 @@ export interface AnalyticsReport {
     application_created: SimpleSeries;
     ai_tailored: SimpleSeries;
     resume_exported: ExportSeries;
+    activeUsers: SimpleSeries; // distinct users per bucket
   };
   totals: {
     login: number;
@@ -32,7 +35,9 @@ export interface AnalyticsReport {
     application_created: number;
     ai_tailored: number;
     resume_exported: { total: number } & Record<ExportFormat, number>;
+    activeUsers: number; // all-time distinct users
   };
+  countries: CountryCount[]; // all-time logins by country, desc
 }
 
 const SIMPLE_EVENTS: Exclude<AnalyticsEventType, "resume_exported">[] = [
@@ -42,34 +47,28 @@ const SIMPLE_EVENTS: Exclude<AnalyticsEventType, "resume_exported">[] = [
   "ai_tailored",
 ];
 
+// Count distinct keys under a prefix — each `uu|period|bucket|<token>` key is one
+// distinct user, so the key count is the distinct-user count for that bucket.
+function countPrefix(doc: CounterDoc, prefix: string): number {
+  let n = 0;
+  for (const k in doc) if (k.startsWith(prefix)) n++;
+  return n;
+}
+
 export async function getReport(
   period: Period,
   range: number,
   now = new Date()
 ): Promise<AnalyticsReport> {
   const buckets = recentBucketKeys(period, range, now);
-
-  // Collect every storage key we need for the per-period series...
-  const keys = new Set<string>();
-  for (const b of buckets) {
-    for (const ev of SIMPLE_EVENTS) keys.add(storageKey(ev, period, b));
-    for (const fmt of EXPORT_FORMATS)
-      keys.add(storageKey("resume_exported", period, b, fmt));
-  }
-  // ...plus the all-time totals.
-  for (const ev of SIMPLE_EVENTS) keys.add(storageKey(ev, "all", "all"));
-  for (const fmt of EXPORT_FORMATS)
-    keys.add(storageKey("resume_exported", "all", "all", fmt));
-
-  const counts = await getStore().read([...keys]);
-  const at = (k: string) => counts[k] ?? 0;
+  const doc = await getStore().snapshot();
+  const at = (k: string) => doc[k] ?? 0;
 
   const simpleSeries = (ev: AnalyticsEventType): number[] =>
     buckets.map((b) => at(storageKey(ev, period, b)));
 
-  const exportSeries: ExportSeries = {
-    total: buckets.map(() => 0),
-  } as ExportSeries;
+  // Exports per format + total, per bucket.
+  const exportSeries = { total: buckets.map(() => 0) } as ExportSeries;
   for (const fmt of EXPORT_FORMATS) {
     exportSeries[fmt] = buckets.map((b) =>
       at(storageKey("resume_exported", period, b, fmt))
@@ -79,17 +78,23 @@ export async function getReport(
     EXPORT_FORMATS.reduce((sum, fmt) => sum + exportSeries[fmt][i], 0)
   );
 
-  const exportTotals = { total: 0 } as { total: number } & Record<
-    ExportFormat,
-    number
-  >;
+  const exportTotals = { total: 0 } as { total: number } & Record<ExportFormat, number>;
   for (const fmt of EXPORT_FORMATS) {
     exportTotals[fmt] = at(storageKey("resume_exported", "all", "all", fmt));
   }
-  exportTotals.total = EXPORT_FORMATS.reduce(
-    (sum, fmt) => sum + exportTotals[fmt],
-    0
-  );
+  exportTotals.total = EXPORT_FORMATS.reduce((s, fmt) => s + exportTotals[fmt], 0);
+
+  // Active (distinct) users: count `uu|period|bucket|<token>` keys per bucket.
+  const activeUsers = buckets.map((b) => countPrefix(doc, `uu|${period}|${b}|`));
+  const activeUsersTotal = countPrefix(doc, "uu|all|all|");
+
+  // All-time logins by country, descending.
+  const countryPrefix = "country|all|all|";
+  const countries: CountryCount[] = Object.keys(doc)
+    .filter((k) => k.startsWith(countryPrefix))
+    .map((k) => ({ code: k.slice(countryPrefix.length), count: doc[k] }))
+    .filter((c) => c.code && c.count > 0)
+    .sort((a, b) => b.count - a.count);
 
   return {
     period,
@@ -100,6 +105,7 @@ export async function getReport(
       application_created: simpleSeries("application_created"),
       ai_tailored: simpleSeries("ai_tailored"),
       resume_exported: exportSeries,
+      activeUsers,
     },
     totals: {
       login: at(storageKey("login", "all", "all")),
@@ -107,9 +113,8 @@ export async function getReport(
       application_created: at(storageKey("application_created", "all", "all")),
       ai_tailored: at(storageKey("ai_tailored", "all", "all")),
       resume_exported: exportTotals,
+      activeUsers: activeUsersTotal,
     },
+    countries,
   };
 }
-
-// Re-exported for callers/tests that want the canonical event list.
-export { ANALYTICS_EVENT_TYPES };

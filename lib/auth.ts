@@ -1,7 +1,8 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { GOOGLE_SCOPES, authSecret, useSecureCookies } from "./googleConfig";
-import { track } from "./analytics/track";
+import { headers } from "next/headers";
+import { trackLogin } from "./analytics/track";
 import { isAdminEmail } from "./admin";
 
 // Refresh an expired Google access token using the stored refresh token.
@@ -53,10 +54,18 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn() {
-      // Privacy-friendly login counter (no identity stored). Fail-open: track()
-      // never throws, and we still allow the sign-in regardless.
-      await track({ type: "login" });
+    async signIn({ user }) {
+      // Privacy-friendly login analytics: a login counter, a salted non-reversible
+      // user token (distinct-user counting — no identity stored), and a 2-letter
+      // country code from Vercel's geo header (no IP). Fail-open: never blocks
+      // sign-in, and a missing header/identity is just not counted.
+      let country: string | null = null;
+      try {
+        country = (await headers()).get("x-vercel-ip-country");
+      } catch {
+        // headers() unavailable in this context — skip country.
+      }
+      await trackLogin({ userId: user?.email ?? user?.id ?? null, country });
       return true;
     },
     async jwt({ token, account }) {
