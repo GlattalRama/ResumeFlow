@@ -5,7 +5,7 @@ import { GOOGLE_SCOPES, authSecret, useSecureCookies } from "./googleConfig";
 // Refresh an expired Google access token using the stored refresh token.
 // Google only returns a refresh token on the first consent, so we request
 // access_type=offline + prompt=consent below.
-async function refreshAccessToken(token: Record<string, unknown>) {
+export async function refreshAccessToken(token: Record<string, unknown>) {
   try {
     const res = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",

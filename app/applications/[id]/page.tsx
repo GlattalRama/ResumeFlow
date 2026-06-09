@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getItem, readAll, readByApplication } from "@/lib/store";
+import { resolveBaseResumeId } from "@/lib/baseResume";
 import { Card, StatusBadge } from "@/components/ui";
 import StatusUpdater from "@/components/StatusUpdater";
 import NotesSection from "@/components/NotesSection";
 import DocumentsSection from "@/components/DocumentsSection";
 import AiActions from "@/components/AiActions";
+import TailorResumeFlow from "@/components/TailorResumeFlow";
 import ApplicationActions from "@/components/ApplicationActions";
 
 export const dynamic = "force-dynamic";
@@ -19,19 +21,24 @@ export default async function ApplicationDetailPage({
   const app = await getItem("applications", id);
   if (!app) notFound();
 
-  const [notes, history, documents, qna, resumes] = await Promise.all([
-    readByApplication("notes", id),
-    readByApplication("statusHistory", id),
-    readByApplication("documents", id),
-    readByApplication("qna", id),
-    readAll("resumes"),
-  ]);
+  const [notes, history, documents, qna, resumes, baseResumeId] =
+    await Promise.all([
+      readByApplication("notes", id),
+      readByApplication("statusHistory", id),
+      readByApplication("documents", id),
+      readByApplication("qna", id),
+      readAll("resumes"),
+      resolveBaseResumeId(),
+    ]);
 
   const resumeOptions = resumes.map((r) => ({
     id: r.id,
     label: `${r.versionName} (v${r.versionNumber})`,
   }));
   const linkedResume = resumes.find((r) => r.id === app.resumeVersionUsed);
+  // Tailoring source default: Base Resume → linked version → none (force pick).
+  const defaultSourceId =
+    baseResumeId ?? (linkedResume ? linkedResume.id : "");
 
   const sortedHistory = [...history].sort((a, b) =>
     b.changedAt.localeCompare(a.changedAt)
@@ -151,11 +158,21 @@ export default async function ApplicationDetailPage({
         </div>
       </Card>
 
-      {/* AI placeholders */}
+      {/* AI assistant */}
       <Card>
         <h2 className="mb-3 text-sm font-semibold text-gray-700">
           AI assistant
         </h2>
+        <div className="mb-4">
+          <p className="mb-1 text-xs font-medium text-gray-500">
+            Tailored resume
+          </p>
+          <TailorResumeFlow
+            applicationId={app.id}
+            resumeOptions={resumeOptions}
+            defaultSourceId={defaultSourceId}
+          />
+        </div>
         <AiActions applicationId={app.id} />
       </Card>
 

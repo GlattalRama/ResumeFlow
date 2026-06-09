@@ -25,6 +25,7 @@ import {
   DEFAULT_FONT_SCALE,
   fontExportName,
   getBulletSymbol,
+  normalizeResumeData,
   orderedVisibleDocSections,
   resolveSectionLabels,
   resolveSkillCategories,
@@ -94,6 +95,7 @@ export async function exportResumeDocx(
   // single-column list instead of a (parser-unfriendly) two-cell table.
   atsSafe = false
 ): Promise<void> {
+  data = normalizeResumeData(data); // backfill legacy/partial records
   const s = resolveTemplateStyle(style);
   const font = fontExportName(s.fontFamily);
   const primary = hex(s.primaryColor);
@@ -518,6 +520,7 @@ export async function exportResumePptx(
   style?: TemplateStyleSettings,
   sectionState?: ResumeSectionState[] | null
 ): Promise<void> {
+  data = normalizeResumeData(data); // backfill legacy/partial records
   const s = resolveTemplateStyle(style);
   const font = fontExportName(s.fontFamily);
   const primary = hex(s.primaryColor);

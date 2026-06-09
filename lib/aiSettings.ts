@@ -24,6 +24,28 @@ export async function loadSettings(): Promise<UserSettings | null> {
   return all.find((s) => s.id === SINGLETON) ?? all[0] ?? null;
 }
 
+// Single writer for the settings singleton: load the current record, apply a
+// partial patch, and write it back. Going through one merge point means a write
+// that only cares about one field (e.g. usage or baseResumeId) can never drop
+// the others — the failure mode that previously lost fields on partial writes.
+async function patchSettings(
+  patch: Partial<Omit<UserSettings, "id" | "updatedAt">>
+): Promise<UserSettings> {
+  const s = await loadSettings();
+  const merged: UserSettings = {
+    id: SINGLETON,
+    provider: s?.provider ?? "openrouter",
+    model: s?.model ?? DEFAULT_MODEL,
+    apiKeyEnc: s?.apiKeyEnc ?? "",
+    usage: s?.usage,
+    baseResumeId: s?.baseResumeId,
+    ...patch,
+    updatedAt: new Date().toISOString(),
+  };
+  await writeAll("settings", [merged]);
+  return merged;
+}
+
 // Persist provider/model, and the API key only when a new one is supplied
 // (an empty/omitted apiKey keeps the existing encrypted key untouched).
 export async function saveSettings(input: {
@@ -31,20 +53,19 @@ export async function saveSettings(input: {
   model: string;
   apiKey?: string;
 }): Promise<void> {
-  const existing = await loadSettings();
-  const apiKeyEnc = input.apiKey
-    ? encrypt(input.apiKey)
-    : existing?.apiKeyEnc ?? "";
-  await writeAll("settings", [
-    {
-      id: SINGLETON,
-      provider: input.provider,
-      model: input.model,
-      apiKeyEnc,
-      usage: existing?.usage, // preserve today's usage counter
-      updatedAt: new Date().toISOString(),
-    },
-  ]);
+  const patch: Partial<UserSettings> = {
+    provider: input.provider,
+    model: input.model,
+  };
+  // Only overwrite the stored key when a new one is supplied.
+  if (input.apiKey) patch.apiKeyEnc = encrypt(input.apiKey);
+  await patchSettings(patch);
+}
+
+// Set or clear the Base Resume pointer, preserving all other settings. Pass null
+// to clear it (e.g. when the designated base resume is deleted).
+export async function setBaseResumeId(id: string | null): Promise<void> {
+  await patchSettings({ baseResumeId: id ?? undefined });
 }
 
 // Enforce + increment the per-user daily limit on the shared key. Returns
@@ -62,16 +83,7 @@ export async function checkAndBumpDailyUsage(
   if (current >= limit) return { ok: false, remaining: 0 };
 
   const next = { day: today, count: current + 1 };
-  await writeAll("settings", [
-    {
-      id: SINGLETON,
-      provider: s?.provider ?? "openrouter",
-      model: s?.model ?? DEFAULT_MODEL,
-      apiKeyEnc: s?.apiKeyEnc ?? "",
-      usage: next,
-      updatedAt: new Date().toISOString(),
-    },
-  ]);
+  await patchSettings({ usage: next });
   return { ok: true, remaining: limit - next.count };
 }
 

@@ -202,6 +202,31 @@ export function emptyResumeData(): ResumeData {
   };
 }
 
+// Backfill any missing arrays / basics on a (possibly legacy or partial)
+// ResumeData so consumers can safely call .map/.join without guarding every
+// field. Older records predate some fields (e.g. languages, areasOfExpertise,
+// skillCategories, customSections) and store them as undefined; templates and
+// exporters render the same shape, so normalize once at those entry points.
+export function normalizeResumeData(data: ResumeData): ResumeData {
+  const d = emptyResumeData();
+  return {
+    ...d,
+    ...data,
+    basics: { ...d.basics, ...(data.basics ?? {}) },
+    areasOfExpertise: data.areasOfExpertise ?? d.areasOfExpertise,
+    areasOfExpertiseBulletStyle:
+      data.areasOfExpertiseBulletStyle ?? d.areasOfExpertiseBulletStyle,
+    experience: data.experience ?? d.experience,
+    education: data.education ?? d.education,
+    skills: data.skills ?? d.skills,
+    skillCategories: data.skillCategories ?? d.skillCategories,
+    projects: data.projects ?? d.projects,
+    certifications: data.certifications ?? d.certifications,
+    languages: data.languages ?? d.languages,
+    customSections: data.customSections ?? d.customSections,
+  };
+}
+
 // ---- Areas of Expertise bullet styles ----
 
 // Selectable marker styles for the Areas of Expertise list. `char` is the glyph

@@ -40,6 +40,12 @@ export async function POST(req: Request) {
     // Normalize the document section layout against the canonical section list.
     sectionState: resolveSectionState(body.sectionState),
     resumeData,
+    // AI-tailoring provenance (only set when creating a tailored version).
+    ...(body.origin === "tailored" ? { origin: "tailored" as const } : {}),
+    ...(typeof body.sourceResumeId === "string" && body.sourceResumeId
+      ? { sourceResumeId: body.sourceResumeId }
+      : {}),
+    ...(body.tailoredMetadata ? { tailoredMetadata: body.tailoredMetadata } : {}),
     createdAt: now,
     updatedAt: now,
   });
