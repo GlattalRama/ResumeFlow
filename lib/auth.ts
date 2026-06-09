@@ -1,6 +1,8 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { GOOGLE_SCOPES, authSecret, useSecureCookies } from "./googleConfig";
+import { track } from "./analytics/track";
+import { isAdminEmail } from "./admin";
 
 // Refresh an expired Google access token using the stored refresh token.
 // Google only returns a refresh token on the first consent, so we request
@@ -51,6 +53,12 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn() {
+      // Privacy-friendly login counter (no identity stored). Fail-open: track()
+      // never throws, and we still allow the sign-in regardless.
+      await track({ type: "login" });
+      return true;
+    },
     async jwt({ token, account }) {
       // Initial sign-in: persist the OAuth tokens in the (encrypted) JWT only.
       if (account) {
@@ -84,6 +92,11 @@ export const authOptions: NextAuthOptions = {
       if (token.error) {
         (session as { error?: string }).error = token.error as string;
       }
+      // Non-sensitive flag so the UI can show/hide the admin area. Authorization
+      // is still re-checked server-side on every admin route.
+      (session as { isAdmin?: boolean }).isAdmin = isAdminEmail(
+        session.user?.email ?? null
+      );
       return session;
     },
   },
