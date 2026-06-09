@@ -23,6 +23,11 @@ export default function Nav() {
   // On the sign-in page, show only the brand mark.
   const onSignIn = pathname === "/signin";
 
+  const isAdmin = Boolean((session as { isAdmin?: boolean } | null)?.isAdmin);
+  const links = isAdmin
+    ? [...LINKS, { href: "/admin/analytics", label: "Analytics" }]
+    : LINKS;
+
   return (
     <header className="no-print sticky top-0 z-20 border-b border-gray-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
@@ -35,7 +40,7 @@ export default function Nav() {
 
         {!onSignIn && (
           <nav className="flex items-center gap-1">
-            {LINKS.map((link) => (
+            {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

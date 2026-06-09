@@ -33,6 +33,16 @@ export default function ResumePreviewActions({
   const [busy, setBusy] = useState(false);
   const [exporting, setExporting] = useState<"docx" | "pptx" | null>(null);
 
+  // Fire-and-forget aggregate export counter (no resume content sent).
+  function reportExport(format: "pdf" | "docx" | "pptx") {
+    void fetch("/api/analytics/export", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ format }),
+      keepalive: true,
+    }).catch(() => {});
+  }
+
   async function setBase() {
     setBusy(true);
     try {
@@ -94,6 +104,7 @@ export default function ResumePreviewActions({
     setExporting("docx");
     try {
       await exportResumeDocx(resumeData, templateStyle, sectionState, atsSafe);
+      reportExport("docx");
     } catch (e) {
       console.error(e);
       alert("DOCX export failed.");
@@ -106,6 +117,7 @@ export default function ResumePreviewActions({
     setExporting("pptx");
     try {
       await exportResumePptx(resumeData, templateStyle, sectionState);
+      reportExport("pptx");
     } catch (e) {
       console.error(e);
       alert("PPTX export failed.");
@@ -117,7 +129,10 @@ export default function ResumePreviewActions({
   return (
     <div className="no-print flex flex-wrap gap-2">
       <button
-        onClick={() => window.print()}
+        onClick={() => {
+          reportExport("pdf");
+          window.print();
+        }}
         className={buttonClass("primary")}
         type="button"
       >

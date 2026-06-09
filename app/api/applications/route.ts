@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createItem, readAll } from "@/lib/store";
 import { APPLICATION_STATUSES } from "@/lib/constants";
 import type { ApplicationStatus } from "@/lib/types";
+import { track } from "@/lib/analytics/track";
 
 export async function GET() {
   const apps = await readAll("applications");
@@ -39,6 +40,8 @@ export async function POST(req: Request) {
     changedAt: now,
     comment: "Application created",
   });
+
+  await track({ type: "application_created" });
 
   return NextResponse.json(created, { status: 201 });
 }

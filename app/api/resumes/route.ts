@@ -8,6 +8,7 @@ import {
   resolveTemplateStyle,
 } from "@/lib/constants";
 import type { ResumeData, TemplateId } from "@/lib/types";
+import { track } from "@/lib/analytics/track";
 
 export async function GET() {
   const resumes = await readAll("resumes");
@@ -49,6 +50,10 @@ export async function POST(req: Request) {
     createdAt: now,
     updatedAt: now,
   });
+
+  // A tailored save counts as an AI tailoring; everything else is a plain
+  // resume creation. Aggregate-only, fail-open.
+  await track({ type: body.origin === "tailored" ? "ai_tailored" : "resume_created" });
 
   return NextResponse.json(created, { status: 201 });
 }
