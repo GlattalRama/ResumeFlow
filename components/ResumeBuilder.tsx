@@ -16,12 +16,14 @@ import type {
   ResumeSectionState,
   ResumeVersion,
   TemplateId,
+  TemplateMeta,
   TemplateStyleSettings,
 } from "@/lib/types";
 import {
   BULLET_STYLE_OPTIONS,
   CUSTOM_LAYOUT_OPTIONS,
   DEFAULT_TEMPLATE_ID,
+  VISIBLE_TEMPLATES,
   FONT_OPTIONS,
   customSectionLabel,
   defaultTemplateStyle,
@@ -49,15 +51,24 @@ const labelClass = "block text-xs font-medium text-gray-600 mb-1";
 interface Props {
   mode: "create" | "edit";
   initial?: ResumeVersion;
+  // Templates offered in the picker, resolved against the admin visibility
+  // overrides on the server. Falls back to the static visible set.
+  availableTemplates?: TemplateMeta[];
 }
 
-export default function ResumeBuilder({ mode, initial }: Props) {
+export default function ResumeBuilder({
+  mode,
+  initial,
+  availableTemplates = VISIBLE_TEMPLATES,
+}: Props) {
   const router = useRouter();
 
   const [versionName, setVersionName] = useState(initial?.versionName ?? "");
   const [targetRole, setTargetRole] = useState(initial?.targetRole ?? "");
   const [template, setTemplate] = useState<TemplateId>(
-    initial ? normalizeTemplateId(initial.selectedTemplate) : DEFAULT_TEMPLATE_ID
+    initial
+      ? normalizeTemplateId(initial.selectedTemplate)
+      : availableTemplates[0]?.id ?? DEFAULT_TEMPLATE_ID
   );
   const [data, setData] = useState<ResumeData>(() => {
     // Shallow-merge with defaults so resumes saved before a field existed
@@ -626,7 +637,13 @@ export default function ResumeBuilder({ mode, initial }: Props) {
     { count?: number; headerRight?: React.ReactNode; body: React.ReactNode }
   > = {
     template: {
-      body: <TemplateSelector value={template} onChange={setTemplate} />,
+      body: (
+        <TemplateSelector
+          value={template}
+          onChange={setTemplate}
+          templates={availableTemplates}
+        />
+      ),
     },
     style: {
       headerRight: (

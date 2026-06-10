@@ -1,19 +1,23 @@
 "use client";
 
 import { VISIBLE_TEMPLATES } from "@/lib/constants";
-import type { TemplateId } from "@/lib/types";
+import type { TemplateId, TemplateMeta } from "@/lib/types";
 
-// Template selector cards. Clicking a card switches the live preview.
+// Template selector cards. Clicking a card switches the live preview. The list
+// of offered templates is passed in (resolved against the admin visibility
+// overrides); falls back to the static visible set.
 export default function TemplateSelector({
   value,
   onChange,
+  templates = VISIBLE_TEMPLATES,
 }: {
   value: TemplateId;
   onChange: (id: TemplateId) => void;
+  templates?: TemplateMeta[];
 }) {
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-      {VISIBLE_TEMPLATES.map((t) => {
+      {templates.map((t) => {
         const active = t.id === value;
         return (
           <button

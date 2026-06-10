@@ -14,6 +14,7 @@ import ClassicTemplate from "./templates/ClassicTemplate";
 import MinimalTemplate from "./templates/MinimalTemplate";
 import CustomTemplate from "./templates/CustomTemplate";
 import AtsCorporateTemplate from "./templates/AtsCorporateTemplate";
+import CognizantTemplate from "./templates/CognizantTemplate";
 
 // Renders the correct template for the given resumeData + selectedTemplate.
 // All templates consume the identical ResumeData shape and accept the same
@@ -51,6 +52,8 @@ export default function ResumeTemplateRenderer({
       return <CustomTemplate {...props} />;
     case "ats-corporate":
       return <AtsCorporateTemplate {...props} atsSafe={atsSafe} />;
+    case "cognizant":
+      return <CognizantTemplate {...props} atsSafe={atsSafe} />;
     case "modern":
     default:
       return <ModernTemplate {...props} />;

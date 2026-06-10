@@ -6,7 +6,8 @@ export type TemplateId =
   | "classic"
   | "minimal"
   | "custom"
-  | "ats-corporate";
+  | "ats-corporate"
+  | "cognizant";
 
 export interface TemplateMeta {
   id: TemplateId;
@@ -440,6 +441,12 @@ export interface UserSettings {
   // set) or dangling (points at a deleted version) — consumers resolve it via
   // lib/baseResume.resolveBaseResumeId, which treats a dangling pointer as none.
   baseResumeId?: string;
+  // Admin-controlled per-template visibility overrides, keyed by TemplateId.
+  // A present boolean overrides the template's hardcoded `hidden` default:
+  // true = show in the picker, false = hide. Absent ids fall back to the
+  // hardcoded default (see lib/constants.resolveVisibleTemplates). Lets an admin
+  // turn the otherwise-hidden templates on/off without a code change.
+  templateVisibility?: Record<string, boolean>;
   updatedAt: string;
 }
 
