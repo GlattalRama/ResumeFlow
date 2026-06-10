@@ -53,6 +53,7 @@ export default async function ResumePreviewPage({
         templateStyle={resume.templateStyle}
         sectionState={resume.sectionState}
         isBase={isBase}
+        baseSet={baseResumeId !== null}
       />
     </div>
   );

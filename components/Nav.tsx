@@ -25,7 +25,11 @@ export default function Nav() {
 
   const isAdmin = Boolean((session as { isAdmin?: boolean } | null)?.isAdmin);
   const links = isAdmin
-    ? [...LINKS, { href: "/admin/analytics", label: "Analytics" }]
+    ? [
+        ...LINKS,
+        { href: "/admin/analytics", label: "Analytics" },
+        { href: "/admin/templates", label: "Templates" },
+      ]
     : LINKS;
 
   return (

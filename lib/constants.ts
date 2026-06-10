@@ -44,6 +44,13 @@ export const TEMPLATES: TemplateMeta[] = [
     name: "ATS Corporate Style",
     description: "ATS-friendly, single column, plain headings.",
   },
+  {
+    id: "cognizant",
+    name: "Cognizant Corporate",
+    description:
+      "Branded corporate layout: logo header, blue section rules, two-column expertise, projects page.",
+    hidden: true,
+  },
 ];
 
 export const TEMPLATE_IDS: TemplateId[] = TEMPLATES.map((t) => t.id);
@@ -57,6 +64,27 @@ export const VISIBLE_TEMPLATES: TemplateMeta[] = TEMPLATES.filter(
 // Default template for new resume versions: the first visible template.
 export const DEFAULT_TEMPLATE_ID: TemplateId =
   VISIBLE_TEMPLATES[0]?.id ?? "ats-corporate";
+
+// Effective visibility of a template given the admin overrides map. A present
+// boolean override wins; otherwise fall back to the hardcoded `hidden` default.
+export function isTemplateVisible(
+  meta: TemplateMeta,
+  overrides?: Record<string, boolean> | null
+): boolean {
+  const override = overrides?.[meta.id];
+  if (typeof override === "boolean") return override;
+  return !meta.hidden;
+}
+
+// The templates offered in the picker after applying the admin overrides. Used
+// by the resume builder so admins can enable/disable hidden templates without a
+// code change; falls back to VISIBLE_TEMPLATES when no overrides are passed.
+export function resolveVisibleTemplates(
+  overrides?: Record<string, boolean> | null
+): TemplateMeta[] {
+  if (!overrides) return VISIBLE_TEMPLATES;
+  return TEMPLATES.filter((t) => isTemplateVisible(t, overrides));
+}
 
 export function isTemplateId(value: string): value is TemplateId {
   return TEMPLATE_IDS.includes(value as TemplateId);

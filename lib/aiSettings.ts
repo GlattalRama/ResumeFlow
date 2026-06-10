@@ -39,6 +39,7 @@ async function patchSettings(
     apiKeyEnc: s?.apiKeyEnc ?? "",
     usage: s?.usage,
     baseResumeId: s?.baseResumeId,
+    templateVisibility: s?.templateVisibility,
     ...patch,
     updatedAt: new Date().toISOString(),
   };
@@ -66,6 +67,22 @@ export async function saveSettings(input: {
 // to clear it (e.g. when the designated base resume is deleted).
 export async function setBaseResumeId(id: string | null): Promise<void> {
   await patchSettings({ baseResumeId: id ?? undefined });
+}
+
+// Read the admin template-visibility overrides map (empty when none set).
+export async function loadTemplateVisibility(): Promise<
+  Record<string, boolean>
+> {
+  const s = await loadSettings();
+  return s?.templateVisibility ?? {};
+}
+
+// Persist the admin template-visibility overrides map, preserving all other
+// settings. The map is keyed by TemplateId; true = visible, false = hidden.
+export async function setTemplateVisibility(
+  overrides: Record<string, boolean>
+): Promise<void> {
+  await patchSettings({ templateVisibility: overrides });
 }
 
 // Enforce + increment the per-user daily limit on the shared key. Returns

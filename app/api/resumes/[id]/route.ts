@@ -12,8 +12,7 @@ import {
   resolveSectionState,
   resolveTemplateStyle,
 } from "@/lib/constants";
-import { loadSettings } from "@/lib/aiSettings";
-import { clearBaseResume } from "@/lib/baseResume";
+import { resolveBaseResumeId } from "@/lib/baseResume";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -78,11 +77,29 @@ export async function POST(_req: Request, { params }: Ctx) {
 
 export async function DELETE(_req: Request, { params }: Ctx) {
   const { id } = await params;
+  // Deletion requires a designated Base Resume to protect, and the Base Resume
+  // itself can never be deleted. This guarantees the user always keeps a clean
+  // master copy. resolveBaseResumeId() returns null when none is set or the
+  // pointer is dangling, so this also forces the user to (re)designate a base.
+  const baseResumeId = await resolveBaseResumeId();
+  if (!baseResumeId)
+    return NextResponse.json(
+      {
+        error:
+          "Select a Base Resume first. You must designate a Base Resume before you can delete any resume version.",
+      },
+      { status: 409 }
+    );
+  if (id === baseResumeId)
+    return NextResponse.json(
+      {
+        error:
+          "The Base Resume can't be deleted. Designate a different version as the Base Resume first.",
+      },
+      { status: 409 }
+    );
+
   const ok = await deleteItem("resumes", id);
   if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  // If the deleted version was the Base Resume, clear the dangling pointer so a
-  // future tailoring flow doesn't default to a non-existent base.
-  const settings = await loadSettings();
-  if (settings?.baseResumeId === id) await clearBaseResume();
   return NextResponse.json({ ok: true });
 }
