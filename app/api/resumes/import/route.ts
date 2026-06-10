@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { resolveAiAccess, openrouterModel } from "@/lib/aiServer";
 import { isCreditsError, notifyOwnerCreditsExhausted } from "@/lib/aiNotify";
-import { extractResumeFromText } from "@/lib/aiImport";
+import { extractResumeFromText, htmlToInlineFormattedText } from "@/lib/aiImport";
 import { emptyResumeData, normalizeResumeData } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
@@ -9,10 +9,14 @@ export const maxDuration = 60;
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB — resumes are small; reject blobs early.
 
-// Pull plain text out of an uploaded resume file. PDF via unpdf, .docx via
-// mammoth. Both libs are dynamically imported so they're only loaded on the
-// (rare) import path, not on every cold start.
-async function extractFileText(file: File): Promise<string> {
+// Pull text out of an uploaded resume file. PDF via unpdf (plain text), .docx
+// via mammoth. For .docx we convert to HTML and keep inline bold/italic/
+// underline tags so the import can preserve formatting in the rich-text fields;
+// `formatted` tells the parser the text carries those tags. Both libs are
+// dynamically imported so they're only loaded on the (rare) import path.
+async function extractFileContent(
+  file: File
+): Promise<{ text: string; formatted: boolean }> {
   const name = file.name.toLowerCase();
   const type = file.type;
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -27,13 +31,22 @@ async function extractFileText(file: File): Promise<string> {
     const { getDocumentProxy, extractText } = await import("unpdf");
     const pdf = await getDocumentProxy(new Uint8Array(buffer));
     const { text } = await extractText(pdf, { mergePages: true });
-    return Array.isArray(text) ? text.join("\n") : text;
+    // PDF text extraction has no reliable style runs — import as plain text.
+    return {
+      text: Array.isArray(text) ? text.join("\n") : text,
+      formatted: false,
+    };
   }
 
   if (isDocx) {
     const mammoth = (await import("mammoth")).default;
-    const { value } = await mammoth.extractRawText({ buffer });
-    return value;
+    // convertToHtml emits <strong>/<em> for bold/italic; the styleMap turns the
+    // underline run property into <u> (mammoth ignores underline by default).
+    const { value: html } = await mammoth.convertToHtml(
+      { buffer },
+      { styleMap: ["u => u"] }
+    );
+    return { text: htmlToInlineFormattedText(html), formatted: true };
   }
 
   // Legacy .doc (binary Word) isn't supported by mammoth; tell the user.
@@ -74,8 +87,11 @@ export async function POST(req: Request) {
   // Extract text BEFORE resolving access, so an unreadable file never burns a
   // daily-cap unit.
   let text: string;
+  let formatted = false;
   try {
-    text = (await extractFileText(file)).trim();
+    const content = await extractFileContent(file);
+    text = content.text.trim();
+    formatted = content.formatted;
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Could not read that file.";
@@ -101,7 +117,8 @@ export async function POST(req: Request) {
   try {
     const extracted = await extractResumeFromText(
       text,
-      openrouterModel(access.apiKey, access.model)
+      openrouterModel(access.apiKey, access.model),
+      formatted
     );
     const resumeData = normalizeResumeData({
       ...emptyResumeData(),
