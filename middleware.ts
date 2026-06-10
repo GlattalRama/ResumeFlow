@@ -8,6 +8,19 @@ import { authSecret, useSecureCookies } from "@/lib/googleConfig";
 // When real Google credentials are NOT configured the app runs in local
 // development mode — authentication is not enforced and every page is open.
 export async function middleware(req: NextRequest) {
+  // Canonical-domain redirect: send visitors of the old production *.vercel.app
+  // URLs to the custom domain. Gated on VERCEL_ENV === "production" so preview
+  // deployments keep their own *.vercel.app URLs for testing, and local dev is
+  // unaffected. Runs before the auth check so visitors land on the custom
+  // domain's sign-in (OAuth callbacks target kiwi-cv.com via NEXTAUTH_URL).
+  const host = req.headers.get("host") ?? "";
+  if (process.env.VERCEL_ENV === "production" && host.endsWith(".vercel.app")) {
+    const url = req.nextUrl.clone();
+    url.protocol = "https";
+    url.host = "kiwi-cv.com";
+    return NextResponse.redirect(url, 308);
+  }
+
   const id = process.env.GOOGLE_CLIENT_ID;
   const secret = process.env.GOOGLE_CLIENT_SECRET;
   const credsConfigured =
