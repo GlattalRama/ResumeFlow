@@ -9,11 +9,126 @@ export const maxDuration = 60;
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB — resumes are small; reject blobs early.
 
-// Pull text out of an uploaded resume file. PDF via unpdf (plain text), .docx
-// via mammoth. For .docx we convert to HTML and keep inline bold/italic/
-// underline tags so the import can preserve formatting in the rich-text fields;
-// `formatted` tells the parser the text carries those tags. Both libs are
-// dynamically imported so they're only loaded on the (rare) import path.
+function escHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function tidyInlineText(s: string): string {
+  return s
+    .replace(/[ \t]+/g, " ")
+    .replace(/ *\n */g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+const BOLD_FONT_RE = /bold|black|heavy|semibold|demibold|demi/i;
+const ITALIC_FONT_RE = /italic|oblique/i;
+
+// EXPERIMENTAL best-effort: pull text from a PDF and infer bold/italic per text
+// run from its font. PDFs don't carry real style runs — emphasis is implied by
+// the embedded font's name/flags (e.g. "...-BoldMT") — so this is a heuristic:
+// reliable-ish for bold/italic, and underline is not recoverable (it's drawn as
+// a separate line, not a text attribute). Returns inline <strong>/<em> tagged
+// text. The caller falls back to plain extraction if this throws or yields little.
+async function extractPdfFormatted(
+  buffer: Buffer
+): Promise<{ text: string; formatted: boolean }> {
+  const { getDocumentProxy } = await import("unpdf");
+  const pdf = await getDocumentProxy(new Uint8Array(buffer));
+
+  let out = "";
+  let boldChars = 0;
+  let totalChars = 0;
+
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page = await pdf.getPage(p);
+    // Parse the content stream first so the embedded fonts get registered in
+    // commonObjs — getTextContent alone doesn't load them, and without the
+    // resolved font name (e.g. "Arial,Bold") there's no bold/italic signal.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (page as any).getOperatorList().catch(() => {});
+    const content = await page.getTextContent();
+    const styles: Record<string, { fontFamily?: string }> =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (content as any).styles ?? {};
+
+    const styleOf = (fontName: string): { bold: boolean; italic: boolean } => {
+      // Prefer the resolved font object (has reliable .bold/.italic flags and a
+      // PostScript .name); fall back to the CSS fontFamily from getTextContent.
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const co: any = (page as any).commonObjs;
+        if (co?.has?.(fontName)) {
+          const f = co.get(fontName);
+          const nm = String(f?.name ?? "");
+          return {
+            bold: f?.bold === true || BOLD_FONT_RE.test(nm),
+            italic: f?.italic === true || ITALIC_FONT_RE.test(nm),
+          };
+        }
+      } catch {
+        /* fall through to fontFamily */
+      }
+      const fam = String(styles[fontName]?.fontFamily ?? "");
+      return { bold: BOLD_FONT_RE.test(fam), italic: ITALIC_FONT_RE.test(fam) };
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let prev: any = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    for (const it of content.items as any[]) {
+      if (typeof it.str !== "string") continue;
+      const s: string = it.str;
+      if (s.length === 0) {
+        if (it.hasEOL) {
+          out += "\n";
+          prev = null;
+        }
+        continue;
+      }
+      // Insert a space when two runs on the same line are visually separated
+      // but neither supplies the whitespace (common in PDF text streams).
+      if (prev) {
+        const prevEndX = prev.transform[4] + (prev.width || 0);
+        const gap = it.transform[4] - prevEndX;
+        const approx =
+          prev.width && prev.str.length ? prev.width / prev.str.length : 1.5;
+        if (!/\s$/.test(prev.str) && !/^\s/.test(s) && gap > approx * 0.3) {
+          out += " ";
+        }
+      }
+      const { bold, italic } = styleOf(it.fontName);
+      let chunk = escHtml(s);
+      if (italic) chunk = `<em>${chunk}</em>`;
+      if (bold) chunk = `<strong>${chunk}</strong>`;
+      out += chunk;
+      totalChars += s.length;
+      if (bold) boldChars += s.length;
+      if (it.hasEOL) {
+        out += "\n";
+        prev = null;
+      } else {
+        prev = it;
+      }
+    }
+    out += "\n";
+  }
+
+  // Guard against a resume whose body font merely has a "bold" name: if most of
+  // the text came out bold, the signal is noise — drop bold entirely.
+  if (totalChars > 0 && boldChars / totalChars > 0.6) {
+    out = out.replace(/<\/?strong>/g, "");
+  }
+  out = tidyInlineText(out);
+  return { text: out, formatted: /<(?:strong|em)>/.test(out) };
+}
+
+// Pull text out of an uploaded resume file. PDF via unpdf, .docx via mammoth.
+// Both .docx and PDF attempt to keep inline bold/italic(/underline for .docx)
+// so the import can preserve formatting in the rich-text fields; `formatted`
+// tells the parser the text carries those tags. PDF style detection is a
+// heuristic and falls back to plain text. Both libs are dynamically imported so
+// they're only loaded on the (rare) import path.
 async function extractFileContent(
   file: File
 ): Promise<{ text: string; formatted: boolean }> {
@@ -28,10 +143,19 @@ async function extractFileContent(
     name.endsWith(".docx");
 
   if (isPdf) {
+    // Try the experimental styled extraction first; if it errors or recovers
+    // too little text, fall back to the proven plain-text extraction so PDF
+    // import never regresses.
+    try {
+      const styled = await extractPdfFormatted(buffer);
+      const plainLen = styled.text.replace(/<[^>]+>/g, "").trim().length;
+      if (plainLen >= 30) return styled;
+    } catch {
+      /* fall back to plain text below */
+    }
     const { getDocumentProxy, extractText } = await import("unpdf");
     const pdf = await getDocumentProxy(new Uint8Array(buffer));
     const { text } = await extractText(pdf, { mergePages: true });
-    // PDF text extraction has no reliable style runs — import as plain text.
     return {
       text: Array.isArray(text) ? text.join("\n") : text,
       formatted: false,
