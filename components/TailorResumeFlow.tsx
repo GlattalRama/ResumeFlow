@@ -140,9 +140,7 @@ export default function TailorResumeFlow({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        disabled={!hasResumes}
-        title={hasResumes ? undefined : "Create a resume version first"}
-        className="rounded-md border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700 transition hover:bg-brand-100 disabled:opacity-50"
+        className="rounded-md border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700 transition hover:bg-brand-100"
       >
         Tailor Resume for this Job
       </button>
@@ -170,8 +168,35 @@ export default function TailorResumeFlow({
               </button>
             </div>
 
+            {/* No resumes yet: tailoring needs a source resume to work from. */}
+            {!hasResumes && (
+              <div className="space-y-4">
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                  You don&apos;t have any resumes yet. Tailoring rephrases an
+                  existing resume for this job, so create one first — then come
+                  back here to tailor it.
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={close}
+                    className={buttonClass("secondary")}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/resumes/new")}
+                    className={buttonClass("primary")}
+                  >
+                    Create resume
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Pick a source */}
-            {(phase === "pick" || phase === "generating") && (
+            {hasResumes && (phase === "pick" || phase === "generating") && (
               <div className="space-y-4">
                 <label className="block text-sm">
                   <span className="mb-1 block font-medium text-gray-700">
