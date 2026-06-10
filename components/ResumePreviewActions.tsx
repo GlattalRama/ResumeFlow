@@ -18,6 +18,7 @@ export default function ResumePreviewActions({
   sectionState,
   atsSafe = false,
   isBase = false,
+  baseSet = false,
 }: {
   id: string;
   resumeData: ResumeData;
@@ -28,6 +29,9 @@ export default function ResumePreviewActions({
   atsSafe?: boolean;
   // Whether this version is the designated Base Resume.
   isBase?: boolean;
+  // Whether ANY Base Resume is currently designated. Deletion is only allowed
+  // once a base exists (and the base itself can't be deleted).
+  baseSet?: boolean;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -70,24 +74,23 @@ export default function ResumePreviewActions({
   }
 
   async function remove() {
-    // The Base Resume is the user's clean master copy — require a stronger,
-    // two-step confirmation before deleting it (and note the base is cleared).
+    // Deletion is gated on having a clean master copy to protect:
+    //  - no Base Resume designated → the user must pick one first;
+    //  - this version IS the base → it can't be deleted (pick a different base).
+    // These mirror the server-side guard in /api/resumes/[id] DELETE.
+    if (!baseSet) {
+      alert(
+        "Select a Base Resume first. You must designate a Base Resume before you can delete any resume version."
+      );
+      return;
+    }
     if (isBase) {
-      if (
-        !confirm(
-          "This is your BASE RESUME — your clean master copy. Deleting it removes it and clears the Base Resume designation. This cannot be undone."
-        )
-      )
-        return;
-      if (
-        !confirm(
-          "Are you absolutely sure? You'll need to designate a new Base Resume afterward."
-        )
-      )
-        return;
-    } else if (
-      !confirm("Delete this resume version? This cannot be undone.")
-    ) {
+      alert(
+        "The Base Resume can't be deleted. Designate a different version as the Base Resume first."
+      );
+      return;
+    }
+    if (!confirm("Delete this resume version? This cannot be undone.")) {
       return;
     }
     setBusy(true);
@@ -182,7 +185,16 @@ export default function ResumePreviewActions({
       <button
         onClick={remove}
         disabled={busy}
-        className={buttonClass("danger")}
+        className={`${buttonClass("danger")}${
+          !baseSet || isBase ? " opacity-50" : ""
+        }`}
+        title={
+          !baseSet
+            ? "Select a Base Resume first before deleting any version."
+            : isBase
+            ? "The Base Resume can't be deleted."
+            : undefined
+        }
         type="button"
       >
         Delete
