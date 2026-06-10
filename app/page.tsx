@@ -22,16 +22,15 @@ export const dynamic = "force-dynamic";
 // Statuses considered "closed" — excluded from the Active Applications metric.
 const CLOSED_STATUSES: ApplicationStatus[] = ["Rejected", "Withdrawn"];
 
-// Solid bar colors for the application pipeline, keyed by status. Mirrors the
-// badge accents in STATUS_STYLES but as filled bars.
-const STATUS_BAR: Record<ApplicationStatus, string> = {
-  Saved: "bg-gray-400",
-  Applied: "bg-blue-500",
-  "Phone Screen": "bg-amber-500",
-  Interview: "bg-violet-500",
-  Offer: "bg-emerald-500",
-  Rejected: "bg-red-500",
-  Withdrawn: "bg-gray-300",
+// Gradient fills for the application pipeline bars, keyed by status.
+const STATUS_GRAD: Record<ApplicationStatus, string> = {
+  Saved: "from-slate-300 to-slate-400",
+  Applied: "from-sky-400 to-blue-600",
+  "Phone Screen": "from-amber-400 to-orange-500",
+  Interview: "from-violet-400 to-purple-600",
+  Offer: "from-emerald-400 to-teal-500",
+  Rejected: "from-rose-400 to-red-500",
+  Withdrawn: "from-slate-200 to-slate-300",
 };
 
 export default async function DashboardPage() {
@@ -59,7 +58,7 @@ export default async function DashboardPage() {
       helper: "Tailored resume documents",
       href: "/resumes",
       icon: <DocIcon />,
-      chip: "bg-brand-50 text-brand-600",
+      grad: "from-indigo-500 to-violet-500",
     },
     {
       label: "Applications",
@@ -67,7 +66,7 @@ export default async function DashboardPage() {
       helper: "Jobs you're tracking",
       href: "/applications",
       icon: <BriefcaseIcon />,
-      chip: "bg-blue-50 text-blue-600",
+      grad: "from-sky-500 to-blue-600",
     },
     {
       label: "Active Applications",
@@ -75,7 +74,7 @@ export default async function DashboardPage() {
       helper: "Not rejected or withdrawn",
       href: "/applications",
       icon: <BoltIcon />,
-      chip: "bg-emerald-50 text-emerald-600",
+      grad: "from-emerald-500 to-teal-500",
     },
     {
       label: "Interview Prep Items",
@@ -83,7 +82,7 @@ export default async function DashboardPage() {
       helper: "Saved Q&A to practice",
       href: "/applications",
       icon: <ChatIcon />,
-      chip: "bg-amber-50 text-amber-600",
+      grad: "from-amber-500 to-orange-500",
     },
   ];
 
@@ -177,8 +176,10 @@ export default async function DashboardPage() {
     .sort((a, b) => b.at.localeCompare(a.at))
     .slice(0, 8);
 
+  const totalApps = applications.length;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* ---- Hero ---- */}
       <section className="overflow-hidden rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 via-white to-white p-6 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -210,22 +211,25 @@ export default async function DashboardPage() {
           <Link
             key={m.label}
             href={m.href}
-            className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md"
+            className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm ring-1 ring-transparent transition hover:-translate-y-1 hover:shadow-xl hover:ring-brand-100"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-medium text-gray-500">{m.label}</p>
-                <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900">
+                <p className="mt-2 text-4xl font-bold tracking-tight text-gray-900">
                   {m.value}
                 </p>
                 <p className="mt-1 text-xs text-gray-400">{m.helper}</p>
               </div>
               <span
-                className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${m.chip}`}
+                className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${m.grad} text-white shadow-sm transition group-hover:scale-110`}
               >
                 {m.icon}
               </span>
             </div>
+            <span
+              className={`absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r ${m.grad} opacity-0 transition group-hover:opacity-100`}
+            />
           </Link>
         ))}
       </section>
@@ -239,9 +243,9 @@ export default async function DashboardPage() {
           action={
             <Link
               href="/applications"
-              className="text-xs font-medium text-brand-600 hover:underline"
+              className="text-xs font-semibold text-brand-600 hover:underline"
             >
-              View all
+              View all →
             </Link>
           }
         >
@@ -252,25 +256,34 @@ export default async function DashboardPage() {
               cta={{ href: "/applications/new", label: "Add application" }}
             />
           ) : (
-            <ul className="space-y-3">
-              {pipeline.map((p) => (
-                <li key={p.status} className="flex items-center gap-3">
-                  <span className="w-28 shrink-0 text-xs font-medium text-gray-600">
-                    {p.status}
-                  </span>
-                  <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-gray-100">
-                    <div
-                      className={`h-full rounded-full ${STATUS_BAR[p.status]} transition-all`}
-                      style={{
-                        width: `${Math.round((p.count / pipelineMax) * 100)}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="w-6 shrink-0 text-right text-sm font-semibold tabular-nums text-gray-700">
-                    {p.count}
-                  </span>
-                </li>
-              ))}
+            <ul className="space-y-3.5">
+              {pipeline.map((p) => {
+                const pct = Math.round((p.count / totalApps) * 100) || 0;
+                return (
+                  <li key={p.status} className="flex items-center gap-3">
+                    <span className="w-28 shrink-0 text-xs font-medium text-gray-600">
+                      {p.status}
+                    </span>
+                    <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-gray-100">
+                      <div
+                        className={`h-full rounded-full bg-gradient-to-r ${STATUS_GRAD[p.status]} transition-all duration-500`}
+                        style={{
+                          width: `${Math.max(
+                            p.count > 0 ? 6 : 0,
+                            Math.round((p.count / pipelineMax) * 100)
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                    <span className="w-14 shrink-0 text-right text-sm font-semibold tabular-nums text-gray-700">
+                      {p.count}
+                      <span className="ml-1 text-[11px] font-normal text-gray-400">
+                        {pct}%
+                      </span>
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </SectionCard>
@@ -281,16 +294,16 @@ export default async function DashboardPage() {
               No activity yet. Create a resume or application to get started.
             </p>
           ) : (
-            <ul className="space-y-3">
+            <ul className="relative space-y-1 before:absolute before:bottom-2 before:left-[13px] before:top-2 before:w-px before:bg-gray-100">
               {recentActivity.map((e, i) => {
                 const row = (
                   <div className="flex items-start gap-3">
                     <span
-                      className={`mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full ${e.tone}`}
+                      className={`relative z-10 mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full ring-4 ring-white ${e.tone}`}
                     >
                       <ActivityDot className="h-3.5 w-3.5" />
                     </span>
-                    <div className="min-w-0">
+                    <div className="min-w-0 pt-0.5">
                       <p className="text-sm leading-snug text-gray-700">
                         {e.text}
                       </p>
@@ -303,12 +316,12 @@ export default async function DashboardPage() {
                     {e.href ? (
                       <Link
                         href={e.href}
-                        className="-mx-2 block rounded-lg px-2 py-1 transition hover:bg-gray-50"
+                        className="-mx-2 block rounded-lg px-2 py-1.5 transition hover:bg-gray-50"
                       >
                         {row}
                       </Link>
                     ) : (
-                      <div className="px-2 py-1">{row}</div>
+                      <div className="px-2 py-1.5">{row}</div>
                     )}
                   </li>
                 );
@@ -326,9 +339,9 @@ export default async function DashboardPage() {
           action={
             <Link
               href="/applications"
-              className="text-xs font-medium text-brand-600 hover:underline"
+              className="text-xs font-semibold text-brand-600 hover:underline"
             >
-              View all
+              View all →
             </Link>
           }
         >
@@ -374,9 +387,9 @@ export default async function DashboardPage() {
           action={
             <Link
               href="/resumes"
-              className="text-xs font-medium text-brand-600 hover:underline"
+              className="text-xs font-semibold text-brand-600 hover:underline"
             >
-              View all
+              View all →
             </Link>
           }
         >
@@ -434,14 +447,12 @@ function SectionCard({
 }) {
   return (
     <div
-      className={`rounded-2xl border border-gray-200 bg-white p-5 shadow-sm ${className}`}
+      className={`rounded-2xl border border-gray-100 bg-white p-5 shadow-sm ${className}`}
     >
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold text-gray-900">{title}</h2>
-          {subtitle && (
-            <p className="text-xs text-gray-400">{subtitle}</p>
-          )}
+          {subtitle && <p className="text-xs text-gray-400">{subtitle}</p>}
         </div>
         {action}
       </div>
