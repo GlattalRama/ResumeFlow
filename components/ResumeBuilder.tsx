@@ -138,6 +138,12 @@ export default function ResumeBuilder({ mode, initial }: Props) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  // Create-mode "Import from PDF/Word": parse an uploaded resume with AI and
+  // pre-fill the builder. Persists nothing — the user reviews then presses
+  // "Create resume" through the normal save path.
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState("");
+  const [importNote, setImportNote] = useState("");
   // Live-preview-only: render the ATS-safe layout (single column, no photo).
   const [atsView, setAtsView] = useState(false);
 
@@ -540,6 +546,45 @@ export default function ResumeBuilder({ mode, initial }: Props) {
       .split("\n")
       .map((s) => s.trim())
       .filter(Boolean);
+  }
+
+  // Upload a resume file, parse it with AI, and replace the builder contents
+  // with the extracted data. Also seeds a sensible version name / target role
+  // from the parsed identity when those are still blank.
+  async function importResume(file: File) {
+    setImporting(true);
+    setImportError("");
+    setImportNote("");
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/resumes/import", {
+        method: "POST",
+        body: form,
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(json?.error || "Import failed");
+      }
+      const imported = json.resumeData as ResumeData;
+      // skillCategories is the single source for Technical Skills; drop any
+      // legacy flat skills so the new editor shows the extracted rows.
+      imported.skills = [];
+      setData(imported);
+      if (!versionName.trim() && imported.basics?.name) {
+        setVersionName(`${imported.basics.name} — imported`);
+      }
+      if (!targetRole.trim() && imported.basics?.title) {
+        setTargetRole(imported.basics.title);
+      }
+      setImportNote(
+        "Imported. Review the sections below, then press “Create resume” to save."
+      );
+    } catch (e) {
+      setImportError(e instanceof Error ? e.message : "Import failed");
+    } finally {
+      setImporting(false);
+    }
   }
 
   async function save() {
@@ -1061,6 +1106,52 @@ export default function ResumeBuilder({ mode, initial }: Props) {
     <div className="grid gap-4 lg:grid-cols-5">
       {/* Left: ordered, collapsible, draggable form cards */}
       <div className="space-y-4 lg:col-span-2">
+        {mode === "create" && (
+          <div className="rounded-xl border border-brand-200 bg-brand-50 p-4 shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-gray-800">
+                  Start from an existing resume
+                </p>
+                <p className="mt-0.5 text-xs text-gray-600">
+                  Upload a PDF or Word (.docx) file and AI will sort it into the
+                  sections below. Nothing is saved until you press “Create
+                  resume”.
+                </p>
+              </div>
+              <label
+                className={`shrink-0 cursor-pointer ${buttonClass("primary")} ${
+                  importing ? "pointer-events-none opacity-60" : ""
+                }`}
+              >
+                {importing ? "Reading…" : "Import file"}
+                <input
+                  type="file"
+                  accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  className="hidden"
+                  disabled={importing}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    // Reset so re-selecting the same file fires onChange again.
+                    e.target.value = "";
+                    if (file) void importResume(file);
+                  }}
+                />
+              </label>
+            </div>
+            {importing && (
+              <p className="mt-2 text-xs text-gray-500">
+                Parsing and categorizing with AI — this can take a few seconds.
+              </p>
+            )}
+            {importError && (
+              <p className="mt-2 text-xs text-red-600">{importError}</p>
+            )}
+            {importNote && !importError && (
+              <p className="mt-2 text-xs text-green-700">{importNote}</p>
+            )}
+          </div>
+        )}
         <p className="text-xs text-gray-400">
           Use the ↑ ↓ controls to reorder cards, or click a card header to
           collapse it. Your layout is saved with this version and only affects
