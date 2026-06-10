@@ -117,7 +117,7 @@ export default function CognizantTemplate({
       {/* ---- Header: photo · name/title · contact column · logo ---- */}
       {!atsSafe && (
         <div className="mb-2 flex justify-end">
-          <CognizantLogo color={BRAND.blue} />
+          <CognizantLogo />
         </div>
       )}
       <header className="flex items-start gap-6">
@@ -504,22 +504,17 @@ function ContactRow({
   );
 }
 
-// Cognizant wordmark with a hexagon mark. Self-contained (no asset/import) and
-// tinted with the template's primary color so it tracks color customization.
-function CognizantLogo({ color }: { color: string }) {
+// Official Cognizant primary horizontal logo, served from /public. The PNG is
+// full-color with a transparent background, so it sits cleanly on the header and
+// prints/exports to PDF as part of the page.
+function CognizantLogo() {
   return (
-    <div className="flex items-center gap-1.5">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill={color} aria-hidden>
-        <path d="M12 1.7l9 5.2v10.4l-9 5.2-9-5.2V6.9l9-5.2z" opacity="0.92" />
-      </svg>
-      <span
-        className="font-semibold tracking-tight"
-        style={{ color, fontSize: "1.15em" }}
-      >
-        Cognizant
-        <sup style={{ fontSize: "0.5em" }}>™</sup>
-      </span>
-    </div>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/cognizant-logo.png"
+      alt="Cognizant"
+      style={{ height: 30, width: "auto" }}
+    />
   );
 }
 
