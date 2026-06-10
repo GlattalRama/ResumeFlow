@@ -17,6 +17,18 @@ import {
 } from "@/lib/constants";
 import RichText, { InlineRichText } from "../RichText";
 
+// Fixed Cognizant brand palette + font. This template is a branded layout, so it
+// renders with these regardless of the global color/font pickers — only size,
+// margins, line spacing, and the name/heading scale stay user-editable.
+const BRAND = {
+  navy: "#1A3A6B", // section headings + name
+  blue: "#1B7FC4", // logo, contact icons, education course, project name
+  body: "#222222",
+  muted: "#6b7280", // work title, dates
+  rule: "#c4c4c4", // heading rule + footer divider
+  font: "Arial, Helvetica, sans-serif",
+};
+
 // Cognizant Corporate template — a branded, fixed two-page layout that matches
 // the corporate resume format: a logo header with photo + contact column, blue
 // section headings with a trailing rule, a two-column "Areas of expertise /
@@ -40,7 +52,18 @@ export default function CognizantTemplate({
   sectionState?: ResumeSectionState[] | null;
   atsSafe?: boolean;
 }) {
-  const s = resolveTemplateStyle(style);
+  // Keep the user-editable dimensions (font size/scale, margins, line spacing)
+  // but force the Cognizant brand font + colors so the template matches the
+  // sample out of the box.
+  const base = resolveTemplateStyle(style);
+  const s: TemplateStyleSettings = {
+    ...base,
+    fontFamily: BRAND.font,
+    primaryColor: BRAND.navy,
+    bodyColor: BRAND.body,
+    mutedColor: BRAND.muted,
+    sectionLineColor: BRAND.rule,
+  };
   const { basics } = data;
   const labels = resolveSectionLabels(sectionState);
 
@@ -94,7 +117,7 @@ export default function CognizantTemplate({
       {/* ---- Header: photo · name/title · contact column · logo ---- */}
       {!atsSafe && (
         <div className="mb-2 flex justify-end">
-          <CognizantLogo color={s.primaryColor} />
+          <CognizantLogo color={BRAND.blue} />
         </div>
       )}
       <header className="flex items-start gap-6">
@@ -115,7 +138,7 @@ export default function CognizantTemplate({
         <div className="min-w-0 flex-1">
           <h1
             className="font-bold leading-tight"
-            style={{ color: s.bodyColor, fontSize: `${s.fontScale.name}em` }}
+            style={{ color: s.primaryColor, fontSize: `${s.fontScale.name}em` }}
           >
             {basics.name || "Name surname"}
           </h1>
@@ -128,17 +151,17 @@ export default function CognizantTemplate({
         {(basics.email || basics.phone || basics.website) && (
           <div className="shrink-0 space-y-1.5 text-[0.9em]">
             {basics.email && (
-              <ContactRow icon={<MailIcon />} color={s.primaryColor}>
+              <ContactRow icon={<MailIcon />} color={BRAND.blue}>
                 {basics.email}
               </ContactRow>
             )}
             {basics.phone && (
-              <ContactRow icon={<PhoneIcon />} color={s.primaryColor}>
+              <ContactRow icon={<PhoneIcon />} color={BRAND.blue}>
                 {basics.phone}
               </ContactRow>
             )}
             {basics.website && (
-              <ContactRow icon={<LinkedInIcon />} color={s.primaryColor}>
+              <ContactRow icon={<LinkedInIcon />} color={BRAND.blue}>
                 {basics.website}
               </ContactRow>
             )}
@@ -163,7 +186,7 @@ export default function CognizantTemplate({
               <BulletColumns
                 items={areas}
                 marker={areasMarker}
-                markerColor={s.primaryColor}
+                markerColor={s.bodyColor}
                 single={atsSafe}
               />
             </section>
@@ -176,7 +199,7 @@ export default function CognizantTemplate({
               <BulletColumns
                 items={industryItems}
                 marker={getBulletSymbol(industries?.bulletStyle)}
-                markerColor={s.primaryColor}
+                markerColor={s.bodyColor}
                 single={atsSafe}
               />
             </section>
@@ -237,7 +260,7 @@ export default function CognizantTemplate({
                 }
               >
                 <div>
-                  <p className="font-bold" style={{ color: s.primaryColor }}>
+                  <p className="font-bold" style={{ color: BRAND.blue }}>
                     {[course, ed.school].filter(Boolean).join(", ") || "—"}
                   </p>
                   {dates && (
@@ -312,7 +335,7 @@ export default function CognizantTemplate({
                 </div>
                 <div>
                   {p.name && (
-                    <p className="font-bold" style={{ color: s.primaryColor }}>
+                    <p className="font-bold" style={{ color: BRAND.blue }}>
                       {p.name}
                     </p>
                   )}
