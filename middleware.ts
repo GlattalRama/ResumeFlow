@@ -8,20 +8,22 @@ import { authSecret, useSecureCookies } from "@/lib/googleConfig";
 // When real Google credentials are NOT configured the app runs in local
 // development mode — authentication is not enforced and every page is open.
 export async function middleware(req: NextRequest) {
-  // Canonical-domain redirect: send visitors of the old production *.vercel.app
-  // URLs and the www subdomain to the apex custom domain. Gated on
-  // VERCEL_ENV === "production" so preview deployments keep their own
-  // *.vercel.app URLs for testing, and local dev is unaffected. Runs before the
-  // auth check so visitors land on the apex domain's sign-in — OAuth callbacks
-  // target kiwi-cv.com via NEXTAUTH_URL, and Google rejects any other host
-  // (e.g. www.kiwi-cv.com) with redirect_uri_mismatch.
+  // Canonical-domain redirect: force the apex custom domain in production.
+  // Vercel's domain settings handle the alias-domain redirects natively
+  // (resumeflowats.com and the old kiwi-cv.com → resumeflow-ats.com), so this
+  // only needs to catch the raw *.vercel.app deployment URL and any www
+  // subdomain as a backstop. Gated on VERCEL_ENV === "production" so preview
+  // deployments keep their own *.vercel.app URLs and local dev is unaffected.
+  // Runs before the auth check so visitors land on the apex domain's sign-in —
+  // OAuth callbacks target resumeflow-ats.com via NEXTAUTH_URL, and Google
+  // rejects any other host with redirect_uri_mismatch.
   const host = req.headers.get("host") ?? "";
-  const isOldVercelHost = host.endsWith(".vercel.app");
-  const isWwwHost = host === "www.kiwi-cv.com";
-  if (process.env.VERCEL_ENV === "production" && (isOldVercelHost || isWwwHost)) {
+  const isVercelHost = host.endsWith(".vercel.app");
+  const isWwwHost = host.startsWith("www.");
+  if (process.env.VERCEL_ENV === "production" && (isVercelHost || isWwwHost)) {
     const url = req.nextUrl.clone();
     url.protocol = "https";
-    url.host = "kiwi-cv.com";
+    url.host = "resumeflow-ats.com";
     return NextResponse.redirect(url, 308);
   }
 

@@ -15,7 +15,7 @@ export default function PrivacyPage() {
         (&ldquo;Resumeflow-ATS&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;)
         collects, uses, and protects your information when you use the
         application at{" "}
-        <a href="https://kiwi-cv.com">https://kiwi-cv.com</a> (the
+        <a href="https://resumeflow-ats.com">https://resumeflow-ats.com</a> (the
         &ldquo;Service&rdquo;). By using the Service you agree to the practices
         described here.
       </p>

@@ -12,7 +12,7 @@ export default function TermsPage() {
       <p>
         These Terms of Service (&ldquo;Terms&rdquo;) govern your access to and
         use of <strong>Resumeflow-ATS</strong> (the &ldquo;Service&rdquo;),
-        available at <a href="https://kiwi-cv.com">https://kiwi-cv.com</a>. By
+        available at <a href="https://resumeflow-ats.com">https://resumeflow-ats.com</a>. By
         accessing or using the Service you agree to be bound by these Terms. If
         you do not agree, do not use the Service.
       </p>
