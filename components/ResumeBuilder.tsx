@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type {
   CustomSection,
@@ -157,6 +157,19 @@ export default function ResumeBuilder({
   const [importNote, setImportNote] = useState("");
   // Live-preview-only: render the ATS-safe layout (single column, no photo).
   const [atsView, setAtsView] = useState(false);
+  // Mobile-only: which pane is showing. On large screens both are always
+  // visible side-by-side, so this is ignored there.
+  const [mobileView, setMobileView] = useState<"edit" | "preview">("edit");
+  // Mobile preview zoom (1 = fit to screen width). Desktop ignores this.
+  const [previewZoom, setPreviewZoom] = useState(1);
+  // Mobile stepper: which form card (section) is in focus. Desktop shows all.
+  const [currentCard, setCurrentCard] = useState(0);
+  // Autosave status (edit mode only).
+  const [saveStatus, setSaveStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+  // Skip the autosave that the initialization render would otherwise trigger.
+  const skipFirstAutosave = useRef(true);
 
   // ----- Form card layout (collapse + drag-to-reorder) -----
   function toggleCollapse(cardId: string) {
@@ -628,6 +641,50 @@ export default function ResumeBuilder({
       setSaving(false);
     }
   }
+
+  // Debounced autosave — edit mode only. Saves ~1.2s after edits stop so the
+  // user never has to hunt for a Save button (the explicit Save still exists
+  // and additionally navigates to the preview). New resumes have no record yet,
+  // so create mode is excluded until the first explicit "Create resume".
+  useEffect(() => {
+    if (mode !== "edit" || !initial) return;
+    if (skipFirstAutosave.current) {
+      skipFirstAutosave.current = false;
+      return;
+    }
+    const t = setTimeout(() => {
+      setSaveStatus("saving");
+      fetch(`/api/resumes/${initial.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          versionName: versionName || "Untitled version",
+          targetRole,
+          selectedTemplate: template,
+          templateStyle,
+          formCardState: formCards,
+          sectionState,
+          resumeData: data,
+        }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error();
+          setSaveStatus("saved");
+        })
+        .catch(() => setSaveStatus("error"));
+    }, 1200);
+    return () => clearTimeout(t);
+  }, [
+    mode,
+    initial,
+    versionName,
+    targetRole,
+    template,
+    templateStyle,
+    formCards,
+    sectionState,
+    data,
+  ]);
 
   // Content for each form card, keyed by cardId. Cards are rendered in the
   // user-chosen order; the CollapsibleCard wrapper supplies the header, the
@@ -1118,11 +1175,54 @@ export default function ResumeBuilder({
   };
 
   const orderedCards = [...formCards].sort((a, b) => a.order - b.order);
+  // Clamp the mobile stepper index in case the card set shrank (custom section
+  // removed). Used only for the one-section-at-a-time mobile view.
+  const safeCurrent = Math.min(
+    currentCard,
+    Math.max(0, orderedCards.length - 1)
+  );
+  const cardTitle = (card: ResumeFormCardState) => {
+    const sec = sectionById[card.cardId];
+    return sec ? sectionLabel(sec) : card.title;
+  };
 
   return (
-    <div className="grid gap-4 lg:grid-cols-5">
-      {/* Left: ordered, collapsible, draggable form cards */}
-      <div className="space-y-4 lg:col-span-2">
+    <div>
+      {/* Mobile tab switcher: edit vs. preview. Hidden on large screens where
+          both panes show side-by-side. Sticky so you can flip back to Edit
+          while scrolled down in the preview. */}
+      <div className="sticky top-16 z-20 mb-4 grid grid-cols-2 gap-1 rounded-lg border border-gray-200 bg-gray-100 p-1 lg:hidden">
+        <button
+          type="button"
+          onClick={() => setMobileView("edit")}
+          className={`rounded-md px-3 py-2 text-sm font-semibold transition ${
+            mobileView === "edit"
+              ? "bg-white text-brand-700 shadow-sm"
+              : "text-gray-600"
+          }`}
+        >
+          Edit
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileView("preview")}
+          className={`rounded-md px-3 py-2 text-sm font-semibold transition ${
+            mobileView === "preview"
+              ? "bg-white text-brand-700 shadow-sm"
+              : "text-gray-600"
+          }`}
+        >
+          Preview
+        </button>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-5">
+        {/* Left: ordered, collapsible, draggable form cards */}
+        <div
+          className={`space-y-4 lg:col-span-2 lg:block ${
+            mobileView === "preview" ? "hidden" : ""
+          }`}
+        >
         {mode === "create" && (
           <div className="rounded-xl border border-brand-200 bg-brand-50 p-4 shadow-sm">
             <div className="flex items-start justify-between gap-3">
@@ -1169,7 +1269,33 @@ export default function ResumeBuilder({
             )}
           </div>
         )}
-        <p className="text-xs text-gray-400">
+        {/* Mobile section stepper: tappable chip bar (one section at a time). */}
+        <div className="lg:hidden">
+          <div className="-mx-1 flex items-center justify-between gap-2 px-1">
+            <p className="text-xs font-semibold text-gray-500">
+              Section {safeCurrent + 1} of {orderedCards.length}
+            </p>
+            {mode === "edit" && <SaveStatusBadge status={saveStatus} />}
+          </div>
+          <div className="mt-1.5 flex gap-1.5 overflow-x-auto pb-1.5">
+            {orderedCards.map((card, i) => (
+              <button
+                key={card.cardId}
+                type="button"
+                onClick={() => setCurrentCard(i)}
+                className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                  i === safeCurrent
+                    ? "bg-brand-600 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {cardTitle(card)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <p className="hidden text-xs text-gray-400 lg:block">
           Use the ↑ ↓ controls to reorder cards, or click a card header to
           collapse it. Your layout is saved with this version and only affects
           the form — not the resume output.
@@ -1181,30 +1307,57 @@ export default function ResumeBuilder({
           // label renamed; configuration cards (template, style, version, …) map
           // to no document section and so are not renamable.
           const sec = sectionById[card.cardId];
+          // On mobile only the focused section shows; desktop shows every card.
           return (
-            <CollapsibleCard
+            <div
               key={card.cardId}
-              card={card}
-              count={content.count}
-              headerRight={content.headerRight}
-              isFirst={i === 0}
-              isLast={i === orderedCards.length - 1}
-              onToggle={() => toggleCollapse(card.cardId)}
-              onMoveUp={() => moveCard(card.cardId, -1)}
-              onMoveDown={() => moveCard(card.cardId, 1)}
-              displayTitle={sec ? sectionLabel(sec) : undefined}
-              hasCustomLabel={Boolean(sec?.customTitle)}
+              className={i === safeCurrent ? "" : "hidden lg:block"}
             >
-              {content.body}
-            </CollapsibleCard>
+              <CollapsibleCard
+                card={card}
+                count={content.count}
+                headerRight={content.headerRight}
+                isFirst={i === 0}
+                isLast={i === orderedCards.length - 1}
+                onToggle={() => toggleCollapse(card.cardId)}
+                onMoveUp={() => moveCard(card.cardId, -1)}
+                onMoveDown={() => moveCard(card.cardId, 1)}
+                displayTitle={sec ? sectionLabel(sec) : undefined}
+                hasCustomLabel={Boolean(sec?.customTitle)}
+              >
+                {content.body}
+              </CollapsibleCard>
+            </div>
           );
         })}
 
+        {/* Mobile Back / Next stepper controls. */}
+        <div className="flex items-center justify-between gap-2 lg:hidden">
+          <button
+            type="button"
+            disabled={safeCurrent === 0}
+            onClick={() => setCurrentCard((c) => Math.max(0, c - 1))}
+            className={`${buttonClass("secondary")} disabled:opacity-40`}
+          >
+            ← Back
+          </button>
+          <button
+            type="button"
+            disabled={safeCurrent >= orderedCards.length - 1}
+            onClick={() =>
+              setCurrentCard((c) => Math.min(orderedCards.length - 1, c + 1))
+            }
+            className={`${buttonClass("primary")} disabled:opacity-40`}
+          >
+            Next →
+          </button>
+        </div>
+
         {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <button onClick={save} disabled={saving} className={buttonClass("primary")}>
-            {saving ? "Saving…" : mode === "create" ? "Create resume" : "Save changes"}
+            {saving ? "Saving…" : mode === "create" ? "Create resume" : "Save & view"}
           </button>
           <button
             onClick={() => router.back()}
@@ -1213,39 +1366,102 @@ export default function ResumeBuilder({
           >
             Cancel
           </button>
+          {mode === "edit" && (
+            <span className="hidden lg:block">
+              <SaveStatusBadge status={saveStatus} />
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Right: live preview */}
-      <div className="lg:col-span-3 lg:sticky lg:top-20 lg:self-start">
-        <div className="mb-2 flex items-center justify-between gap-3">
-          <p className="text-sm font-semibold text-gray-700">Live preview</p>
-          <label className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-gray-600">
-            <input
-              type="checkbox"
-              checked={atsView}
-              onChange={(e) => setAtsView(e.target.checked)}
-              className="h-3.5 w-3.5"
-            />
-            ATS-safe view
-          </label>
-        </div>
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-gray-100 shadow-sm">
-          <div className="max-h-[80vh] overflow-y-auto p-3">
-            <A4Preview margins={templateStyle.pageMargins}>
-              <ResumeTemplateRenderer
-                resumeData={data}
-                selectedTemplate={template}
-                style={templateStyle}
-                sectionState={sectionState}
-                atsSafe={atsView}
-              />
-            </A4Preview>
+        {/* Right: live preview */}
+        <div
+          className={`lg:col-span-3 lg:block lg:sticky lg:top-20 lg:self-start ${
+            mobileView === "edit" ? "hidden" : ""
+          }`}
+        >
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-gray-700">Live preview</p>
+            <div className="flex items-center gap-2">
+              {/* Mobile zoom controls (desktop shows the sheet full-size). */}
+              <div className="flex items-center gap-1 lg:hidden">
+                <button
+                  type="button"
+                  aria-label="Zoom out"
+                  onClick={() =>
+                    setPreviewZoom((z) => Math.max(0.5, +(z - 0.25).toFixed(2)))
+                  }
+                  className="grid h-7 w-7 place-items-center rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100"
+                >
+                  −
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewZoom(1)}
+                  title="Fit to width"
+                  className="min-w-[3rem] rounded-md border border-gray-300 px-1.5 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100"
+                >
+                  {previewZoom === 1 ? "Fit" : `${Math.round(previewZoom * 100)}%`}
+                </button>
+                <button
+                  type="button"
+                  aria-label="Zoom in"
+                  onClick={() =>
+                    setPreviewZoom((z) => Math.min(3, +(z + 0.25).toFixed(2)))
+                  }
+                  className="grid h-7 w-7 place-items-center rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100"
+                >
+                  +
+                </button>
+              </div>
+              <label className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={atsView}
+                  onChange={(e) => setAtsView(e.target.checked)}
+                  className="h-3.5 w-3.5"
+                />
+                ATS-safe view
+              </label>
+            </div>
+          </div>
+          <div className="overflow-hidden rounded-xl border border-gray-200 bg-gray-100 shadow-sm">
+            <div className="max-h-[80vh] overflow-auto p-3">
+              <A4Preview
+                key={mobileView}
+                margins={templateStyle.pageMargins}
+                zoom={previewZoom}
+              >
+                <ResumeTemplateRenderer
+                  resumeData={data}
+                  selectedTemplate={template}
+                  style={templateStyle}
+                  sectionState={sectionState}
+                  atsSafe={atsView}
+                />
+              </A4Preview>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
+}
+
+// Small autosave indicator. "idle" renders nothing (no edits yet this session).
+function SaveStatusBadge({
+  status,
+}: {
+  status: "idle" | "saving" | "saved" | "error";
+}) {
+  if (status === "idle") return null;
+  const map = {
+    saving: { text: "Saving…", cls: "text-gray-400" },
+    saved: { text: "Saved ✓", cls: "text-green-600" },
+    error: { text: "Couldn’t save", cls: "text-red-600" },
+  } as const;
+  const { text, cls } = map[status];
+  return <span className={`text-xs font-medium ${cls}`}>{text}</span>;
 }
 
 // A form card with a header that toggles collapse, plus up/down controls for
@@ -1466,13 +1682,13 @@ function SkillCategoryEditor({
         {items.map((item, i) => (
           <div key={i} className="flex items-center gap-2">
             <input
-              className={`${inputClass} flex-1 sm:max-w-[40%]`}
+              className={`${inputClass} min-w-0 flex-1 sm:max-w-[40%]`}
               value={item.category}
               onChange={(e) => onUpdate(i, { category: e.target.value })}
               placeholder="e.g. Mainframe"
             />
             <input
-              className={`${inputClass} flex-1`}
+              className={`${inputClass} min-w-0 flex-1`}
               value={item.value}
               onChange={(e) => onUpdate(i, { value: e.target.value })}
               placeholder="e.g. COBOL, PL/I, JCL"
@@ -2038,7 +2254,7 @@ function CategoryValueEditor({
               {i + 1}.
             </span>
             <input
-              className={`${inputClass} sm:max-w-[40%]`}
+              className={`${inputClass} min-w-0 flex-1 sm:max-w-[40%]`}
               value={item.category}
               onChange={(e) =>
                 onUpdateItem(section.id, i, { category: e.target.value })
@@ -2046,7 +2262,7 @@ function CategoryValueEditor({
               placeholder="Category (e.g. Database)"
             />
             <input
-              className={inputClass}
+              className={`${inputClass} min-w-0 flex-1`}
               value={item.value}
               onChange={(e) =>
                 onUpdateItem(section.id, i, { value: e.target.value })

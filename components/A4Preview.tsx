@@ -30,9 +30,13 @@ const useIsomorphicLayoutEffect =
 
 export default function A4Preview({
   margins,
+  zoom = 1,
   children,
 }: {
   margins: PageMargins;
+  // Extra magnification applied on top of the auto fit-to-width scale. 1 = fit
+  // the container exactly; >1 zooms in (the parent should allow scroll/pan).
+  zoom?: number;
   children: React.ReactNode;
 }) {
   const outerRef = useRef<HTMLDivElement>(null);
@@ -45,8 +49,11 @@ export default function A4Preview({
   const padBottomPx = margins.bottom * PX_PER_MM;
   // Height available for content on each printed page (A4 minus top+bottom).
   const printablePx = Math.max(1, A4_HEIGHT_PX - padTopPx - padBottomPx);
-  // Scale the full-width sheet down to fit narrow containers (never up).
-  const scale = containerWidth > 0 ? Math.min(1, containerWidth / A4_WIDTH_PX) : 1;
+  // Scale the full-width sheet down to fit narrow containers (never up), then
+  // apply any user zoom on top.
+  const fitScale =
+    containerWidth > 0 ? Math.min(1, containerWidth / A4_WIDTH_PX) : 1;
+  const scale = fitScale * zoom;
 
   // Recompute forced-break spacers + page-break guide lines + sheet height.
   // Reading getBoundingClientRect between mutations reflects the new layout
