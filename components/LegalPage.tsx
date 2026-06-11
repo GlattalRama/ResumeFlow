@@ -27,7 +27,7 @@ export function LegalPage({
 
       <footer className="mt-12 border-t border-gray-100 pt-6 text-sm text-gray-400">
         <Link href="/" className="font-medium text-brand-600 hover:underline">
-          ← Back to ResumeFlow ATS
+          ← Back to Resumeflow-ATS
         </Link>
         <span className="mx-2">·</span>
         <Link href="/privacy" className="hover:underline">

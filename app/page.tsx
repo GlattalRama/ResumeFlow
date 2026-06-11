@@ -261,7 +261,7 @@ export default async function DashboardPage() {
                 const pct = Math.round((p.count / totalApps) * 100) || 0;
                 return (
                   <li key={p.status} className="flex items-center gap-3">
-                    <span className="w-28 shrink-0 text-xs font-medium text-gray-600">
+                    <span className="w-20 shrink-0 text-xs font-medium text-gray-600 sm:w-28">
                       {p.status}
                     </span>
                     <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-gray-100">

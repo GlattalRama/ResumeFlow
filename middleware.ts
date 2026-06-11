@@ -64,9 +64,11 @@ export async function middleware(req: NextRequest) {
 // Run on every route except NextAuth endpoints, the sign-in page, the public
 // legal pages, and static assets. /privacy and /terms must stay reachable
 // without auth so signed-out visitors and Google's OAuth verifier can read
-// them. /api/drive/* is intentionally covered so Drive routes require auth.
+// them. Image assets (the logo, favicons) are excluded too — otherwise the
+// auth redirect would break the logo on the public sign-in and legal pages.
+// /api/drive/* is intentionally covered so Drive routes require auth.
 export const config = {
   matcher: [
-    "/((?!api/auth|signin|privacy|terms|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api/auth|signin|privacy|terms|manifest.webmanifest|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico)$).*)",
   ],
 };

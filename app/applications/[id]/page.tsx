@@ -224,7 +224,7 @@ function Row({
 }) {
   return (
     <div className="flex gap-2">
-      <dt className="w-28 shrink-0 text-gray-500">{label}</dt>
+      <dt className="w-24 shrink-0 text-gray-500 sm:w-28">{label}</dt>
       <dd className="text-gray-800">{value}</dd>
     </div>
   );

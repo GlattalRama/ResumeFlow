@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import "./globals.css";
@@ -8,8 +8,26 @@ import { getAccessToken } from "@/lib/serverSession";
 import { hasGoogleCredentials } from "@/lib/googleConfig";
 
 export const metadata: Metadata = {
-  title: "ResumeFlow",
+  title: "Resumeflow-ATS",
   description: "Resume builder and job application tracker",
+  applicationName: "Resumeflow-ATS",
+  appleWebApp: {
+    capable: true,
+    title: "Resumeflow-ATS",
+    statusBarStyle: "default",
+  },
+  openGraph: {
+    title: "Resumeflow-ATS",
+    description: "Resume builder and job application tracker",
+    images: ["/logo.png"],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0033a0",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({

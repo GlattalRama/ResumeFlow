@@ -2,17 +2,17 @@ import type { Metadata } from "next";
 import { LegalPage, LegalSection } from "@/components/LegalPage";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy · ResumeFlow ATS",
+  title: "Privacy Policy · Resumeflow-ATS",
   description:
-    "How ResumeFlow ATS collects, uses, and protects your information.",
+    "How Resumeflow-ATS collects, uses, and protects your information.",
 };
 
 export default function PrivacyPage() {
   return (
     <LegalPage title="Privacy Policy" updated="June 11, 2026">
       <p>
-        This Privacy Policy explains how <strong>ResumeFlow ATS</strong>{" "}
-        (&ldquo;ResumeFlow ATS&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;)
+        This Privacy Policy explains how <strong>Resumeflow-ATS</strong>{" "}
+        (&ldquo;Resumeflow-ATS&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;)
         collects, uses, and protects your information when you use the
         application at{" "}
         <a href="https://kiwi-cv.com">https://kiwi-cv.com</a> (the
@@ -22,7 +22,7 @@ export default function PrivacyPage() {
 
       <LegalSection title="1. Who we are">
         <p>
-          ResumeFlow ATS is a resume builder and job-application tracker. It
+          Resumeflow-ATS is a resume builder and job-application tracker. It
           helps you create tailored resume versions, track the jobs you apply
           to, and prepare for interviews. The Service is designed so that the
           content you create is stored in your own Google Drive rather than in a
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
           permission. This is a restricted scope that grants access{" "}
           <strong>only</strong> to a hidden, application-specific folder in your
           Google Drive (&ldquo;appDataFolder&rdquo;). We use it to read and write
-          the JSON files that hold your ResumeFlow ATS content.
+          the JSON files that hold your Resumeflow-ATS content.
         </p>
         <ul>
           <li>
@@ -84,7 +84,7 @@ export default function PrivacyPage() {
             Google account at any time.
           </li>
           <li>
-            ResumeFlow ATS&rsquo;s use of information received from Google APIs
+            Resumeflow-ATS&rsquo;s use of information received from Google APIs
             adheres to the{" "}
             <a
               href="https://developers.google.com/terms/api-services-user-data-policy"
@@ -155,7 +155,7 @@ export default function PrivacyPage() {
         <p>
           Your content remains in your Google Drive app-data folder until you
           delete it. You can remove individual items inside the app, delete the
-          app-data folder from your Google account, or revoke ResumeFlow ATS&rsquo;s
+          app-data folder from your Google account, or revoke Resumeflow-ATS&rsquo;s
           access at{" "}
           <a
             href="https://myaccount.google.com/permissions"

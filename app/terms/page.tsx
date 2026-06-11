@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { LegalPage, LegalSection } from "@/components/LegalPage";
 
 export const metadata: Metadata = {
-  title: "Terms of Service · ResumeFlow ATS",
-  description: "The terms that govern your use of ResumeFlow ATS.",
+  title: "Terms of Service · Resumeflow-ATS",
+  description: "The terms that govern your use of Resumeflow-ATS.",
 };
 
 export default function TermsPage() {
@@ -11,7 +11,7 @@ export default function TermsPage() {
     <LegalPage title="Terms of Service" updated="June 11, 2026">
       <p>
         These Terms of Service (&ldquo;Terms&rdquo;) govern your access to and
-        use of <strong>ResumeFlow ATS</strong> (the &ldquo;Service&rdquo;),
+        use of <strong>Resumeflow-ATS</strong> (the &ldquo;Service&rdquo;),
         available at <a href="https://kiwi-cv.com">https://kiwi-cv.com</a>. By
         accessing or using the Service you agree to be bound by these Terms. If
         you do not agree, do not use the Service.
@@ -19,7 +19,7 @@ export default function TermsPage() {
 
       <LegalSection title="1. The Service">
         <p>
-          ResumeFlow ATS is a resume builder and job-application tracker that
+          Resumeflow-ATS is a resume builder and job-application tracker that
           lets you create tailored resume versions, track applications, prepare
           for interviews, and export documents. The content you create is stored
           in your own Google Drive via Google&rsquo;s application-data folder.
@@ -90,7 +90,7 @@ export default function TermsPage() {
           The Service depends on third-party providers including Google
           (authentication and storage), Vercel (hosting), and OpenRouter and its
           model providers (AI processing). Your use of those services through
-          ResumeFlow ATS is also subject to their respective terms and policies.
+          Resumeflow-ATS is also subject to their respective terms and policies.
         </p>
       </LegalSection>
 
@@ -124,7 +124,7 @@ export default function TermsPage() {
 
       <LegalSection title="10. Limitation of liability">
         <p>
-          To the maximum extent permitted by law, ResumeFlow ATS and its
+          To the maximum extent permitted by law, Resumeflow-ATS and its
           operators will not be liable for any indirect, incidental, special,
           consequential, or punitive damages, or for any loss of data, profits,
           or goodwill, arising out of or related to your use of the Service.
