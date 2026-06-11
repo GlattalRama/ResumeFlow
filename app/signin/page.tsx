@@ -66,6 +66,16 @@ export default async function SignInPage({
           We request access only to ResumeFlow&apos;s own app data folder in
           your Google Drive.
         </p>
+
+        <p className="mt-3 text-center text-[11px] text-gray-400">
+          <Link href="/privacy" className="hover:underline">
+            Privacy Policy
+          </Link>
+          <span className="mx-1.5">·</span>
+          <Link href="/terms" className="hover:underline">
+            Terms of Service
+          </Link>
+        </p>
       </div>
     </div>
   );

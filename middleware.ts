@@ -9,12 +9,16 @@ import { authSecret, useSecureCookies } from "@/lib/googleConfig";
 // development mode — authentication is not enforced and every page is open.
 export async function middleware(req: NextRequest) {
   // Canonical-domain redirect: send visitors of the old production *.vercel.app
-  // URLs to the custom domain. Gated on VERCEL_ENV === "production" so preview
-  // deployments keep their own *.vercel.app URLs for testing, and local dev is
-  // unaffected. Runs before the auth check so visitors land on the custom
-  // domain's sign-in (OAuth callbacks target kiwi-cv.com via NEXTAUTH_URL).
+  // URLs and the www subdomain to the apex custom domain. Gated on
+  // VERCEL_ENV === "production" so preview deployments keep their own
+  // *.vercel.app URLs for testing, and local dev is unaffected. Runs before the
+  // auth check so visitors land on the apex domain's sign-in — OAuth callbacks
+  // target kiwi-cv.com via NEXTAUTH_URL, and Google rejects any other host
+  // (e.g. www.kiwi-cv.com) with redirect_uri_mismatch.
   const host = req.headers.get("host") ?? "";
-  if (process.env.VERCEL_ENV === "production" && host.endsWith(".vercel.app")) {
+  const isOldVercelHost = host.endsWith(".vercel.app");
+  const isWwwHost = host === "www.kiwi-cv.com";
+  if (process.env.VERCEL_ENV === "production" && (isOldVercelHost || isWwwHost)) {
     const url = req.nextUrl.clone();
     url.protocol = "https";
     url.host = "kiwi-cv.com";
@@ -57,10 +61,12 @@ export async function middleware(req: NextRequest) {
   return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
-// Run on every route except NextAuth endpoints, the sign-in page, and static
-// assets. /api/drive/* is intentionally covered so Drive routes require auth.
+// Run on every route except NextAuth endpoints, the sign-in page, the public
+// legal pages, and static assets. /privacy and /terms must stay reachable
+// without auth so signed-out visitors and Google's OAuth verifier can read
+// them. /api/drive/* is intentionally covered so Drive routes require auth.
 export const config = {
   matcher: [
-    "/((?!api/auth|signin|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api/auth|signin|privacy|terms|_next/static|_next/image|favicon.ico).*)",
   ],
 };
