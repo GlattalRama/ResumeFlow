@@ -80,7 +80,7 @@ export default function CustomTemplate({
     experience: (
       <Section title={labels.experience} style={s}>
         {data.experience.map((exp, i) => (
-          <div key={i} className="mb-3">
+          <div key={i} data-rf-item={i} className="mb-3">
             <div className="flex items-baseline justify-between">
               <p className="font-semibold text-gray-900">{exp.role}</p>
               <span className="text-xs text-gray-500">
@@ -104,7 +104,7 @@ export default function CustomTemplate({
     projects: (
       <Section title={labels.projects} style={s}>
         {data.projects.map((p, i) => (
-          <div key={i} className="mb-2">
+          <div key={i} data-rf-item={i} className="mb-2">
             <p className="font-semibold text-gray-900">{p.name}</p>
             {p.description && <p>{p.description}</p>}
           </div>
@@ -114,7 +114,7 @@ export default function CustomTemplate({
     education: (
       <Section title={labels.education} style={s}>
         {data.education.map((ed, i) => (
-          <div key={i} className="mb-2">
+          <div key={i} data-rf-item={i} className="mb-2">
             <p className="font-semibold text-gray-900">{ed.school}</p>
             <p className="text-xs text-gray-600">
               {[ed.degree, ed.field].filter(Boolean).join(", ")}

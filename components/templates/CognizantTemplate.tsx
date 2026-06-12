@@ -213,7 +213,7 @@ export default function CognizantTemplate({
           <Heading style={s}>{labels.experience}</Heading>
           {data.experience.map((exp, i) => (
             <div
-              key={i}
+              key={i} data-rf-item={i}
               className={
                 atsSafe ? "mb-3" : "mb-3 grid grid-cols-[150px_1fr] gap-x-4"
               }
@@ -254,7 +254,7 @@ export default function CognizantTemplate({
             const dates = [ed.startDate, ed.endDate].filter(Boolean).join(" – ");
             return (
               <div
-                key={i}
+                key={i} data-rf-item={i}
                 className={
                   atsSafe ? "mb-2" : "mb-2 grid grid-cols-[1fr_1fr] gap-x-6"
                 }
@@ -318,7 +318,7 @@ export default function CognizantTemplate({
             </Heading>
             {data.projects.map((p, i) => (
               <div
-                key={i}
+                key={i} data-rf-item={i}
                 className={
                   atsSafe ? "mb-3" : "mb-3 grid grid-cols-[180px_1fr] gap-x-4"
                 }

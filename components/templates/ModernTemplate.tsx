@@ -39,7 +39,7 @@ export default function ModernTemplate({
     experience: (
       <Section title={labels.experience} style={s}>
         {data.experience.map((exp, i) => (
-          <div key={i} className="mb-3">
+          <div key={i} data-rf-item={i} className="mb-3">
             <div className="flex items-baseline justify-between">
               <p className="font-semibold text-gray-900">
                 {exp.role}
@@ -68,7 +68,7 @@ export default function ModernTemplate({
     projects: (
       <Section title={labels.projects} style={s}>
         {data.projects.map((p, i) => (
-          <div key={i} className="mb-2">
+          <div key={i} data-rf-item={i} className="mb-2">
             <p className="font-semibold text-gray-900">
               {p.name}
               {p.link && (
@@ -85,7 +85,7 @@ export default function ModernTemplate({
     education: (
       <Section title={labels.education} style={s}>
         {data.education.map((ed, i) => (
-          <div key={i} className="mb-2 flex items-baseline justify-between">
+          <div key={i} data-rf-item={i} className="mb-2 flex items-baseline justify-between">
             <div>
               <p className="font-semibold text-gray-900">{ed.school}</p>
               <p className="text-xs text-gray-600">

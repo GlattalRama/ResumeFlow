@@ -36,7 +36,7 @@ export default function ClassicTemplate({
     experience: (
       <Section title={labels.experience} style={s}>
         {data.experience.map((exp, i) => (
-          <div key={i} className="mb-3">
+          <div key={i} data-rf-item={i} className="mb-3">
             <div className="flex items-baseline justify-between">
               <p className="font-bold">{exp.company || exp.role}</p>
               <span className="text-xs italic">
@@ -60,7 +60,7 @@ export default function ClassicTemplate({
     education: (
       <Section title={labels.education} style={s}>
         {data.education.map((ed, i) => (
-          <div key={i} className="mb-2 flex items-baseline justify-between">
+          <div key={i} data-rf-item={i} className="mb-2 flex items-baseline justify-between">
             <p>
               <span className="font-bold">{ed.school}</span>
               {(ed.degree || ed.field) && (
@@ -77,7 +77,7 @@ export default function ClassicTemplate({
     projects: (
       <Section title={labels.projects} style={s}>
         {data.projects.map((p, i) => (
-          <div key={i} className="mb-2">
+          <div key={i} data-rf-item={i} className="mb-2">
             <p className="font-bold">{p.name}</p>
             {p.description && <p>{p.description}</p>}
             {p.link && <p className="text-xs italic">{p.link}</p>}

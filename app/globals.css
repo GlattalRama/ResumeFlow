@@ -90,14 +90,43 @@
   outline-color: hsl(239 84% 67% / 0.55);
 }
 
-/* The section currently open in the editor: a steady soft outline + faint
-   tint so you can see where edits land. Screen-only by construction (the
-   marker class is applied only inside the screen page slices). */
+/* Item-level affordance: entries inside a section (jobs, degrees, projects)
+   are individually clickable. While hovering an entry, suppress the section
+   outline so only the tighter target shows. */
+.rf-click-edit [data-rf-item] {
+  border-radius: 2px;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 120ms ease;
+}
+.rf-click-edit [data-rf-item]:hover {
+  outline-color: hsl(239 84% 67% / 0.55);
+}
+.rf-click-edit [data-rf-section]:has([data-rf-item]:hover):hover {
+  outline-color: transparent;
+}
+
+/* The section (or single entry) currently open in the editor: a steady soft
+   outline + faint tint so you can see where edits land. Screen-only by
+   construction (the marker class is applied only inside the page slices). */
 @media screen {
   .rf-click-edit .rf-active-section {
     outline-color: hsl(239 84% 67% / 0.4);
     background-color: hsl(239 84% 67% / 0.05);
   }
+}
+
+/* Brief flash on the form entry targeted from the preview. */
+@keyframes rf-flash {
+  from {
+    box-shadow: 0 0 0 3px hsl(239 84% 67% / 0.5);
+  }
+  to {
+    box-shadow: 0 0 0 3px transparent;
+  }
+}
+.rf-flash {
+  animation: rf-flash 1.2s ease-out;
 }
 
 /* Adjustable gap between consecutive list / row items in a resume. The gap is

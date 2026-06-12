@@ -249,8 +249,13 @@ export default function ResumeBuilder({
   const [mobileView, setMobileView] = useState<"edit" | "preview">("edit");
   // Mobile preview zoom (1 = fit to screen width). Desktop ignores this.
   const [previewZoom, setPreviewZoom] = useState(1);
-  // Mobile stepper: which form card (section) is in focus. Desktop shows all.
+  // Which form card (section) is in focus — drives the rail, the mobile
+  // stepper, and the single visible SectionCard.
   const [currentCard, setCurrentCard] = useState(0);
+  // The specific list entry being edited (e.g. one Work Experience role), as
+  // "cardId:index". When set, the preview highlight narrows from the whole
+  // section to just that entry. Cleared on ordinary section navigation.
+  const [activeItem, setActiveItem] = useState<string | null>(null);
   // Autosave status (edit mode only).
   const [saveStatus, setSaveStatus] = useState<
     "idle" | "saving" | "saved" | "error"
@@ -688,7 +693,7 @@ export default function ResumeBuilder({
       const idx = [...formCards]
         .sort((a, b) => a.order - b.order)
         .findIndex((c) => c.cardId === "basics");
-      if (idx >= 0) setCurrentCard(idx);
+      if (idx >= 0) goToCard(idx);
     } catch (e) {
       setImportError(e instanceof Error ? e.message : "Import failed");
     } finally {
@@ -1175,7 +1180,12 @@ export default function ResumeBuilder({
       body: (
         <div className="space-y-3">
           {data.experience.map((exp, i) => (
-            <ItemCard key={i} onRemove={() => removeExperience(i)}>
+            <ItemCard
+              key={i}
+              onRemove={() => removeExperience(i)}
+              dataKey={`experience:${i}`}
+              onActive={() => setActiveItem(`experience:${i}`)}
+            >
               <div className="grid gap-2 sm:grid-cols-2">
                 <Field label="Role" value={exp.role} onChange={(v) => updateExperience(i, { role: v })} />
                 <Field label="Company" value={exp.company} onChange={(v) => updateExperience(i, { company: v })} />
@@ -1220,7 +1230,12 @@ export default function ResumeBuilder({
       body: (
         <div className="space-y-3">
           {data.education.map((ed, i) => (
-            <ItemCard key={i} onRemove={() => removeEducation(i)}>
+            <ItemCard
+              key={i}
+              onRemove={() => removeEducation(i)}
+              dataKey={`education:${i}`}
+              onActive={() => setActiveItem(`education:${i}`)}
+            >
               <div className="grid gap-2 sm:grid-cols-2">
                 <Field label="School" value={ed.school} onChange={(v) => updateEducation(i, { school: v })} />
                 <Field label="Degree" value={ed.degree} onChange={(v) => updateEducation(i, { degree: v })} />
@@ -1241,7 +1256,12 @@ export default function ResumeBuilder({
       body: (
         <div className="space-y-3">
           {data.projects.map((p, i) => (
-            <ItemCard key={i} onRemove={() => removeProject(i)}>
+            <ItemCard
+              key={i}
+              onRemove={() => removeProject(i)}
+              dataKey={`projects:${i}`}
+              onActive={() => setActiveItem(`projects:${i}`)}
+            >
               <div className="grid gap-2">
                 <Field label="Name" value={p.name} onChange={(v) => updateProject(i, { name: v })} />
                 <Field label="Link" value={p.link} onChange={(v) => updateProject(i, { link: v })} />
@@ -1398,14 +1418,25 @@ export default function ResumeBuilder({
     }
   }
 
-  // The reverse of click-to-edit: highlight the active section on the preview
-  // sheet and keep it scrolled into view, so you always see where your edits
-  // land. Scoped to the screen page slices — never the hidden print copy.
+  // Ordinary section navigation (rail, chips, Next/Previous): switching
+  // sections drops any narrowed item highlight.
+  function goToCard(i: number) {
+    setCurrentCard(i);
+    setActiveItem(null);
+  }
+
+  // The reverse of click-to-edit: highlight the active section — or, when a
+  // specific list entry is being edited, just that entry — on the preview
+  // sheet and keep it scrolled into view. Scoped to the screen page slices,
+  // never the hidden print copy.
   const previewRef = useRef<HTMLDivElement>(null);
   const activeCardId = orderedCards[safeCurrent]?.cardId;
+  const [activeItemCard, activeItemIndex] = activeItem?.split(":") ?? [];
+  const narrowedIndex =
+    activeItemCard === activeCardId ? activeItemIndex : undefined;
   useEffect(() => {
     // No dependency array: the slices' DOM is recreated whenever content or
-    // page count changes, so re-apply the marker class after every render.
+    // page count changes, so re-apply the marker classes after every render.
     const root = previewRef.current;
     if (!root) return;
     root
@@ -1413,32 +1444,74 @@ export default function ResumeBuilder({
       .forEach((el) => {
         el.classList.toggle(
           "rf-active-section",
-          el.dataset.rfSection === activeCardId
+          el.dataset.rfSection === activeCardId && narrowedIndex == null
+        );
+      });
+    root
+      .querySelectorAll<HTMLElement>(".a4-screen-pages [data-rf-item]")
+      .forEach((el) => {
+        el.classList.toggle(
+          "rf-active-section",
+          narrowedIndex != null &&
+            el.dataset.rfItem === narrowedIndex &&
+            el.closest<HTMLElement>("[data-rf-section]")?.dataset.rfSection ===
+              activeCardId
         );
       });
   });
   useEffect(() => {
     const root = previewRef.current;
     if (!root || !activeCardId) return;
-    root
-      .querySelector<HTMLElement>(
+    const target =
+      (narrowedIndex != null
+        ? root.querySelector<HTMLElement>(
+            `.a4-screen-pages [data-rf-section="${activeCardId}"] [data-rf-item="${narrowedIndex}"]`
+          )
+        : null) ??
+      root.querySelector<HTMLElement>(
         `.a4-screen-pages [data-rf-section="${activeCardId}"]`
-      )
-      ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  }, [activeCardId, mobileView]);
+      );
+    target?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    // narrowedIndex is derived from activeItem; activeCardId from safeCurrent.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCardId, activeItem, mobileView]);
+
+  // When an item was picked by clicking the preview, scroll its form entry
+  // into view (after the section card has rendered) and flash it briefly.
+  const pendingFormScroll = useRef(false);
+  useEffect(() => {
+    if (!pendingFormScroll.current) return;
+    pendingFormScroll.current = false;
+    if (!activeItem) return;
+    const el = document.querySelector<HTMLElement>(
+      `[data-rf-form-item="${activeItem}"]`
+    );
+    if (!el) return;
+    el.scrollIntoView({ block: "center", behavior: "smooth" });
+    el.classList.add("rf-flash");
+    const t = setTimeout(() => el.classList.remove("rf-flash"), 1200);
+    return () => clearTimeout(t);
+  }, [activeItem]);
 
   // Click-to-edit: clicking a section inside the live preview focuses its form
-  // card (and flips to the edit pane on mobile). Templates tag their section
-  // wrappers with data-rf-section, whose value is the matching cardId.
+  // card (and flips to the edit pane on mobile); clicking a tagged list entry
+  // (data-rf-item) additionally narrows to that entry and scrolls its form
+  // card into view. Templates tag section wrappers with data-rf-section.
   function onPreviewClick(e: React.MouseEvent<HTMLDivElement>) {
-    const hit = (e.target as HTMLElement).closest<HTMLElement>(
-      "[data-rf-section]"
-    );
-    const cardId = hit?.dataset.rfSection;
+    const target = e.target as HTMLElement;
+    const itemEl = target.closest<HTMLElement>("[data-rf-item]");
+    const cardId = target.closest<HTMLElement>("[data-rf-section]")?.dataset
+      .rfSection;
     if (!cardId) return;
     const idx = orderedCards.findIndex((c) => c.cardId === cardId);
     if (idx === -1) return;
     setCurrentCard(idx);
+    if (itemEl?.dataset.rfItem != null) {
+      setActiveItem(`${cardId}:${itemEl.dataset.rfItem}`);
+      pendingFormScroll.current = true;
+    } else {
+      setActiveItem(null);
+    }
     setMobileView("edit");
   }
 
@@ -1462,7 +1535,7 @@ export default function ResumeBuilder({
             <div key={card.cardId}>
               <button
                 type="button"
-                onClick={() => setCurrentCard(i)}
+                onClick={() => goToCard(i)}
                 aria-current={active ? "true" : undefined}
                 className={`flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-left text-[13px] font-medium transition ${
                   active
@@ -1612,7 +1685,7 @@ export default function ResumeBuilder({
             <button
               key={card.cardId}
               type="button"
-              onClick={() => setCurrentCard(i)}
+              onClick={() => goToCard(i)}
               className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition ${
                 i === safeCurrent
                   ? "bg-brand-600 text-white"
@@ -1644,7 +1717,7 @@ export default function ResumeBuilder({
                     <button
                       type="button"
                       disabled={!prevCardMeta}
-                      onClick={() => setCurrentCard((c) => Math.max(0, c - 1))}
+                      onClick={() => goToCard(Math.max(0, safeCurrent - 1))}
                       className={`${buttonClass("secondary")} disabled:opacity-40`}
                     >
                       ← {prevCardMeta ? cardTitle(prevCardMeta) : "Back"}
@@ -1652,11 +1725,7 @@ export default function ResumeBuilder({
                     <button
                       type="button"
                       disabled={!nextCardMeta}
-                      onClick={() =>
-                        setCurrentCard((c) =>
-                          Math.min(orderedCards.length - 1, c + 1)
-                        )
-                      }
+                      onClick={() => goToCard(Math.min(orderedCards.length - 1, safeCurrent + 1))}
                       className={`${buttonClass("primary")} disabled:opacity-40`}
                     >
                       {nextCardMeta ? `Next: ${cardTitle(nextCardMeta)}` : "Done"}{" "}
@@ -1805,7 +1874,7 @@ export default function ResumeBuilder({
                 type="button"
                 aria-label="Previous section"
                 disabled={safeCurrent === 0}
-                onClick={() => setCurrentCard((c) => Math.max(0, c - 1))}
+                onClick={() => goToCard(Math.max(0, safeCurrent - 1))}
                 className="grid h-9 w-9 place-items-center rounded-md border border-input text-foreground/80 disabled:opacity-40"
               >
                 ←
@@ -1817,9 +1886,7 @@ export default function ResumeBuilder({
                 type="button"
                 aria-label="Next section"
                 disabled={safeCurrent >= orderedCards.length - 1}
-                onClick={() =>
-                  setCurrentCard((c) => Math.min(orderedCards.length - 1, c + 1))
-                }
+                onClick={() => goToCard(Math.min(orderedCards.length - 1, safeCurrent + 1))}
                 className="grid h-9 w-9 place-items-center rounded-md bg-brand-600 text-white disabled:opacity-40"
               >
                 →
@@ -2814,12 +2881,24 @@ function ColorField({
 function ItemCard({
   children,
   onRemove,
+  dataKey,
+  onActive,
 }: {
   children: React.ReactNode;
   onRemove: () => void;
+  // "cardId:index" identity for preview↔form item linking: the preview's
+  // click-to-edit scrolls to this card via data-rf-form-item, and onActive
+  // fires when the user works in this entry so the preview narrows to it.
+  dataKey?: string;
+  onActive?: () => void;
 }) {
   return (
-    <div className="relative rounded-lg border border-border bg-muted/50 p-3">
+    <div
+      className="relative rounded-lg border border-border bg-muted/50 p-3"
+      data-rf-form-item={dataKey}
+      onFocusCapture={onActive}
+      onClickCapture={onActive}
+    >
       <button
         type="button"
         onClick={onRemove}

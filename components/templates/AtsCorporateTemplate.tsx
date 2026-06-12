@@ -88,7 +88,7 @@ export default function AtsCorporateTemplate({
     experience: (
       <Section title={labels.experience} style={s}>
         {data.experience.map((exp, i) => (
-          <div key={i} className="mb-3">
+          <div key={i} data-rf-item={i} className="mb-3">
             <p className="font-bold">
               {exp.role}
               {exp.company ? `, ${exp.company}` : ""}
@@ -114,7 +114,7 @@ export default function AtsCorporateTemplate({
     projects: (
       <Section title={labels.projects} style={s}>
         {data.projects.map((p, i) => (
-          <div key={i} className="mb-2">
+          <div key={i} data-rf-item={i} className="mb-2">
             <p className="font-bold">{p.name}</p>
             {p.description && <p>{p.description}</p>}
             {p.link && (
@@ -129,7 +129,7 @@ export default function AtsCorporateTemplate({
     education: (
       <Section title={labels.education} style={s}>
         {data.education.map((ed, i) => (
-          <div key={i} className="mb-1">
+          <div key={i} data-rf-item={i} className="mb-1">
             <p className="font-bold">{ed.school}</p>
             <p className="text-[0.92em]" style={{ color: s.mutedColor }}>
               {[
