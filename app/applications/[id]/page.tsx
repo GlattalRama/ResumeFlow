@@ -8,6 +8,7 @@ import NotesSection from "@/components/NotesSection";
 import DocumentsSection from "@/components/DocumentsSection";
 import AiActions from "@/components/AiActions";
 import TailorResumeFlow from "@/components/TailorResumeFlow";
+import CoverLetterSection from "@/components/CoverLetterSection";
 import ApplicationActions from "@/components/ApplicationActions";
 
 export const dynamic = "force-dynamic";
@@ -174,6 +175,21 @@ export default async function ApplicationDetailPage({
           />
         </div>
         <AiActions applicationId={app.id} />
+      </Card>
+
+      {/* Cover letter */}
+      <Card>
+        <h2 className="mb-3 text-sm font-semibold text-foreground/80">
+          Cover letter
+        </h2>
+        <CoverLetterSection
+          applicationId={app.id}
+          company={app.company}
+          initialLetter={app.coverLetter ?? ""}
+          initialMeta={app.coverLetterMeta ?? null}
+          resumeOptions={resumeOptions}
+          defaultSourceId={defaultSourceId}
+        />
       </Card>
 
       {/* Interview prep link */}

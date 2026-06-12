@@ -30,6 +30,8 @@ export async function PUT(req: Request, { params }: Ctx) {
     "appliedDate",
     "nextAction",
     "nextActionDate",
+    "coverLetter",
+    "coverLetterMeta",
   ];
   const patch: Partial<Application> = { updatedAt: new Date().toISOString() };
   for (const key of editable) {

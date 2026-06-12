@@ -366,6 +366,16 @@ export interface Application {
   nextActionDate: string;
   createdAt: string;
   updatedAt: string;
+  // Saved cover letter (AI-drafted, then user-edited). Absent/empty when none.
+  coverLetter?: string;
+  coverLetterMeta?: CoverLetterMeta;
+}
+
+export interface CoverLetterMeta {
+  sourceResumeId: string;
+  tone: string;
+  model: string;
+  generatedAt: string;
 }
 
 // ---- Notes ----
