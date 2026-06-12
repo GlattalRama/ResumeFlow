@@ -120,7 +120,7 @@ export default function CognizantTemplate({
           <CognizantLogo />
         </div>
       )}
-      <header className="flex items-start gap-6">
+      <header className="flex items-start gap-6" data-rf-section="basics">
         {!atsSafe &&
           (profilePhoto ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -171,7 +171,7 @@ export default function CognizantTemplate({
 
       {/* ---- Summary ---- */}
       {show("summary") && (
-        <section>
+        <section data-rf-section="summary">
           <Heading style={s}>{labels.summary}</Heading>
           <RichText value={basics.summary} />
         </section>
@@ -181,7 +181,7 @@ export default function CognizantTemplate({
       {(showAreas || showIndustries) && (
         <div className={atsSafe ? "" : "grid grid-cols-2 gap-x-10"}>
           {showAreas && (
-            <section>
+            <section data-rf-section="areas">
               <Heading style={s}>{labels.areas}</Heading>
               <BulletColumns
                 items={areas}
@@ -192,7 +192,7 @@ export default function CognizantTemplate({
             </section>
           )}
           {showIndustries && (
-            <section>
+            <section data-rf-section="areas">
               <Heading style={s}>
                 {industries?.title?.trim() || "Industries"}
               </Heading>
@@ -209,7 +209,7 @@ export default function CognizantTemplate({
 
       {/* ---- Work experience ---- */}
       {show("experience") && (
-        <section>
+        <section data-rf-section="experience">
           <Heading style={s}>{labels.experience}</Heading>
           {data.experience.map((exp, i) => (
             <div
@@ -247,7 +247,7 @@ export default function CognizantTemplate({
 
       {/* ---- Education ---- */}
       {show("education") && (
-        <section>
+        <section data-rf-section="education">
           <Heading style={s}>{labels.education}</Heading>
           {data.education.map((ed, i) => {
             const course = [ed.degree, ed.field].filter(Boolean).join(", ");
@@ -284,13 +284,13 @@ export default function CognizantTemplate({
       {(showLanguages || showSkills) && (
         <div className={atsSafe ? "" : "grid grid-cols-2 gap-x-10"}>
           {showLanguages && (
-            <section>
+            <section data-rf-section="languages">
               <Heading style={s}>{labels.languages}</Heading>
               <BulletColumns items={languages} marker="" single={atsSafe} />
             </section>
           )}
           {showSkills && (
-            <section>
+            <section data-rf-section="skills">
               <Heading style={s}>{labels.skills}</Heading>
               <SkillColumns
                 items={skills}
@@ -310,7 +310,7 @@ export default function CognizantTemplate({
           {/* Screen-only spacer grows to fill the page so projects start on a
               fresh page; print uses the breakBefore rule below. */}
           <div data-pb-spacer aria-hidden className="print:hidden" />
-          <section style={{ breakBefore: "page" }}>
+          <section data-rf-section="projects" style={{ breakBefore: "page" }}>
             <Heading style={s} large>
               {labels.projects === "Projects"
                 ? "Selected relevant project experience"

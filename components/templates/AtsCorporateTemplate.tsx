@@ -176,7 +176,7 @@ export default function AtsCorporateTemplate({
       {atsSafe ? (
         // ATS-safe header: no photo, plain text name/title and a single-line
         // contact string — the simplest possible block for a parser to read.
-        <header>
+        <header data-rf-section="basics">
           <h1
             className="font-bold leading-tight"
             style={{ color: s.bodyColor, fontSize: `${s.fontScale.name}em` }}
@@ -202,7 +202,7 @@ export default function AtsCorporateTemplate({
       ) : (
         /* Cognizant-style header: photo on the left, name + role in the middle,
            and a right-aligned contact column with icons. */
-        <header className="flex items-center gap-6">
+        <header className="flex items-center gap-6" data-rf-section="basics">
           {profilePhoto && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -267,6 +267,9 @@ export default function AtsCorporateTemplate({
         return (
           <div
             key={key}
+            data-rf-section={
+              entry.kind === "custom" ? "customSections" : entry.sectionId
+            }
             style={entry.pageBreakAfter ? { breakAfter: "page" } : undefined}
           >
             {content}

@@ -48,6 +48,71 @@ const inputClass =
   "w-full rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500";
 const labelClass = "block text-xs font-medium text-muted-foreground mb-1";
 
+// One-tap layout density presets: each sets the body size, page margins, and
+// line spacing together. "Balanced" mirrors defaultTemplateStyle().
+type LayoutPreset = {
+  id: string;
+  label: string;
+  desc: string;
+  fontSize: number;
+  margins: number;
+  lineSpacing: TemplateStyleSettings["lineSpacing"];
+};
+const LAYOUT_PRESETS: LayoutPreset[] = [
+  {
+    id: "compact",
+    label: "Compact",
+    desc: "Fits the most per page",
+    fontSize: 12,
+    margins: 10,
+    lineSpacing: { section: 0.6, text: 1.35, bullet: 0.05 },
+  },
+  {
+    id: "balanced",
+    label: "Balanced",
+    desc: "The default look",
+    fontSize: 13,
+    margins: 12,
+    lineSpacing: { section: 1, text: 1.6, bullet: 0.15 },
+  },
+  {
+    id: "spacious",
+    label: "Spacious",
+    desc: "Airy and easy to scan",
+    fontSize: 13.5,
+    margins: 16,
+    lineSpacing: { section: 1.4, text: 1.8, bullet: 0.3 },
+  },
+];
+
+function layoutPresetActive(p: LayoutPreset, s: TemplateStyleSettings): boolean {
+  return (
+    s.fontSize === p.fontSize &&
+    marginsUniform(s.pageMargins) &&
+    s.pageMargins.top === p.margins &&
+    s.lineSpacing.section === p.lineSpacing.section &&
+    s.lineSpacing.text === p.lineSpacing.text &&
+    s.lineSpacing.bullet === p.lineSpacing.bullet
+  );
+}
+
+function marginsUniform(m: TemplateStyleSettings["pageMargins"]): boolean {
+  return m.top === m.right && m.top === m.bottom && m.top === m.left;
+}
+
+// Curated resume color schemes (primary accent + section rule color).
+const COLOR_THEMES = [
+  { label: "Corporate Blue", primary: "#0033A0", line: "#111111" },
+  { label: "Graphite", primary: "#111827", line: "#111827" },
+  { label: "Indigo", primary: "#4F46E5", line: "#312E81" },
+  { label: "Forest", primary: "#065F46", line: "#064E3B" },
+  { label: "Burgundy", primary: "#7F1D1D", line: "#7F1D1D" },
+];
+
+// Form-card ids that configure the document rather than hold resume content.
+// The desktop rail groups these under "Setup"; the rest are "Content".
+const CONFIG_CARD_IDS = new Set(["template", "style", "sections", "version"]);
+
 interface Props {
   mode: "create" | "edit";
   initial?: ResumeVersion;
@@ -122,6 +187,28 @@ export default function ResumeBuilder({
       pageMargins: { ...s.pageMargins, [side]: value },
     }));
   }
+  // The "Page margins" slider sets all four sides at once; per-side tuning
+  // lives in the "Per-side margins" disclosure.
+  function setAllMargins(mm: number) {
+    const value = Math.max(0, Math.min(40, Number.isFinite(mm) ? mm : 0));
+    setTemplateStyle((s) => ({
+      ...s,
+      pageMargins: { top: value, right: value, bottom: value, left: value },
+    }));
+  }
+  function applyLayoutPreset(p: LayoutPreset) {
+    setTemplateStyle((s) => ({
+      ...s,
+      fontSize: p.fontSize,
+      pageMargins: {
+        top: p.margins,
+        right: p.margins,
+        bottom: p.margins,
+        left: p.margins,
+      },
+      lineSpacing: { ...p.lineSpacing },
+    }));
+  }
   function patchScale(
     key: keyof TemplateStyleSettings["fontScale"],
     raw: number
@@ -171,14 +258,7 @@ export default function ResumeBuilder({
   // Skip the autosave that the initialization render would otherwise trigger.
   const skipFirstAutosave = useRef(true);
 
-  // ----- Form card layout (collapse + drag-to-reorder) -----
-  function toggleCollapse(cardId: string) {
-    setFormCards((cards) =>
-      cards.map((c) =>
-        c.cardId === cardId ? { ...c, collapsed: !c.collapsed } : c
-      )
-    );
-  }
+  // ----- Form card layout (rail order) -----
   // Move a card up (-1) or down (+1) one position in the form and renumber.
   function moveCard(cardId: string, dir: -1 | 1) {
     setFormCards((cards) => {
@@ -604,6 +684,11 @@ export default function ResumeBuilder({
       setImportNote(
         "Imported. Review the sections below, then press “Create resume” to save."
       );
+      // Land the user on Basics so they can review the extracted data.
+      const idx = [...formCards]
+        .sort((a, b) => a.order - b.order)
+        .findIndex((c) => c.cardId === "basics");
+      if (idx >= 0) setCurrentCard(idx);
     } catch (e) {
       setImportError(e instanceof Error ? e.message : "Import failed");
     } finally {
@@ -714,7 +799,38 @@ export default function ResumeBuilder({
       ),
       body: (
         <>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Layout density presets — one tap sets size, margins, and spacing. */}
+          <div>
+            <label className={labelClass}>Layout density</label>
+            <div className="grid grid-cols-3 gap-2">
+              {LAYOUT_PRESETS.map((p) => {
+                const active = layoutPresetActive(p, templateStyle);
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => applyLayoutPreset(p)}
+                    aria-pressed={active}
+                    className={`rounded-lg border px-3 py-2 text-left transition ${
+                      active
+                        ? "border-brand-500 bg-brand-50 dark:bg-brand-500/15 ring-1 ring-brand-500"
+                        : "border-input bg-card hover:border-brand-300 dark:hover:border-brand-400/60"
+                    }`}
+                  >
+                    <span className="block text-xs font-semibold text-foreground">
+                      {p.label}
+                    </span>
+                    <span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">
+                      {p.desc}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Typography */}
+          <div className="mt-4 grid gap-x-4 gap-y-3 sm:grid-cols-2">
             <div>
               <label className={labelClass}>Font</label>
               <select
@@ -729,79 +845,145 @@ export default function ResumeBuilder({
                 ))}
               </select>
             </div>
-            <div>
-              <label className={labelClass}>Body text size (px)</label>
-              <input
-                type="number"
-                min={8}
-                max={24}
-                step={0.5}
-                className={inputClass}
-                value={templateStyle.fontSize}
-                onChange={(e) =>
-                  patchStyle(
-                    "fontSize",
-                    Math.max(
-                      8,
-                      Math.min(
-                        24,
-                        Number.isFinite(e.target.valueAsNumber)
-                          ? e.target.valueAsNumber
-                          : 13
-                      )
-                    )
-                  )
-                }
-              />
-            </div>
-            <div>
-              <label className={labelClass}>Name size (×)</label>
-              <input
-                type="number"
-                min={0.8}
-                max={4}
-                step={0.05}
-                className={inputClass}
-                value={templateStyle.fontScale.name}
-                onChange={(e) => patchScale("name", e.target.valueAsNumber)}
-              />
-            </div>
-            <div>
-              <label className={labelClass}>Heading size (×)</label>
-              <input
-                type="number"
-                min={0.8}
-                max={4}
-                step={0.05}
-                className={inputClass}
-                value={templateStyle.fontScale.heading}
-                onChange={(e) => patchScale("heading", e.target.valueAsNumber)}
-              />
-            </div>
-            <ColorField
-              label="Primary color"
-              value={templateStyle.primaryColor}
-              onChange={(v) => patchStyle("primaryColor", v)}
+            <SliderField
+              label="Body text size"
+              value={templateStyle.fontSize}
+              min={8}
+              max={24}
+              step={0.5}
+              display={`${templateStyle.fontSize}px`}
+              onChange={(v) => patchStyle("fontSize", v)}
             />
-            <ColorField
-              label="Body text color"
-              value={templateStyle.bodyColor}
-              onChange={(v) => patchStyle("bodyColor", v)}
+            <SliderField
+              label="Name size"
+              value={templateStyle.fontScale.name}
+              min={1}
+              max={3}
+              step={0.05}
+              display={`${templateStyle.fontScale.name.toFixed(2)}×`}
+              onChange={(v) => patchScale("name", v)}
             />
-            <ColorField
-              label="Muted text color"
-              value={templateStyle.mutedColor}
-              onChange={(v) => patchStyle("mutedColor", v)}
-            />
-            <ColorField
-              label="Section line color"
-              value={templateStyle.sectionLineColor}
-              onChange={(v) => patchStyle("sectionLineColor", v)}
+            <SliderField
+              label="Heading size"
+              value={templateStyle.fontScale.heading}
+              min={0.8}
+              max={2}
+              step={0.02}
+              display={`${templateStyle.fontScale.heading.toFixed(2)}×`}
+              onChange={(v) => patchScale("heading", v)}
             />
           </div>
+
+          {/* Colors: curated theme swatches up front, full pickers tucked away. */}
           <div className="mt-4">
-            <label className={labelClass}>Page margins (mm)</label>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <label className={labelClass}>Color theme</label>
+            <div className="flex flex-wrap items-center gap-2">
+              {COLOR_THEMES.map((t) => {
+                const active =
+                  templateStyle.primaryColor.toLowerCase() ===
+                  t.primary.toLowerCase();
+                return (
+                  <button
+                    key={t.label}
+                    type="button"
+                    title={t.label}
+                    aria-pressed={active}
+                    onClick={() =>
+                      setTemplateStyle((s) => ({
+                        ...s,
+                        primaryColor: t.primary,
+                        sectionLineColor: t.line,
+                      }))
+                    }
+                    className={`h-8 w-8 rounded-full border-2 transition ${
+                      active
+                        ? "border-foreground ring-2 ring-ring/50"
+                        : "border-transparent hover:scale-110"
+                    }`}
+                    style={{ backgroundColor: t.primary }}
+                  >
+                    <span className="sr-only">{t.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <details className="mt-2">
+              <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground">
+                Custom colors
+              </summary>
+              <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                <ColorField
+                  label="Primary color"
+                  value={templateStyle.primaryColor}
+                  onChange={(v) => patchStyle("primaryColor", v)}
+                />
+                <ColorField
+                  label="Body text color"
+                  value={templateStyle.bodyColor}
+                  onChange={(v) => patchStyle("bodyColor", v)}
+                />
+                <ColorField
+                  label="Muted text color"
+                  value={templateStyle.mutedColor}
+                  onChange={(v) => patchStyle("mutedColor", v)}
+                />
+                <ColorField
+                  label="Section line color"
+                  value={templateStyle.sectionLineColor}
+                  onChange={(v) => patchStyle("sectionLineColor", v)}
+                />
+              </div>
+            </details>
+          </div>
+
+          {/* Spacing */}
+          <div className="mt-4 grid gap-x-4 gap-y-3 sm:grid-cols-2">
+            <SliderField
+              label="Page margins"
+              value={templateStyle.pageMargins.top}
+              min={0}
+              max={40}
+              step={1}
+              display={
+                marginsUniform(templateStyle.pageMargins)
+                  ? `${templateStyle.pageMargins.top}mm`
+                  : "custom"
+              }
+              onChange={setAllMargins}
+            />
+            <SliderField
+              label="Line height"
+              value={templateStyle.lineSpacing.text}
+              min={0.8}
+              max={3}
+              step={0.05}
+              display={templateStyle.lineSpacing.text.toFixed(2)}
+              onChange={(v) => patchSpacing("text", v)}
+            />
+            <SliderField
+              label="Section gap"
+              value={templateStyle.lineSpacing.section}
+              min={0}
+              max={3}
+              step={0.1}
+              display={`${templateStyle.lineSpacing.section.toFixed(1)}rem`}
+              onChange={(v) => patchSpacing("section", v)}
+            />
+            <SliderField
+              label="Bullet gap"
+              value={templateStyle.lineSpacing.bullet}
+              min={0}
+              max={1.5}
+              step={0.05}
+              display={`${templateStyle.lineSpacing.bullet.toFixed(2)}rem`}
+              onChange={(v) => patchSpacing("bullet", v)}
+            />
+          </div>
+          <details className="mt-2">
+            <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground">
+              Per-side margins
+            </summary>
+            <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {(["top", "right", "bottom", "left"] as const).map((side) => (
                 <div key={side}>
                   <span className="mb-1 block text-xs capitalize text-muted-foreground">
@@ -819,37 +1001,11 @@ export default function ResumeBuilder({
                 </div>
               ))}
             </div>
-          </div>
-          <div className="mt-4">
-            <label className={labelClass}>Line spacing</label>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {(
-                [
-                  { key: "section", label: "Section gap (rem)", step: 0.1 },
-                  { key: "text", label: "Text line height", step: 0.05 },
-                  { key: "bullet", label: "Bullet gap (rem)", step: 0.05 },
-                ] as const
-              ).map(({ key, label, step }) => (
-                <div key={key}>
-                  <span className="mb-1 block text-xs text-muted-foreground">{label}</span>
-                  <input
-                    type="number"
-                    min={key === "text" ? 0.8 : 0}
-                    max={3}
-                    step={step}
-                    className={inputClass}
-                    value={templateStyle.lineSpacing[key]}
-                    onChange={(e) => patchSpacing(key, e.target.valueAsNumber)}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground/70">
+          </details>
+          <p className="mt-3 text-xs text-muted-foreground/70">
             Applied live to the preview and saved with this version. Margins set
-            the printed A4 page margins (and the on-screen sheet padding). The
-            ATS Corporate Style template uses every setting; other templates use
-            the font and primary color.
+            the printed A4 page margins. The ATS Corporate Style template uses
+            every setting; other templates use the font and primary color.
           </p>
         </>
       ),
@@ -1186,40 +1342,192 @@ export default function ResumeBuilder({
     return sec ? sectionLabel(sec) : card.title;
   };
 
-  return (
-    <div>
-      {/* Mobile tab switcher: edit vs. preview. Hidden on large screens where
-          both panes show side-by-side. Sticky so you can flip back to Edit
-          while scrolled down in the preview. */}
-      <div className="sticky top-16 z-20 mb-4 grid grid-cols-2 gap-1 rounded-lg border border-border bg-muted p-1 lg:hidden">
-        <button
-          type="button"
-          onClick={() => setMobileView("edit")}
-          className={`rounded-md px-3 py-2 text-sm font-semibold transition ${
-            mobileView === "edit"
-              ? "bg-card text-brand-700 dark:text-brand-300 shadow-sm"
-              : "text-muted-foreground"
-          }`}
-        >
-          Edit
-        </button>
-        <button
-          type="button"
-          onClick={() => setMobileView("preview")}
-          className={`rounded-md px-3 py-2 text-sm font-semibold transition ${
-            mobileView === "preview"
-              ? "bg-card text-brand-700 dark:text-brand-300 shadow-sm"
-              : "text-muted-foreground"
-          }`}
-        >
-          Preview
-        </button>
-      </div>
+  const prevCardMeta = safeCurrent > 0 ? orderedCards[safeCurrent - 1] : null;
+  const nextCardMeta =
+    safeCurrent < orderedCards.length - 1 ? orderedCards[safeCurrent + 1] : null;
+  const railEntries = orderedCards.map((card, i) => ({ card, i }));
+  const setupEntries = railEntries.filter(({ card }) =>
+    CONFIG_CARD_IDS.has(card.cardId)
+  );
+  const contentEntries = railEntries.filter(
+    ({ card }) => !CONFIG_CARD_IDS.has(card.cardId)
+  );
 
-      <div className="grid gap-4 lg:grid-cols-5">
-        {/* Left: ordered, collapsible, draggable form cards */}
+  // Rail completion status per content card; null for Setup cards (which have
+  // no notion of "done").
+  function cardStatus(cardId: string): { done: boolean; count?: number } | null {
+    switch (cardId) {
+      case "basics":
+        return {
+          done: Boolean(data.basics.name.trim() && data.basics.email.trim()),
+        };
+      case "summary":
+        return {
+          done: htmlToLines(data.basics.summary).join("").trim().length > 0,
+        };
+      case "areas":
+        return {
+          done: data.areasOfExpertise.length > 0,
+          count: data.areasOfExpertise.length,
+        };
+      case "experience":
+        return { done: data.experience.length > 0, count: data.experience.length };
+      case "education":
+        return { done: data.education.length > 0, count: data.education.length };
+      case "projects":
+        return { done: data.projects.length > 0, count: data.projects.length };
+      case "skills": {
+        const n = (data.skillCategories ?? []).length;
+        return { done: n > 0, count: n };
+      }
+      case "certifications":
+        return {
+          done: data.certifications.length > 0,
+          count: data.certifications.length,
+        };
+      case "languages": {
+        const n = (data.languages ?? []).length;
+        return { done: n > 0, count: n };
+      }
+      case "customSections": {
+        const n = (data.customSections ?? []).length;
+        return { done: n > 0, count: n };
+      }
+      default:
+        return null;
+    }
+  }
+
+  // Click-to-edit: clicking a section inside the live preview focuses its form
+  // card (and flips to the edit pane on mobile). Templates tag their section
+  // wrappers with data-rf-section, whose value is the matching cardId.
+  function onPreviewClick(e: React.MouseEvent<HTMLDivElement>) {
+    const hit = (e.target as HTMLElement).closest<HTMLElement>(
+      "[data-rf-section]"
+    );
+    const cardId = hit?.dataset.rfSection;
+    if (!cardId) return;
+    const idx = orderedCards.findIndex((c) => c.cardId === cardId);
+    if (idx === -1) return;
+    setCurrentCard(idx);
+    setMobileView("edit");
+  }
+
+  // One group of the desktop rail. Content cards show a completion dot or item
+  // count; the active card additionally exposes move up/down (the form-card
+  // order is saved per version).
+  const renderRailGroup = (
+    label: string,
+    entries: { card: ResumeFormCardState; i: number }[],
+    reorderable: boolean
+  ) => (
+    <div>
+      <p className="px-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+        {label}
+      </p>
+      <div className="space-y-0.5">
+        {entries.map(({ card, i }, gi) => {
+          const status = cardStatus(card.cardId);
+          const active = i === safeCurrent;
+          return (
+            <div key={card.cardId}>
+              <button
+                type="button"
+                onClick={() => setCurrentCard(i)}
+                aria-current={active ? "true" : undefined}
+                className={`flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-left text-[13px] font-medium transition ${
+                  active
+                    ? "bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-200"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                }`}
+              >
+                <span className="truncate">{cardTitle(card)}</span>
+                {status &&
+                  (status.count ? (
+                    <span
+                      className={`shrink-0 rounded-full px-1.5 text-[10px] font-semibold tabular-nums ${
+                        active
+                          ? "bg-brand-100 text-brand-700 dark:bg-brand-500/25 dark:text-brand-200"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {status.count}
+                    </span>
+                  ) : status.done ? (
+                    <CheckDot />
+                  ) : (
+                    <span
+                      className="h-1.5 w-1.5 shrink-0 rounded-full border border-input"
+                      aria-hidden
+                    />
+                  ))}
+              </button>
+              {reorderable && active && (
+                <div className="flex items-center gap-2 px-2.5 pb-1 pt-0.5">
+                  <button
+                    type="button"
+                    disabled={gi === 0}
+                    onClick={() => moveCard(card.cardId, -1)}
+                    className="text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-30"
+                  >
+                    ↑ Move up
+                  </button>
+                  <button
+                    type="button"
+                    disabled={gi === entries.length - 1}
+                    onClick={() => moveCard(card.cardId, 1)}
+                    className="text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-30"
+                  >
+                    ↓ Move down
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="pb-16 lg:pb-0">
+      <div className="grid gap-4 lg:grid-cols-[11.5rem_minmax(0,10fr)_minmax(0,11fr)] lg:items-start lg:gap-5">
+        {/* Desktop rail: section navigation, completion, and save actions. */}
+        <aside className="hidden lg:sticky lg:top-20 lg:block lg:self-start">
+          <nav aria-label="Resume sections" className="space-y-4">
+            {renderRailGroup("Setup", setupEntries, false)}
+            {renderRailGroup("Content", contentEntries, true)}
+          </nav>
+          <div className="mt-4 space-y-2 border-t border-border pt-4">
+            <button
+              onClick={save}
+              disabled={saving}
+              className={`${buttonClass("primary")} w-full`}
+            >
+              {saving
+                ? "Saving…"
+                : mode === "create"
+                  ? "Create resume"
+                  : "Save & view"}
+            </button>
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className={`${buttonClass("secondary")} w-full`}
+            >
+              Cancel
+            </button>
+            {mode === "edit" && (
+              <p className="text-center">
+                <SaveStatusBadge status={saveStatus} />
+              </p>
+            )}
+          </div>
+        </aside>
+
+        {/* Middle: the active section's form */}
         <div
-          className={`space-y-4 lg:col-span-2 lg:block ${
+          className={`space-y-4 lg:block ${
             mobileView === "preview" ? "hidden" : ""
           }`}
         >
@@ -1270,36 +1578,22 @@ export default function ResumeBuilder({
           </div>
         )}
         {/* Mobile section stepper: tappable chip bar (one section at a time). */}
-        <div className="lg:hidden">
-          <div className="-mx-1 flex items-center justify-between gap-2 px-1">
-            <p className="text-xs font-semibold text-muted-foreground">
-              Section {safeCurrent + 1} of {orderedCards.length}
-            </p>
-            {mode === "edit" && <SaveStatusBadge status={saveStatus} />}
-          </div>
-          <div className="mt-1.5 flex gap-1.5 overflow-x-auto pb-1.5">
-            {orderedCards.map((card, i) => (
-              <button
-                key={card.cardId}
-                type="button"
-                onClick={() => setCurrentCard(i)}
-                className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                  i === safeCurrent
-                    ? "bg-brand-600 text-white"
-                    : "bg-muted text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                {cardTitle(card)}
-              </button>
-            ))}
-          </div>
+        <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1.5 lg:hidden">
+          {orderedCards.map((card, i) => (
+            <button
+              key={card.cardId}
+              type="button"
+              onClick={() => setCurrentCard(i)}
+              className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                i === safeCurrent
+                  ? "bg-brand-600 text-white"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {cardTitle(card)}
+            </button>
+          ))}
         </div>
-
-        <p className="hidden text-xs text-muted-foreground/70 lg:block">
-          Use the ↑ ↓ controls to reorder cards, or click a card header to
-          collapse it. Your layout is saved with this version and only affects
-          the form — not the resume output.
-        </p>
         {orderedCards.map((card, i) => {
           const content = cardContent[card.cardId];
           if (!content) return null;
@@ -1307,55 +1601,51 @@ export default function ResumeBuilder({
           // label renamed; configuration cards (template, style, version, …) map
           // to no document section and so are not renamable.
           const sec = sectionById[card.cardId];
-          // On mobile only the focused section shows; desktop shows every card.
+          // One section at a time on every screen size; the rail (desktop) and
+          // the chips / bottom bar (mobile) navigate between sections.
           return (
-            <div
-              key={card.cardId}
-              className={i === safeCurrent ? "" : "hidden lg:block"}
-            >
-              <CollapsibleCard
-                card={card}
+            <div key={card.cardId} className={i === safeCurrent ? "" : "hidden"}>
+              <SectionCard
+                title={sec ? sectionLabel(sec) : card.title}
                 count={content.count}
                 headerRight={content.headerRight}
-                isFirst={i === 0}
-                isLast={i === orderedCards.length - 1}
-                onToggle={() => toggleCollapse(card.cardId)}
-                onMoveUp={() => moveCard(card.cardId, -1)}
-                onMoveDown={() => moveCard(card.cardId, 1)}
-                displayTitle={sec ? sectionLabel(sec) : undefined}
                 hasCustomLabel={Boolean(sec?.customTitle)}
+                footer={
+                  <div className="hidden items-center justify-between gap-2 border-t border-border px-4 py-3 lg:flex">
+                    <button
+                      type="button"
+                      disabled={!prevCardMeta}
+                      onClick={() => setCurrentCard((c) => Math.max(0, c - 1))}
+                      className={`${buttonClass("secondary")} disabled:opacity-40`}
+                    >
+                      ← {prevCardMeta ? cardTitle(prevCardMeta) : "Back"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!nextCardMeta}
+                      onClick={() =>
+                        setCurrentCard((c) =>
+                          Math.min(orderedCards.length - 1, c + 1)
+                        )
+                      }
+                      className={`${buttonClass("primary")} disabled:opacity-40`}
+                    >
+                      {nextCardMeta ? `Next: ${cardTitle(nextCardMeta)}` : "Done"}{" "}
+                      →
+                    </button>
+                  </div>
+                }
               >
                 {content.body}
-              </CollapsibleCard>
+              </SectionCard>
             </div>
           );
         })}
 
-        {/* Mobile Back / Next stepper controls. */}
-        <div className="flex items-center justify-between gap-2 lg:hidden">
-          <button
-            type="button"
-            disabled={safeCurrent === 0}
-            onClick={() => setCurrentCard((c) => Math.max(0, c - 1))}
-            className={`${buttonClass("secondary")} disabled:opacity-40`}
-          >
-            ← Back
-          </button>
-          <button
-            type="button"
-            disabled={safeCurrent >= orderedCards.length - 1}
-            onClick={() =>
-              setCurrentCard((c) => Math.min(orderedCards.length - 1, c + 1))
-            }
-            className={`${buttonClass("primary")} disabled:opacity-40`}
-          >
-            Next →
-          </button>
-        </div>
-
         {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
-        <div className="flex items-center gap-2">
+        {/* Mobile save actions; on desktop these live in the rail. */}
+        <div className="flex items-center gap-2 lg:hidden">
           <button onClick={save} disabled={saving} className={buttonClass("primary")}>
             {saving ? "Saving…" : mode === "create" ? "Create resume" : "Save & view"}
           </button>
@@ -1366,22 +1656,24 @@ export default function ResumeBuilder({
           >
             Cancel
           </button>
-          {mode === "edit" && (
-            <span className="hidden lg:block">
-              <SaveStatusBadge status={saveStatus} />
-            </span>
-          )}
         </div>
       </div>
 
         {/* Right: live preview */}
         <div
-          className={`lg:col-span-3 lg:block lg:sticky lg:top-20 lg:self-start ${
+          className={`lg:block lg:sticky lg:top-20 lg:self-start ${
             mobileView === "edit" ? "hidden" : ""
           }`}
         >
           <div className="mb-2 flex items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-foreground/80">Live preview</p>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-foreground/80">
+                Live preview
+              </p>
+              <p className="hidden text-xs text-muted-foreground/70 lg:block">
+                Click any part of the page to jump to its editor.
+              </p>
+            </div>
             <div className="flex items-center gap-2">
               {/* Mobile zoom controls (desktop shows the sheet full-size). */}
               <div className="flex items-center gap-1 lg:hidden">
@@ -1426,7 +1718,10 @@ export default function ResumeBuilder({
             </div>
           </div>
           <div className="overflow-hidden rounded-xl border border-border bg-muted shadow-sm">
-            <div className="max-h-[80vh] overflow-auto p-3">
+            <div
+              className="rf-click-edit max-h-[80vh] overflow-auto p-3"
+              onClick={onPreviewClick}
+            >
               <A4Preview
                 key={mobileView}
                 margins={templateStyle.pageMargins}
@@ -1441,6 +1736,73 @@ export default function ResumeBuilder({
                 />
               </A4Preview>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile bottom action bar: pane switch, section stepping, save state.
+          Fixed so thumbs never have to travel; the root pads for it (pb-16). */}
+      <div className="no-print fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 backdrop-blur lg:hidden">
+        <div className="flex items-center justify-between gap-2 px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2">
+          <div className="flex items-center rounded-lg border border-border bg-muted p-0.5">
+            <button
+              type="button"
+              onClick={() => setMobileView("edit")}
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                mobileView === "edit"
+                  ? "bg-card text-brand-700 dark:text-brand-300 shadow-sm"
+                  : "text-muted-foreground"
+              }`}
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileView("preview")}
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                mobileView === "preview"
+                  ? "bg-card text-brand-700 dark:text-brand-300 shadow-sm"
+                  : "text-muted-foreground"
+              }`}
+            >
+              Preview
+            </button>
+          </div>
+
+          {mobileView === "edit" ? (
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                aria-label="Previous section"
+                disabled={safeCurrent === 0}
+                onClick={() => setCurrentCard((c) => Math.max(0, c - 1))}
+                className="grid h-9 w-9 place-items-center rounded-md border border-input text-foreground/80 disabled:opacity-40"
+              >
+                ←
+              </button>
+              <span className="min-w-[3rem] text-center text-[11px] font-medium tabular-nums text-muted-foreground">
+                {safeCurrent + 1} / {orderedCards.length}
+              </span>
+              <button
+                type="button"
+                aria-label="Next section"
+                disabled={safeCurrent >= orderedCards.length - 1}
+                onClick={() =>
+                  setCurrentCard((c) => Math.min(orderedCards.length - 1, c + 1))
+                }
+                className="grid h-9 w-9 place-items-center rounded-md bg-brand-600 text-white disabled:opacity-40"
+              >
+                →
+              </button>
+            </div>
+          ) : (
+            <span className="truncate text-xs text-muted-foreground">
+              Tap a section to edit it
+            </span>
+          )}
+
+          <div className="min-w-[3.5rem] text-right">
+            {mode === "edit" && <SaveStatusBadge status={saveStatus} />}
           </div>
         </div>
       </div>
@@ -1464,87 +1826,64 @@ function SaveStatusBadge({
   return <span className={`text-xs font-medium ${cls}`}>{text}</span>;
 }
 
-// A form card with a header that toggles collapse, plus up/down controls for
-// reordering. The title + caret collapse the card; the ↑ ↓ buttons move it.
-function CollapsibleCard({
-  card,
+// The card framing the active section's form: title header (with optional
+// count / renamed marker and per-card actions) and an optional footer used for
+// the desktop Back / Next flow. Navigation between cards lives in the rail
+// (desktop) and the chip bar + bottom bar (mobile).
+function SectionCard({
+  title,
   count,
   headerRight,
-  isFirst,
-  isLast,
-  onToggle,
-  onMoveUp,
-  onMoveDown,
-  displayTitle,
   hasCustomLabel,
+  footer,
   children,
 }: {
-  card: ResumeFormCardState;
+  title: string;
   count?: number;
   headerRight?: React.ReactNode;
-  isFirst: boolean;
-  isLast: boolean;
-  onToggle: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
-  // For content-section cards: the resolved label shown in the header
-  // (customTitle || defaultTitle) and whether a custom label is set, so the
-  // header reflects renames done in the Document Sections card. Absent for
-  // configuration cards. Renaming itself lives in SectionLayoutEditor.
-  displayTitle?: string;
   hasCustomLabel?: boolean;
+  footer?: React.ReactNode;
   children: React.ReactNode;
 }) {
-  // Section cards show their (possibly custom) label; other cards keep the
-  // canonical card title.
-  const title = displayTitle ?? card.title;
-
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm">
-      <div className="flex items-center justify-between gap-2 px-4 py-3">
-        <button
-          type="button"
-          onClick={onToggle}
-          className="flex min-w-0 flex-1 items-center gap-2 text-left"
-          aria-expanded={!card.collapsed}
-        >
-          <span
-            className="text-muted-foreground/70 transition-transform"
-            aria-hidden
-            style={{ transform: card.collapsed ? "rotate(-90deg)" : "none" }}
-          >
-            ▾
-          </span>
-          <span className="truncate text-sm font-semibold text-foreground/80">
-            {title}
-            {hasCustomLabel && (
-              <span className="ml-1 text-xs font-normal text-muted-foreground/70">
-                (renamed)
-              </span>
-            )}
-            {typeof count === "number" && (
-              <span className="ml-1 text-xs font-normal text-muted-foreground/70">
-                ({count})
-              </span>
-            )}
-          </span>
-        </button>
-        <div className="flex shrink-0 items-center gap-1">
-          {headerRight}
-          <IconButton label="Move card up" disabled={isFirst} onClick={onMoveUp}>
-            ↑
-          </IconButton>
-          <IconButton
-            label="Move card down"
-            disabled={isLast}
-            onClick={onMoveDown}
-          >
-            ↓
-          </IconButton>
-        </div>
+      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
+        <h2 className="min-w-0 truncate text-sm font-semibold text-foreground">
+          {title}
+          {hasCustomLabel && (
+            <span className="ml-1 text-xs font-normal text-muted-foreground/70">
+              (renamed)
+            </span>
+          )}
+          {typeof count === "number" && count > 0 && (
+            <span className="ml-1 text-xs font-normal text-muted-foreground/70">
+              ({count})
+            </span>
+          )}
+        </h2>
+        <div className="flex shrink-0 items-center gap-1">{headerRight}</div>
       </div>
-      {!card.collapsed && <div className="px-4 pb-4">{children}</div>}
+      <div className="p-4">{children}</div>
+      {footer}
     </div>
+  );
+}
+
+// Small green check shown in the rail next to completed sections.
+function CheckDot() {
+  return (
+    <span
+      className="grid h-3.5 w-3.5 shrink-0 place-items-center rounded-full bg-green-500/15 text-green-600 dark:text-green-400"
+      aria-hidden
+    >
+      <svg className="h-2.5 w-2.5" viewBox="0 0 20 20" fill="currentColor">
+        <path
+          fillRule="evenodd"
+          d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 1 1 1.4-1.4l3.3 3.29 6.8-6.8a1 1 0 0 1 1.4 0Z"
+          clipRule="evenodd"
+        />
+      </svg>
+    </span>
   );
 }
 
@@ -2365,6 +2704,48 @@ function Field({
         className={inputClass}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
+  );
+}
+
+// A labelled range slider with a live value badge. All style controls use this
+// instead of bare numeric inputs so changes can be scrubbed against the live
+// preview.
+function SliderField({
+  label,
+  value,
+  min,
+  max,
+  step,
+  display,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  display?: string;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div>
+      <div className="mb-1 flex items-baseline justify-between gap-2">
+        <label className="text-xs font-medium text-muted-foreground">{label}</label>
+        <span className="rounded bg-muted px-1.5 py-0.5 text-[11px] font-semibold tabular-nums text-foreground/80">
+          {display ?? value}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        aria-label={label}
+        onChange={(e) => onChange(e.target.valueAsNumber)}
+        className="h-2 w-full cursor-pointer accent-brand-600"
       />
     </div>
   );

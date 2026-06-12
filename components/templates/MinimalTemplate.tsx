@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import type {
   ResumeData,
   ResumeSectionId,
@@ -113,7 +112,7 @@ export default function MinimalTemplate({
       className="bg-white text-[13px] font-light leading-relaxed text-gray-700"
       style={{ fontFamily: s.fontFamily }}
     >
-      <header>
+      <header data-rf-section="basics">
         <h1
           className="text-2xl font-normal tracking-tight"
           style={{ color: s.primaryColor }}
@@ -132,13 +131,15 @@ export default function MinimalTemplate({
 
       {orderedVisibleDocSections(data, sectionState).map((entry) =>
         entry.kind === "custom" ? (
-          <Section key={entry.id} title={entry.label} style={s}>
-            <CustomSectionContent section={entry.section} style={s} />
-          </Section>
+          <div key={entry.id} data-rf-section="customSections">
+            <Section title={entry.label} style={s}>
+              <CustomSectionContent section={entry.section} style={s} />
+            </Section>
+          </div>
         ) : sections[entry.sectionId] ? (
-          <Fragment key={entry.sectionId}>
+          <div key={entry.sectionId} data-rf-section={entry.sectionId}>
             {sections[entry.sectionId]}
-          </Fragment>
+          </div>
         ) : null
       )}
     </div>

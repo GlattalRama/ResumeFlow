@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import type {
   ResumeData,
   ResumeSectionId,
@@ -148,7 +147,7 @@ export default function CustomTemplate({
         className="col-span-1 space-y-6 p-6 text-white"
         style={{ backgroundColor: s.primaryColor }}
       >
-        <div>
+        <div data-rf-section="basics">
           <h1 className="text-2xl font-bold leading-tight text-white">
             {basics.name || "Your Name"}
           </h1>
@@ -165,7 +164,9 @@ export default function CustomTemplate({
 
         {sidebarOrder.map((e) =>
           e.kind === "default" ? (
-            <Fragment key={e.sectionId}>{sidebarSections[e.sectionId]}</Fragment>
+            <div key={e.sectionId} data-rf-section={e.sectionId}>
+              {sidebarSections[e.sectionId]}
+            </div>
           ) : null
         )}
       </aside>
@@ -173,11 +174,15 @@ export default function CustomTemplate({
       <div className="col-span-2 p-7">
         {mainOrder.map((e) =>
           e.kind === "custom" ? (
-            <Section key={e.id} title={e.label} style={s}>
-              <CustomSectionContent section={e.section} style={s} />
-            </Section>
+            <div key={e.id} data-rf-section="customSections">
+              <Section title={e.label} style={s}>
+                <CustomSectionContent section={e.section} style={s} />
+              </Section>
+            </div>
           ) : (
-            <Fragment key={e.sectionId}>{mainSections[e.sectionId]}</Fragment>
+            <div key={e.sectionId} data-rf-section={e.sectionId}>
+              {mainSections[e.sectionId]}
+            </div>
           )
         )}
       </div>

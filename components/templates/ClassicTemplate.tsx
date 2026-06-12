@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import type {
   ResumeData,
   ResumeSectionId,
@@ -112,6 +111,7 @@ export default function ClassicTemplate({
       style={{ fontFamily: s.fontFamily }}
     >
       <header
+        data-rf-section="basics"
         className="border-b-2 pb-3 text-center"
         style={{ borderColor: s.sectionLineColor }}
       >
@@ -131,13 +131,15 @@ export default function ClassicTemplate({
 
       {orderedVisibleDocSections(data, sectionState).map((entry) =>
         entry.kind === "custom" ? (
-          <Section key={entry.id} title={entry.label} style={s}>
-            <CustomSectionContent section={entry.section} style={s} />
-          </Section>
+          <div key={entry.id} data-rf-section="customSections">
+            <Section title={entry.label} style={s}>
+              <CustomSectionContent section={entry.section} style={s} />
+            </Section>
+          </div>
         ) : sections[entry.sectionId] ? (
-          <Fragment key={entry.sectionId}>
+          <div key={entry.sectionId} data-rf-section={entry.sectionId}>
             {sections[entry.sectionId]}
-          </Fragment>
+          </div>
         ) : null
       )}
     </div>

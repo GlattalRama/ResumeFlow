@@ -76,6 +76,20 @@
   --input: 216 12% 84%;
 }
 
+/* Click-to-edit affordance in the builder's live preview: tagged sections
+   show a subtle brand outline on hover and are clickable. Screen-only — the
+   class lives on the builder preview container, never the print/export DOM. */
+.rf-click-edit [data-rf-section] {
+  cursor: pointer;
+  border-radius: 2px;
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+  transition: outline-color 120ms ease;
+}
+.rf-click-edit [data-rf-section]:hover {
+  outline-color: hsl(239 84% 67% / 0.55);
+}
+
 /* Adjustable gap between consecutive list / row items in a resume. The gap is
    driven by the --rf-bullet-gap CSS variable set on the template root (from the
    per-version line-spacing setting); falls back to the previous fixed spacing. */
