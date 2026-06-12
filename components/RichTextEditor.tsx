@@ -85,9 +85,9 @@ export default function RichTextEditor({
 
   return (
     <div
-      className={`rounded-md border border-gray-300 focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500 ${className}`}
+      className={`rounded-md border border-input bg-card text-foreground focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500 ${className}`}
     >
-      <div className="flex flex-wrap items-center gap-0.5 border-b border-gray-200 px-1.5 py-1">
+      <div className="flex flex-wrap items-center gap-0.5 border-b border-border px-1.5 py-1">
         <ToolbarButton label="Bold (Ctrl/Cmd+B)" onClick={() => format("bold")}>
           <span className="font-bold">B</span>
         </ToolbarButton>
@@ -105,7 +105,7 @@ export default function RichTextEditor({
         </ToolbarButton>
         {showLists && (
           <>
-            <span className="mx-1 h-4 w-px bg-gray-200" aria-hidden="true" />
+            <span className="mx-1 h-4 w-px bg-muted" aria-hidden="true" />
             <ToolbarButton
               label="Bulleted list"
               onClick={() => format("insertUnorderedList")}
@@ -121,12 +121,12 @@ export default function RichTextEditor({
           </>
         )}
         {hint && (
-          <span className="ml-1 text-[11px] text-gray-400">{hint}</span>
+          <span className="ml-1 text-[11px] text-muted-foreground/70">{hint}</span>
         )}
       </div>
       <div className="relative">
         {isEmpty && placeholder && (
-          <span className="pointer-events-none absolute left-3 top-2 text-sm text-gray-400">
+          <span className="pointer-events-none absolute left-3 top-2 text-sm text-muted-foreground/70">
             {placeholder}
           </span>
         )}
@@ -164,7 +164,7 @@ function ToolbarButton({
       // formatting command applies to the current selection.
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
-      className="grid h-7 w-7 place-items-center rounded text-sm text-gray-600 transition hover:bg-gray-100"
+      className="grid h-7 w-7 place-items-center rounded text-sm text-muted-foreground transition hover:bg-muted"
     >
       {children}
     </button>

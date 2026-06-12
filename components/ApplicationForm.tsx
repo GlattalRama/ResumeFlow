@@ -7,8 +7,8 @@ import { APPLICATION_STATUSES } from "@/lib/constants";
 import { buttonClass } from "./ui";
 
 const inputClass =
-  "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500";
-const labelClass = "block text-xs font-medium text-gray-600 mb-1";
+  "w-full rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500";
+const labelClass = "block text-xs font-medium text-muted-foreground mb-1";
 
 export interface ResumeOption {
   id: string;
@@ -72,7 +72,7 @@ export default function ApplicationForm({
 
   return (
     <div className="max-w-2xl space-y-4">
-      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <label className={labelClass}>Company *</label>
@@ -143,7 +143,7 @@ export default function ApplicationForm({
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       <div className="flex gap-2">
         <button onClick={save} disabled={saving} className={buttonClass("primary")}>

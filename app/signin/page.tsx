@@ -61,7 +61,7 @@ export default async function SignInPage({
       {/* Decorative brand-colored gradient blobs */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#0033a0]/10 blur-3xl"
+        className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#0033a0]/10 dark:bg-blue-400/10 blur-3xl"
       />
       <div
         aria-hidden
@@ -71,17 +71,17 @@ export default async function SignInPage({
       <div className="relative grid items-center gap-10 py-6 lg:grid-cols-2 lg:gap-16 lg:py-16">
         {/* ---- Left: hero copy ---- */}
         <div className="max-w-xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#0033a0]/20 bg-[#0033a0]/5 px-3 py-1 text-xs font-semibold text-[#0033a0]">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#0033a0]/20 bg-[#0033a0]/5 px-3 py-1 text-xs font-semibold text-[#0033a0] dark:border-blue-400/30 dark:bg-blue-400/10 dark:text-blue-300">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
             AI-powered resume builder &amp; job tracker
           </span>
 
-          <h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-tight text-gray-900 sm:text-5xl">
+          <h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl">
             Land more interviews with resumes built to{" "}
-            <span className="text-[#0033a0]">beat the ATS</span>.
+            <span className="text-[#0033a0] dark:text-blue-300">beat the ATS</span>.
           </h1>
 
-          <p className="mt-4 text-base leading-relaxed text-gray-600 sm:text-lg">
+          <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
             Resumeflow-ATS helps you tailor each resume to the job, track every
             application, and prepare for interviews — all in one place, with your
             data saved privately to your own Google Drive.
@@ -90,14 +90,14 @@ export default async function SignInPage({
           <ul className="mt-8 grid gap-4 sm:grid-cols-2">
             {FEATURES.map((f) => (
               <li key={f.title} className="flex gap-3">
-                <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-green-100 text-green-700">
+                <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-300">
                   <CheckIcon />
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">
+                  <p className="text-sm font-semibold text-foreground">
                     {f.title}
                   </p>
-                  <p className="mt-0.5 text-xs leading-relaxed text-gray-500">
+                  <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                     {f.desc}
                   </p>
                 </div>
@@ -108,14 +108,14 @@ export default async function SignInPage({
 
         {/* ---- Right: sign-in card ---- */}
         <div className="mx-auto w-full max-w-md lg:mx-0">
-          <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-lg shadow-gray-200/60">
+          <div className="rounded-2xl border border-border bg-card p-8 shadow-lg shadow-gray-200/60 dark:shadow-black/40">
             <div className="mb-6 flex flex-col items-center text-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo-mark.png" alt="" className="h-14 w-auto" />
-              <h2 className="mt-3 text-xl font-bold text-gray-900">
+              <h2 className="mt-3 text-xl font-bold text-foreground">
                 Get started free
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Sign in to create your first tailored resume in minutes.
               </p>
             </div>
@@ -124,7 +124,7 @@ export default async function SignInPage({
               <SignInButton callbackUrl={target} />
             ) : (
               <div className="space-y-4">
-                <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                <div className="rounded-md border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/40 p-3 text-xs text-amber-800 dark:text-amber-200">
                   Google sign-in is not configured. The app is running in local
                   development mode and stores data in <code>/data</code>. Set{" "}
                   <code>GOOGLE_CLIENT_ID</code> and{" "}
@@ -140,12 +140,12 @@ export default async function SignInPage({
               </div>
             )}
 
-            <p className="mt-6 text-center text-[11px] text-gray-400">
+            <p className="mt-6 text-center text-[11px] text-muted-foreground/70">
               We request access only to Resumeflow-ATS&apos;s own app data folder
               in your Google Drive.
             </p>
 
-            <p className="mt-3 text-center text-[11px] text-gray-400">
+            <p className="mt-3 text-center text-[11px] text-muted-foreground/70">
               <Link href="/privacy" className="hover:underline">
                 Privacy Policy
               </Link>

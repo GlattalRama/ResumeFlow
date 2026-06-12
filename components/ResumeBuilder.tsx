@@ -45,8 +45,8 @@ import { htmlToLines, linesToHtml } from "@/lib/richText";
 import { buttonClass } from "./ui";
 
 const inputClass =
-  "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500";
-const labelClass = "block text-xs font-medium text-gray-600 mb-1";
+  "w-full rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500";
+const labelClass = "block text-xs font-medium text-muted-foreground mb-1";
 
 interface Props {
   mode: "create" | "edit";
@@ -707,7 +707,7 @@ export default function ResumeBuilder({
         <button
           type="button"
           onClick={() => setTemplateStyle(defaultTemplateStyle())}
-          className="text-xs text-gray-400 hover:text-brand-600"
+          className="text-xs text-muted-foreground/70 hover:text-brand-600 dark:hover:text-brand-300"
         >
           Reset to default
         </button>
@@ -804,7 +804,7 @@ export default function ResumeBuilder({
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {(["top", "right", "bottom", "left"] as const).map((side) => (
                 <div key={side}>
-                  <span className="mb-1 block text-xs capitalize text-gray-500">
+                  <span className="mb-1 block text-xs capitalize text-muted-foreground">
                     {side}
                   </span>
                   <input
@@ -831,7 +831,7 @@ export default function ResumeBuilder({
                 ] as const
               ).map(({ key, label, step }) => (
                 <div key={key}>
-                  <span className="mb-1 block text-xs text-gray-500">{label}</span>
+                  <span className="mb-1 block text-xs text-muted-foreground">{label}</span>
                   <input
                     type="number"
                     min={key === "text" ? 0.8 : 0}
@@ -845,7 +845,7 @@ export default function ResumeBuilder({
               ))}
             </div>
           </div>
-          <p className="mt-2 text-xs text-gray-400">
+          <p className="mt-2 text-xs text-muted-foreground/70">
             Applied live to the preview and saved with this version. Margins set
             the printed A4 page margins (and the on-screen sheet padding). The
             ATS Corporate Style template uses every setting; other templates use
@@ -912,17 +912,17 @@ export default function ResumeBuilder({
                 <img
                   src={photoSrc}
                   alt="Profile preview"
-                  className={`h-16 w-16 border border-gray-200 object-cover ${
+                  className={`h-16 w-16 border border-border object-cover ${
                     photoShape === "circle" ? "rounded-full" : "rounded-md"
                   }`}
                 />
               ) : (
-                <div className="flex h-16 w-16 items-center justify-center rounded-md border border-dashed border-gray-300 text-[10px] text-gray-400">
+                <div className="flex h-16 w-16 items-center justify-center rounded-md border border-dashed border-input text-[10px] text-muted-foreground/70">
                   No photo
                 </div>
               )}
               <div className="flex flex-col gap-1">
-                <label className="cursor-pointer rounded-md border border-gray-300 px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50">
+                <label className="cursor-pointer rounded-md border border-input px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/50">
                   {uploadingPhoto
                     ? "Uploading…"
                     : photoSrc
@@ -940,7 +940,7 @@ export default function ResumeBuilder({
                   <button
                     type="button"
                     onClick={removePhoto}
-                    className="text-xs text-gray-400 hover:text-red-600"
+                    className="text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
                   >
                     Remove photo
                   </button>
@@ -950,8 +950,8 @@ export default function ResumeBuilder({
             {/* Shape choice (ATS Corporate Style template). Shown once a photo is present. */}
             {photoSrc && (
               <div className="mt-2 flex items-center gap-2">
-                <span className="text-xs text-gray-500">Shape:</span>
-                <div className="inline-flex overflow-hidden rounded-md border border-gray-300">
+                <span className="text-xs text-muted-foreground">Shape:</span>
+                <div className="inline-flex overflow-hidden rounded-md border border-input">
                   {(["square", "circle"] as const).map((shape) => (
                     <button
                       key={shape}
@@ -961,8 +961,8 @@ export default function ResumeBuilder({
                       }
                       className={`px-2.5 py-1 text-xs font-medium capitalize ${
                         photoShape === shape
-                          ? "bg-gray-800 text-white"
-                          : "bg-white text-gray-600 hover:bg-gray-50"
+                          ? "bg-foreground text-background"
+                          : "bg-card text-muted-foreground hover:bg-muted/50"
                       }`}
                     >
                       {shape}
@@ -971,7 +971,7 @@ export default function ResumeBuilder({
                 </div>
               </div>
             )}
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-muted-foreground/70">
               Saved as an image in your Google Drive app data (only the file
               reference is kept in the resume). Shown in the ATS Corporate Style
               template header. In local dev mode it is embedded as Base64.
@@ -1191,14 +1191,14 @@ export default function ResumeBuilder({
       {/* Mobile tab switcher: edit vs. preview. Hidden on large screens where
           both panes show side-by-side. Sticky so you can flip back to Edit
           while scrolled down in the preview. */}
-      <div className="sticky top-16 z-20 mb-4 grid grid-cols-2 gap-1 rounded-lg border border-gray-200 bg-gray-100 p-1 lg:hidden">
+      <div className="sticky top-16 z-20 mb-4 grid grid-cols-2 gap-1 rounded-lg border border-border bg-muted p-1 lg:hidden">
         <button
           type="button"
           onClick={() => setMobileView("edit")}
           className={`rounded-md px-3 py-2 text-sm font-semibold transition ${
             mobileView === "edit"
-              ? "bg-white text-brand-700 shadow-sm"
-              : "text-gray-600"
+              ? "bg-card text-brand-700 dark:text-brand-300 shadow-sm"
+              : "text-muted-foreground"
           }`}
         >
           Edit
@@ -1208,8 +1208,8 @@ export default function ResumeBuilder({
           onClick={() => setMobileView("preview")}
           className={`rounded-md px-3 py-2 text-sm font-semibold transition ${
             mobileView === "preview"
-              ? "bg-white text-brand-700 shadow-sm"
-              : "text-gray-600"
+              ? "bg-card text-brand-700 dark:text-brand-300 shadow-sm"
+              : "text-muted-foreground"
           }`}
         >
           Preview
@@ -1224,13 +1224,13 @@ export default function ResumeBuilder({
           }`}
         >
         {mode === "create" && (
-          <div className="rounded-xl border border-brand-200 bg-brand-50 p-4 shadow-sm">
+          <div className="rounded-xl border border-brand-200 dark:border-brand-500/40 bg-brand-50 dark:bg-brand-500/15 p-4 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-gray-800">
+                <p className="text-sm font-semibold text-foreground">
                   Start from an existing resume
                 </p>
-                <p className="mt-0.5 text-xs text-gray-600">
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   Upload a PDF or Word (.docx) file and AI will sort it into the
                   sections below. Nothing is saved until you press “Create
                   resume”.
@@ -1257,22 +1257,22 @@ export default function ResumeBuilder({
               </label>
             </div>
             {importing && (
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-muted-foreground">
                 Parsing and categorizing with AI — this can take a few seconds.
               </p>
             )}
             {importError && (
-              <p className="mt-2 text-xs text-red-600">{importError}</p>
+              <p className="mt-2 text-xs text-red-600 dark:text-red-400">{importError}</p>
             )}
             {importNote && !importError && (
-              <p className="mt-2 text-xs text-green-700">{importNote}</p>
+              <p className="mt-2 text-xs text-green-700 dark:text-green-300">{importNote}</p>
             )}
           </div>
         )}
         {/* Mobile section stepper: tappable chip bar (one section at a time). */}
         <div className="lg:hidden">
           <div className="-mx-1 flex items-center justify-between gap-2 px-1">
-            <p className="text-xs font-semibold text-gray-500">
+            <p className="text-xs font-semibold text-muted-foreground">
               Section {safeCurrent + 1} of {orderedCards.length}
             </p>
             {mode === "edit" && <SaveStatusBadge status={saveStatus} />}
@@ -1286,7 +1286,7 @@ export default function ResumeBuilder({
                 className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition ${
                   i === safeCurrent
                     ? "bg-brand-600 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    : "bg-muted text-muted-foreground hover:bg-muted"
                 }`}
               >
                 {cardTitle(card)}
@@ -1295,7 +1295,7 @@ export default function ResumeBuilder({
           </div>
         </div>
 
-        <p className="hidden text-xs text-gray-400 lg:block">
+        <p className="hidden text-xs text-muted-foreground/70 lg:block">
           Use the ↑ ↓ controls to reorder cards, or click a card header to
           collapse it. Your layout is saved with this version and only affects
           the form — not the resume output.
@@ -1353,7 +1353,7 @@ export default function ResumeBuilder({
           </button>
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
         <div className="flex items-center gap-2">
           <button onClick={save} disabled={saving} className={buttonClass("primary")}>
@@ -1381,7 +1381,7 @@ export default function ResumeBuilder({
           }`}
         >
           <div className="mb-2 flex items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-gray-700">Live preview</p>
+            <p className="text-sm font-semibold text-foreground/80">Live preview</p>
             <div className="flex items-center gap-2">
               {/* Mobile zoom controls (desktop shows the sheet full-size). */}
               <div className="flex items-center gap-1 lg:hidden">
@@ -1391,7 +1391,7 @@ export default function ResumeBuilder({
                   onClick={() =>
                     setPreviewZoom((z) => Math.max(0.5, +(z - 0.25).toFixed(2)))
                   }
-                  className="grid h-7 w-7 place-items-center rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100"
+                  className="grid h-7 w-7 place-items-center rounded-md border border-input text-muted-foreground hover:bg-muted"
                 >
                   −
                 </button>
@@ -1399,7 +1399,7 @@ export default function ResumeBuilder({
                   type="button"
                   onClick={() => setPreviewZoom(1)}
                   title="Fit to width"
-                  className="min-w-[3rem] rounded-md border border-gray-300 px-1.5 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100"
+                  className="min-w-[3rem] rounded-md border border-input px-1.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
                 >
                   {previewZoom === 1 ? "Fit" : `${Math.round(previewZoom * 100)}%`}
                 </button>
@@ -1409,12 +1409,12 @@ export default function ResumeBuilder({
                   onClick={() =>
                     setPreviewZoom((z) => Math.min(3, +(z + 0.25).toFixed(2)))
                   }
-                  className="grid h-7 w-7 place-items-center rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100"
+                  className="grid h-7 w-7 place-items-center rounded-md border border-input text-muted-foreground hover:bg-muted"
                 >
                   +
                 </button>
               </div>
-              <label className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-gray-600">
+              <label className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-muted-foreground">
                 <input
                   type="checkbox"
                   checked={atsView}
@@ -1425,7 +1425,7 @@ export default function ResumeBuilder({
               </label>
             </div>
           </div>
-          <div className="overflow-hidden rounded-xl border border-gray-200 bg-gray-100 shadow-sm">
+          <div className="overflow-hidden rounded-xl border border-border bg-muted shadow-sm">
             <div className="max-h-[80vh] overflow-auto p-3">
               <A4Preview
                 key={mobileView}
@@ -1456,9 +1456,9 @@ function SaveStatusBadge({
 }) {
   if (status === "idle") return null;
   const map = {
-    saving: { text: "Saving…", cls: "text-gray-400" },
-    saved: { text: "Saved ✓", cls: "text-green-600" },
-    error: { text: "Couldn’t save", cls: "text-red-600" },
+    saving: { text: "Saving…", cls: "text-muted-foreground/70" },
+    saved: { text: "Saved ✓", cls: "text-green-600 dark:text-green-400" },
+    error: { text: "Couldn’t save", cls: "text-red-600 dark:text-red-400" },
   } as const;
   const { text, cls } = map[status];
   return <span className={`text-xs font-medium ${cls}`}>{text}</span>;
@@ -1500,7 +1500,7 @@ function CollapsibleCard({
   const title = displayTitle ?? card.title;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className="rounded-xl border border-border bg-card shadow-sm">
       <div className="flex items-center justify-between gap-2 px-4 py-3">
         <button
           type="button"
@@ -1509,21 +1509,21 @@ function CollapsibleCard({
           aria-expanded={!card.collapsed}
         >
           <span
-            className="text-gray-400 transition-transform"
+            className="text-muted-foreground/70 transition-transform"
             aria-hidden
             style={{ transform: card.collapsed ? "rotate(-90deg)" : "none" }}
           >
             ▾
           </span>
-          <span className="truncate text-sm font-semibold text-gray-700">
+          <span className="truncate text-sm font-semibold text-foreground/80">
             {title}
             {hasCustomLabel && (
-              <span className="ml-1 text-xs font-normal text-gray-400">
+              <span className="ml-1 text-xs font-normal text-muted-foreground/70">
                 (renamed)
               </span>
             )}
             {typeof count === "number" && (
-              <span className="ml-1 text-xs font-normal text-gray-400">
+              <span className="ml-1 text-xs font-normal text-muted-foreground/70">
                 ({count})
               </span>
             )}
@@ -1638,12 +1638,12 @@ function AreasOfExpertiseEditor({
         <button
           type="button"
           onClick={commitDraft}
-          className="shrink-0 rounded-md border border-gray-300 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50"
+          className="shrink-0 rounded-md border border-input px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted/50"
         >
           + Add
         </button>
       </div>
-      <p className="mt-1 text-xs text-gray-400">
+      <p className="mt-1 text-xs text-muted-foreground/70">
         Rendered as a balanced two-column list on the ATS Corporate Style
         template, using the selected bullet style.
       </p>
@@ -1671,10 +1671,10 @@ function SkillCategoryEditor({
     <div>
       {items.length > 0 && (
         <div className="mb-1 flex items-center gap-2">
-          <span className="flex-1 text-xs font-medium text-gray-500 sm:max-w-[40%]">
+          <span className="flex-1 text-xs font-medium text-muted-foreground sm:max-w-[40%]">
             Category
           </span>
-          <span className="flex-1 text-xs font-medium text-gray-500">Value</span>
+          <span className="flex-1 text-xs font-medium text-muted-foreground">Value</span>
           <span className="w-[104px] shrink-0" />
         </div>
       )}
@@ -1719,7 +1719,7 @@ function SkillCategoryEditor({
         <button
           type="button"
           onClick={onAdd}
-          className="rounded-md border border-gray-300 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50"
+          className="rounded-md border border-input px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted/50"
         >
           Add item
         </button>
@@ -1769,7 +1769,7 @@ function SectionLayoutEditor({
 
   return (
     <div>
-      <p className="mb-3 text-xs text-gray-400">
+      <p className="mb-3 text-xs text-muted-foreground/70">
         Reorder, rename, and show/hide the sections of the resume document. This
         order and these names apply to the live preview and to the PDF, DOCX, and
         PPTX exports. Empty sections are hidden automatically. “Break after”
@@ -1788,28 +1788,28 @@ function SectionLayoutEditor({
           return (
             <div
               key={`${e.kind}:${id}`}
-              className="rounded-lg border border-gray-200 bg-gray-50"
+              className="rounded-lg border border-border bg-muted/50"
             >
               <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
                 <span
                   className={`truncate text-sm font-medium ${
-                    e.visible ? "text-gray-700" : "text-gray-400 line-through"
+                    e.visible ? "text-foreground/80" : "text-muted-foreground/70 line-through"
                   }`}
                 >
                   {e.label}
                   {e.kind === "custom" && (
-                    <span className="ml-1 text-xs font-normal text-gray-400">
+                    <span className="ml-1 text-xs font-normal text-muted-foreground/70">
                       (custom)
                     </span>
                   )}
                   {hasCustomLabel && (
-                    <span className="ml-1 text-xs font-normal text-gray-400">
+                    <span className="ml-1 text-xs font-normal text-muted-foreground/70">
                       (renamed)
                     </span>
                   )}
                 </span>
                 <div className="flex shrink-0 items-center gap-1">
-                  <label className="mr-1 flex items-center gap-1 text-xs text-gray-500">
+                  <label className="mr-1 flex items-center gap-1 text-xs text-muted-foreground">
                     <input
                       type="checkbox"
                       checked={e.visible}
@@ -1818,7 +1818,7 @@ function SectionLayoutEditor({
                     />
                     Show
                   </label>
-                  <label className="mr-1 flex items-center gap-1 text-xs text-gray-500">
+                  <label className="mr-1 flex items-center gap-1 text-xs text-muted-foreground">
                     <input
                       type="checkbox"
                       checked={e.pageBreakAfter}
@@ -1854,7 +1854,7 @@ function SectionLayoutEditor({
                 </div>
               </div>
               {isEditing && renamable && (
-                <div className="flex flex-wrap items-center gap-2 border-t border-gray-200 px-3 py-2">
+                <div className="flex flex-wrap items-center gap-2 border-t border-border px-3 py-2">
                   <input
                     autoFocus
                     className={`${inputClass} flex-1`}
@@ -1877,7 +1877,7 @@ function SectionLayoutEditor({
                   <button
                     type="button"
                     onClick={() => commit(id)}
-                    className="rounded-md border border-gray-300 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                    className="rounded-md border border-input px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted/50"
                   >
                     Save
                   </button>
@@ -1888,7 +1888,7 @@ function SectionLayoutEditor({
                         onResetLabel(id);
                         setEditingId(null);
                       }}
-                      className="text-xs text-gray-400 hover:text-brand-600"
+                      className="text-xs text-muted-foreground/70 hover:text-brand-600 dark:hover:text-brand-300"
                     >
                       Reset to default
                     </button>
@@ -1896,7 +1896,7 @@ function SectionLayoutEditor({
                   <button
                     type="button"
                     onClick={() => setEditingId(null)}
-                    className="text-xs text-gray-400 hover:text-gray-700"
+                    className="text-xs text-muted-foreground/70 hover:text-foreground/80"
                   >
                     Cancel
                   </button>
@@ -1938,7 +1938,7 @@ function CustomSectionsEditor({
 }) {
   return (
     <div>
-      <p className="mb-3 text-xs text-gray-400">
+      <p className="mb-3 text-xs text-muted-foreground/70">
         Add your own sections (Projects, Awards, Publications, …). Each one joins
         the document order in the “Document Sections” card, so you can place it
         anywhere and it flows into the live preview and every export.
@@ -1961,7 +1961,7 @@ function CustomSectionsEditor({
         <button
           type="button"
           onClick={onAdd}
-          className="rounded-md border border-dashed border-gray-300 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50"
+          className="rounded-md border border-dashed border-input px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted/50"
         >
           + Add Custom Section
         </button>
@@ -1998,7 +1998,7 @@ function CustomSectionCard({
     section.layoutType === "bullets" ||
     section.layoutType === "twoColumnBullets";
   return (
-    <div className="rounded-lg border border-gray-200 bg-gray-50">
+    <div className="rounded-lg border border-border bg-muted/50">
       <div className="flex items-center justify-between gap-2 px-3 py-2">
         <button
           type="button"
@@ -2007,23 +2007,23 @@ function CustomSectionCard({
           aria-expanded={!section.collapsed}
         >
           <span
-            className="text-gray-400"
+            className="text-muted-foreground/70"
             aria-hidden
             style={{ transform: section.collapsed ? "rotate(-90deg)" : "none" }}
           >
             ▾
           </span>
-          <span className="truncate text-sm font-semibold text-gray-700">
+          <span className="truncate text-sm font-semibold text-foreground/80">
             {customSectionLabel(section)}
             {!section.visible && (
-              <span className="ml-1 text-xs font-normal text-gray-400">
+              <span className="ml-1 text-xs font-normal text-muted-foreground/70">
                 (hidden)
               </span>
             )}
           </span>
         </button>
         <div className="flex shrink-0 items-center gap-2">
-          <label className="flex items-center gap-1 text-xs text-gray-500">
+          <label className="flex items-center gap-1 text-xs text-muted-foreground">
             <input
               type="checkbox"
               checked={section.visible}
@@ -2035,7 +2035,7 @@ function CustomSectionCard({
           <button
             type="button"
             onClick={() => onDelete(id)}
-            className="rounded-md border border-gray-300 px-2 py-1 text-xs font-medium text-gray-500 hover:border-red-200 hover:text-red-600"
+            className="rounded-md border border-input px-2 py-1 text-xs font-medium text-muted-foreground hover:border-red-200 dark:hover:border-red-900 hover:text-red-600 dark:hover:text-red-400"
           >
             Delete Section
           </button>
@@ -2043,7 +2043,7 @@ function CustomSectionCard({
       </div>
 
       {!section.collapsed && (
-        <div className="space-y-3 border-t border-gray-200 px-3 py-3">
+        <div className="space-y-3 border-t border-border px-3 py-3">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className={labelClass}>Section Title</label>
@@ -2162,7 +2162,7 @@ function BulletItemsEditor({
       <div className="space-y-2">
         {items.map((item, i) => (
           <div key={i} className="flex items-center gap-2">
-            <span className="w-5 shrink-0 text-right text-xs text-gray-400">
+            <span className="w-5 shrink-0 text-right text-xs text-muted-foreground/70">
               {i + 1}.
             </span>
             <input
@@ -2215,7 +2215,7 @@ function BulletItemsEditor({
         <button
           type="button"
           onClick={commit}
-          className="shrink-0 rounded-md border border-gray-300 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50"
+          className="shrink-0 rounded-md border border-input px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted/50"
         >
           Add item
         </button>
@@ -2250,7 +2250,7 @@ function CategoryValueEditor({
       <div className="space-y-2">
         {items.map((item, i) => (
           <div key={i} className="flex items-center gap-2">
-            <span className="w-5 shrink-0 text-right text-xs text-gray-400">
+            <span className="w-5 shrink-0 text-right text-xs text-muted-foreground/70">
               {i + 1}.
             </span>
             <input
@@ -2299,7 +2299,7 @@ function CategoryValueEditor({
         <button
           type="button"
           onClick={() => onAddItem(section.id, { category: "", value: "" })}
-          className="rounded-md border border-gray-300 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50"
+          className="rounded-md border border-input px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted/50"
         >
           Add item
         </button>
@@ -2328,8 +2328,8 @@ function IconButton({
       title={label}
       onClick={onClick}
       disabled={disabled}
-      className={`flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 ${
-        danger ? "hover:border-red-200 hover:text-red-600" : ""
+      className={`flex h-8 w-8 items-center justify-center rounded-md border border-input text-sm text-muted-foreground hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-40 ${
+        danger ? "hover:border-red-200 dark:hover:border-red-900 hover:text-red-600 dark:hover:text-red-400" : ""
       }`}
     >
       {children}
@@ -2342,7 +2342,7 @@ function AddButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="rounded-md border border-gray-300 px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
+      className="rounded-md border border-input px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/50"
     >
       + Add
     </button>
@@ -2387,7 +2387,7 @@ function ColorField({
           type="color"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="h-9 w-10 cursor-pointer rounded border border-gray-300 bg-white p-0.5"
+          className="h-9 w-10 cursor-pointer rounded border border-input bg-card p-0.5"
           aria-label={label}
         />
         <input
@@ -2408,11 +2408,11 @@ function ItemCard({
   onRemove: () => void;
 }) {
   return (
-    <div className="relative rounded-lg border border-gray-200 bg-gray-50 p-3">
+    <div className="relative rounded-lg border border-border bg-muted/50 p-3">
       <button
         type="button"
         onClick={onRemove}
-        className="absolute right-2 top-2 text-xs text-gray-400 hover:text-red-600"
+        className="absolute right-2 top-2 text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
       >
         Remove
       </button>

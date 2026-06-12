@@ -23,27 +23,27 @@ export default async function InterviewPrepPage({
       <div>
         <Link
           href={`/applications/${applicationId}`}
-          className="text-sm text-brand-600 hover:underline"
+          className="text-sm text-brand-600 dark:text-brand-300 hover:underline"
         >
           ← Back to application
         </Link>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight text-gray-900">
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground">
           Interview prep
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           {app.jobTitle} · {app.company}
         </p>
       </div>
 
       <Card>
-        <h2 className="mb-3 text-sm font-semibold text-gray-700">
+        <h2 className="mb-3 text-sm font-semibold text-foreground/80">
           Generate questions
         </h2>
         <AiActions applicationId={applicationId} />
       </Card>
 
       <Card>
-        <h2 className="mb-3 text-sm font-semibold text-gray-700">
+        <h2 className="mb-3 text-sm font-semibold text-foreground/80">
           Questions &amp; answers
         </h2>
         <QnaSection applicationId={applicationId} items={qna} />

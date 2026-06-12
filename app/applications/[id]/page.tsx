@@ -51,14 +51,14 @@ export default async function ApplicationDetailPage({
         <div>
           <Link
             href="/applications"
-            className="text-sm text-brand-600 hover:underline"
+            className="text-sm text-brand-600 dark:text-brand-300 hover:underline"
           >
             ← All applications
           </Link>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-gray-900">
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground">
             {app.jobTitle || "Untitled role"}
           </h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             {app.company || "Unknown company"}
             {app.jobId ? ` · Job ID ${app.jobId}` : ""}
           </p>
@@ -71,7 +71,7 @@ export default async function ApplicationDetailPage({
 
       {/* Overview */}
       <Card>
-        <h2 className="mb-3 text-sm font-semibold text-gray-700">Overview</h2>
+        <h2 className="mb-3 text-sm font-semibold text-foreground/80">Overview</h2>
         <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
           <Row label="Applied date" value={app.appliedDate || "—"} />
           <Row
@@ -90,7 +90,7 @@ export default async function ApplicationDetailPage({
               linkedResume ? (
                 <Link
                   href={`/resumes/${linkedResume.id}`}
-                  className="text-brand-600 hover:underline"
+                  className="text-brand-600 dark:text-brand-300 hover:underline"
                 >
                   {linkedResume.versionName} (v{linkedResume.versionNumber})
                 </Link>
@@ -107,7 +107,7 @@ export default async function ApplicationDetailPage({
                   href={app.jobLink}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-brand-600 hover:underline"
+                  className="text-brand-600 dark:text-brand-300 hover:underline"
                 >
                   {app.jobLink}
                 </a>
@@ -119,8 +119,8 @@ export default async function ApplicationDetailPage({
         </dl>
         {app.jobDescription && (
           <div className="mt-4">
-            <p className="text-xs font-medium text-gray-500">Job description</p>
-            <p className="mt-1 whitespace-pre-wrap text-sm text-gray-700">
+            <p className="text-xs font-medium text-muted-foreground">Job description</p>
+            <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/80">
               {app.jobDescription}
             </p>
           </div>
@@ -129,27 +129,27 @@ export default async function ApplicationDetailPage({
 
       {/* Status + history */}
       <Card>
-        <h2 className="mb-3 text-sm font-semibold text-gray-700">Status</h2>
+        <h2 className="mb-3 text-sm font-semibold text-foreground/80">Status</h2>
         <StatusUpdater applicationId={app.id} current={app.status} />
         <div className="mt-4">
-          <p className="mb-2 text-xs font-medium text-gray-500">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">
             Status history
           </p>
-          <ol className="space-y-2 border-l-2 border-gray-100 pl-4">
+          <ol className="space-y-2 border-l-2 border-border pl-4">
             {sortedHistory.length === 0 && (
-              <li className="text-sm text-gray-400">No history yet.</li>
+              <li className="text-sm text-muted-foreground/70">No history yet.</li>
             )}
             {sortedHistory.map((h) => (
               <li key={h.id} className="relative">
                 <span className="absolute -left-[1.30rem] top-1 h-2 w-2 rounded-full bg-brand-500" />
-                <p className="text-sm text-gray-800">
+                <p className="text-sm text-foreground">
                   {h.oldStatus ? `${h.oldStatus} → ` : ""}
                   <span className="font-medium">{h.newStatus}</span>
                 </p>
                 {h.comment && (
-                  <p className="text-xs text-gray-500">{h.comment}</p>
+                  <p className="text-xs text-muted-foreground">{h.comment}</p>
                 )}
-                <p className="text-[11px] text-gray-400">
+                <p className="text-[11px] text-muted-foreground/70">
                   {new Date(h.changedAt).toLocaleString()}
                 </p>
               </li>
@@ -160,11 +160,11 @@ export default async function ApplicationDetailPage({
 
       {/* AI assistant */}
       <Card>
-        <h2 className="mb-3 text-sm font-semibold text-gray-700">
+        <h2 className="mb-3 text-sm font-semibold text-foreground/80">
           AI assistant
         </h2>
         <div className="mb-4">
-          <p className="mb-1 text-xs font-medium text-gray-500">
+          <p className="mb-1 text-xs font-medium text-muted-foreground">
             Tailored resume
           </p>
           <TailorResumeFlow
@@ -180,16 +180,16 @@ export default async function ApplicationDetailPage({
       <Card>
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-gray-700">
+            <h2 className="text-sm font-semibold text-foreground/80">
               Interview preparation
             </h2>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               {qna.length} question{qna.length === 1 ? "" : "s"} prepared
             </p>
           </div>
           <Link
             href={`/interview-prep/${app.id}`}
-            className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-md border border-input px-4 py-2 text-sm font-medium text-foreground/80 hover:bg-muted/50"
           >
             Open prep →
           </Link>
@@ -198,13 +198,13 @@ export default async function ApplicationDetailPage({
 
       {/* Notes */}
       <Card>
-        <h2 className="mb-3 text-sm font-semibold text-gray-700">Notes</h2>
+        <h2 className="mb-3 text-sm font-semibold text-foreground/80">Notes</h2>
         <NotesSection applicationId={app.id} notes={notes} />
       </Card>
 
       {/* Documents */}
       <Card>
-        <h2 className="mb-3 text-sm font-semibold text-gray-700">Documents</h2>
+        <h2 className="mb-3 text-sm font-semibold text-foreground/80">Documents</h2>
         <DocumentsSection
           applicationId={app.id}
           documents={documents}
@@ -224,8 +224,8 @@ function Row({
 }) {
   return (
     <div className="flex gap-2">
-      <dt className="w-24 shrink-0 text-gray-500 sm:w-28">{label}</dt>
-      <dd className="text-gray-800">{value}</dd>
+      <dt className="w-24 shrink-0 text-muted-foreground sm:w-28">{label}</dt>
+      <dd className="text-foreground">{value}</dd>
     </div>
   );
 }

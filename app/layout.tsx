@@ -24,7 +24,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0033a0",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#0033a0" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0f1a" },
+  ],
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -45,7 +48,9 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en">
+    // suppressHydrationWarning: next-themes sets the theme class on <html>
+    // before hydration, which the server can't know about.
+    <html lang="en" suppressHydrationWarning>
       <body>
         <Providers>
           <Nav />

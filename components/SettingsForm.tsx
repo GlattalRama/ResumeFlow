@@ -90,13 +90,13 @@ export default function SettingsForm() {
   }
 
   if (loading) {
-    return <p className="text-sm text-gray-500">Loading settings…</p>;
+    return <p className="text-sm text-muted-foreground">Loading settings…</p>;
   }
 
   return (
     <div className="space-y-6">
       {builtIn ? (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+        <div className="rounded-md border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/40 p-4 text-sm text-emerald-900 dark:text-emerald-200">
           <p className="font-medium">✓ AI suggestions are built in — no setup needed.</p>
           <p className="mt-1">
             Open any resume, then click{" "}
@@ -107,7 +107,7 @@ export default function SettingsForm() {
           </p>
         </div>
       ) : (
-        <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <div className="rounded-md border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/40 p-4 text-sm text-amber-900 dark:text-amber-200">
           Built-in AI isn’t configured on this deployment yet. You can still use
           AI by adding your own key below.
         </div>
@@ -117,11 +117,11 @@ export default function SettingsForm() {
         <button
           type="button"
           onClick={() => setShowAdvanced((v) => !v)}
-          className="text-sm font-medium text-brand-700 hover:underline"
+          className="text-sm font-medium text-brand-700 dark:text-brand-300 hover:underline"
         >
           {showAdvanced ? "▾" : "▸"} Advanced: use your own API key (optional)
         </button>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-muted-foreground">
           {builtIn
             ? "Optional — only if you want unlimited suggestions on your own account, bypassing the daily limit."
             : "Add a key to enable AI suggestions."}
@@ -129,8 +129,8 @@ export default function SettingsForm() {
       </div>
 
       {!showAdvanced ? null : (
-      <div className="space-y-6 rounded-lg border border-gray-200 p-4">
-      <div className="rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
+      <div className="space-y-6 rounded-lg border border-border p-4">
+      <div className="rounded-md border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/40 p-3 text-sm text-blue-900 dark:text-blue-200">
         Bring your <strong>own</strong> AI key (BYOK) for unlimited use on your
         own account. Create a key at{" "}
         <a
@@ -147,18 +147,18 @@ export default function SettingsForm() {
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">
+        <label className="mb-1 block text-sm font-medium text-foreground/80">
           Provider
         </label>
         <input
           value="OpenRouter"
           disabled
-          className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500"
+          className="w-full rounded-md border border-input bg-card text-foreground bg-muted/50 px-3 py-2 text-sm text-muted-foreground"
         />
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">
+        <label className="mb-1 block text-sm font-medium text-foreground/80">
           Model
         </label>
         <input
@@ -166,14 +166,14 @@ export default function SettingsForm() {
           value={model}
           onChange={(e) => setModel(e.target.value)}
           placeholder="openai/gpt-4o-mini"
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+          className="w-full rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm"
         />
         <datalist id="model-suggestions">
           {MODEL_SUGGESTIONS.map((m) => (
             <option key={m} value={m} />
           ))}
         </datalist>
-        <p className="mt-1 text-xs text-gray-400">
+        <p className="mt-1 text-xs text-muted-foreground/70">
           Any slug from{" "}
           <a
             href="https://openrouter.ai/models"
@@ -189,7 +189,7 @@ export default function SettingsForm() {
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">
+        <label className="mb-1 block text-sm font-medium text-foreground/80">
           OpenRouter API key
         </label>
         <input
@@ -202,10 +202,10 @@ export default function SettingsForm() {
               : "sk-or-v1-…"
           }
           autoComplete="off"
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+          className="w-full rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm"
         />
         {hasKey && (
-          <p className="mt-1 text-xs text-emerald-600">
+          <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
             ✓ A key is configured. Leave this blank to keep it.
           </p>
         )}
@@ -224,7 +224,7 @@ export default function SettingsForm() {
           type="button"
           onClick={test}
           disabled={status.kind === "testing"}
-          className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+          className="rounded-md border border-input bg-card text-foreground bg-card px-4 py-2 text-sm font-medium text-foreground/80 hover:bg-muted/50 disabled:opacity-60"
         >
           {status.kind === "testing" ? "Testing…" : "Test connection"}
         </button>
@@ -233,7 +233,7 @@ export default function SettingsForm() {
       {status.message && (
         <p
           className={`text-sm ${
-            status.kind === "error" ? "text-red-600" : "text-emerald-600"
+            status.kind === "error" ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"
           }`}
         >
           {status.message}

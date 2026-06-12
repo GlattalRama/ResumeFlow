@@ -26,8 +26,8 @@ export default async function TemplatesAdminPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Templates</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-semibold text-foreground">Templates</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Enable or disable resume templates in the builder&apos;s picker.
           Disabling a template only hides it for new resumes — existing resumes
           that already use it keep rendering and stay editable.
@@ -35,11 +35,11 @@ export default async function TemplatesAdminPage() {
         <nav className="mt-3 flex gap-1 text-sm">
           <Link
             href="/admin/analytics"
-            className="rounded-md px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100"
+            className="rounded-md px-3 py-1.5 font-medium text-muted-foreground hover:bg-muted"
           >
             Analytics
           </Link>
-          <span className="rounded-md bg-brand-50 px-3 py-1.5 font-medium text-brand-700">
+          <span className="rounded-md bg-brand-50 dark:bg-brand-500/15 px-3 py-1.5 font-medium text-brand-700 dark:text-brand-300">
             Templates
           </span>
         </nav>

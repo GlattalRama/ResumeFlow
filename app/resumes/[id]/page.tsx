@@ -28,21 +28,21 @@ export default async function ResumePreviewPage({
   return (
     <div>
       <div className="no-print mb-6">
-        <Link href="/resumes" className="text-sm text-brand-600 hover:underline">
+        <Link href="/resumes" className="text-sm text-brand-600 dark:text-brand-300 hover:underline">
           ← All resumes
         </Link>
-        <h1 className="mt-1 flex flex-wrap items-center gap-2 text-2xl font-bold tracking-tight text-gray-900">
+        <h1 className="mt-1 flex flex-wrap items-center gap-2 text-2xl font-bold tracking-tight text-foreground">
           {resume.versionName}
           {isBase && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-900">
               ★ Base Resume
             </span>
           )}
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           v{resume.versionNumber}
           {resume.targetRole ? ` · ${resume.targetRole}` : ""} · Template:{" "}
-          <span className="font-medium text-gray-700">{templateName}</span>
+          <span className="font-medium text-foreground/80">{templateName}</span>
         </p>
       </div>
 

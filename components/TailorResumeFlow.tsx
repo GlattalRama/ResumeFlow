@@ -15,11 +15,11 @@ type TailorResponse = {
 
 // Visual accent per change outcome in the review summary.
 const CHANGE_BADGE: Record<string, string> = {
-  rephrased: "bg-blue-50 text-blue-700 ring-blue-200",
-  reordered: "bg-indigo-50 text-indigo-700 ring-indigo-200",
-  emphasized: "bg-violet-50 text-violet-700 ring-violet-200",
-  unchanged: "bg-gray-50 text-gray-500 ring-gray-200",
-  rejected: "bg-amber-50 text-amber-700 ring-amber-200",
+  rephrased: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 ring-blue-200 dark:ring-blue-900",
+  reordered: "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 ring-indigo-200 dark:ring-indigo-900",
+  emphasized: "bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 ring-violet-200 dark:ring-violet-900",
+  unchanged: "bg-muted/50 text-muted-foreground ring-border",
+  rejected: "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 ring-amber-200 dark:ring-amber-900",
 };
 
 const SECTION_LABEL: Record<string, string> = {
@@ -140,20 +140,20 @@ export default function TailorResumeFlow({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-md border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700 transition hover:bg-brand-100"
+        className="rounded-md border border-brand-200 dark:border-brand-500/40 bg-brand-50 dark:bg-brand-500/15 px-3 py-1.5 text-xs font-medium text-brand-700 dark:text-brand-300 transition hover:bg-brand-100 dark:hover:bg-brand-500/20"
       >
         Tailor Resume for this Job
       </button>
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[85vh] w-full max-w-lg overflow-auto rounded-2xl bg-white p-6 shadow-xl">
+          <div className="max-h-[85vh] w-full max-w-lg overflow-auto rounded-2xl bg-card p-6 shadow-xl">
             <div className="mb-4 flex items-start justify-between">
               <div>
-                <h3 className="text-lg font-bold text-gray-900">
+                <h3 className="text-lg font-bold text-foreground">
                   Tailor resume for this job
                 </h3>
-                <p className="mt-0.5 text-xs text-gray-500">
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   AI rephrases and reorders your existing content — it never
                   invents facts. Review before saving.
                 </p>
@@ -161,7 +161,7 @@ export default function TailorResumeFlow({
               <button
                 type="button"
                 onClick={close}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-muted-foreground/70 hover:text-muted-foreground"
                 aria-label="Close"
               >
                 ✕
@@ -171,7 +171,7 @@ export default function TailorResumeFlow({
             {/* No resumes yet: tailoring needs a source resume to work from. */}
             {!hasResumes && (
               <div className="space-y-4">
-                <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                <div className="rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/40 p-3 text-sm text-amber-800 dark:text-amber-200">
                   You don&apos;t have any resumes yet. Tailoring rephrases an
                   existing resume for this job, so create one first — then come
                   back here to tailor it.
@@ -199,14 +199,14 @@ export default function TailorResumeFlow({
             {hasResumes && (phase === "pick" || phase === "generating") && (
               <div className="space-y-4">
                 <label className="block text-sm">
-                  <span className="mb-1 block font-medium text-gray-700">
+                  <span className="mb-1 block font-medium text-foreground/80">
                     Source resume
                   </span>
                   <select
                     value={sourceId}
                     onChange={(e) => setSourceId(e.target.value)}
                     disabled={phase === "generating"}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    className="w-full rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm"
                   >
                     <option value="">Choose a resume…</option>
                     {resumeOptions.map((o) => (
@@ -215,13 +215,13 @@ export default function TailorResumeFlow({
                       </option>
                     ))}
                   </select>
-                  <span className="mt-1 block text-xs text-gray-400">
+                  <span className="mt-1 block text-xs text-muted-foreground/70">
                     Defaults to your Base Resume. Your own API key (Settings) is
                     recommended for frequent tailoring.
                   </span>
                 </label>
 
-                {error && <p className="text-sm text-red-600">{error}</p>}
+                {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
                 <div className="flex justify-end gap-2">
                   <button
@@ -247,7 +247,7 @@ export default function TailorResumeFlow({
             {(phase === "review" || phase === "saving") && result && (
               <div className="space-y-4">
                 <div>
-                  <p className="mb-2 text-sm font-medium text-gray-700">
+                  <p className="mb-2 text-sm font-medium text-foreground/80">
                     What changed
                   </p>
                   <ul className="space-y-2">
@@ -263,7 +263,7 @@ export default function TailorResumeFlow({
                         >
                           {c.changeType}
                         </span>
-                        <span className="text-gray-700">
+                        <span className="text-foreground/80">
                           <span className="font-medium">
                             {SECTION_LABEL[c.section] ?? c.section}:
                           </span>{" "}
@@ -276,16 +276,16 @@ export default function TailorResumeFlow({
 
                 {result.resumeData.basics.summary && (
                   <div>
-                    <p className="mb-1 text-sm font-medium text-gray-700">
+                    <p className="mb-1 text-sm font-medium text-foreground/80">
                       Tailored summary
                     </p>
-                    <p className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs text-gray-700">
+                    <p className="rounded-lg border border-border bg-muted/50 p-3 text-xs text-foreground/80">
                       {result.resumeData.basics.summary}
                     </p>
                   </div>
                 )}
 
-                {error && <p className="text-sm text-red-600">{error}</p>}
+                {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
                 <div className="flex justify-end gap-2">
                   <button

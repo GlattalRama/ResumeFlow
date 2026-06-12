@@ -55,18 +55,18 @@ export default function DocumentsSection({
 
   return (
     <div>
-      <p className="mb-2 text-xs text-gray-400">
+      <p className="mb-2 text-xs text-muted-foreground/70">
         Stores document metadata only (no files are uploaded).
       </p>
       <div className="flex flex-wrap gap-2">
         <input
-          className="min-w-[10rem] flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
+          className="min-w-[10rem] flex-1 rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm"
           placeholder="Document name"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <select
-          className="rounded-md border border-gray-300 px-2 py-2 text-sm"
+          className="rounded-md border border-input bg-card text-foreground px-2 py-2 text-sm"
           value={type}
           onChange={(e) => setType(e.target.value)}
         >
@@ -77,7 +77,7 @@ export default function DocumentsSection({
           ))}
         </select>
         <select
-          className="rounded-md border border-gray-300 px-2 py-2 text-sm"
+          className="rounded-md border border-input bg-card text-foreground px-2 py-2 text-sm"
           value={resumeVersionId}
           onChange={(e) => setResumeVersionId(e.target.value)}
         >
@@ -89,7 +89,7 @@ export default function DocumentsSection({
           ))}
         </select>
         <input
-          className="min-w-[10rem] flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
+          className="min-w-[10rem] flex-1 rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm"
           placeholder="Link (optional)"
           value={link}
           onChange={(e) => setLink(e.target.value)}
@@ -105,20 +105,20 @@ export default function DocumentsSection({
 
       <ul className="mt-4 space-y-2">
         {documents.length === 0 && (
-          <li className="text-sm text-gray-400">No documents linked yet.</li>
+          <li className="text-sm text-muted-foreground/70">No documents linked yet.</li>
         )}
         {documents.map((d) => (
           <li
             key={d.id}
-            className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3"
+            className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/50 p-3"
           >
             <div>
-              <span className="mr-2 rounded bg-gray-200 px-1.5 py-0.5 text-[10px] font-medium uppercase text-gray-600">
+              <span className="mr-2 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
                 {d.type}
               </span>
-              <span className="text-sm text-gray-800">{d.name}</span>
+              <span className="text-sm text-foreground">{d.name}</span>
               {d.resumeVersionId && resumeLabel(d.resumeVersionId) && (
-                <span className="ml-2 text-xs text-gray-400">
+                <span className="ml-2 text-xs text-muted-foreground/70">
                   · {resumeLabel(d.resumeVersionId)}
                 </span>
               )}
@@ -127,7 +127,7 @@ export default function DocumentsSection({
                   href={d.link}
                   target="_blank"
                   rel="noreferrer"
-                  className="ml-2 text-xs text-brand-600 hover:underline"
+                  className="ml-2 text-xs text-brand-600 dark:text-brand-300 hover:underline"
                 >
                   open
                 </a>
@@ -135,7 +135,7 @@ export default function DocumentsSection({
             </div>
             <button
               onClick={() => remove(d.id)}
-              className="text-xs text-gray-400 hover:text-red-600"
+              className="text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
             >
               Delete
             </button>

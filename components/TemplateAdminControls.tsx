@@ -56,7 +56,7 @@ export default function TemplateAdminControls({
 
   return (
     <div className="space-y-4">
-      <ul className="divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white">
+      <ul className="divide-y divide-border rounded-lg border border-border bg-card">
         {rows.map((r) => (
           <li
             key={r.id}
@@ -64,15 +64,15 @@ export default function TemplateAdminControls({
           >
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <p className="font-medium text-gray-900">{r.name}</p>
+                <p className="font-medium text-foreground">{r.name}</p>
                 {r.defaultHidden && (
-                  <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                  <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                     hidden by default
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-500">{r.description}</p>
-              <p className="mt-0.5 text-[11px] text-gray-400">id: {r.id}</p>
+              <p className="text-xs text-muted-foreground">{r.description}</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground/70">id: {r.id}</p>
             </div>
             <button
               type="button"
@@ -80,12 +80,12 @@ export default function TemplateAdminControls({
               aria-checked={r.visible}
               onClick={() => toggle(r.id)}
               className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition ${
-                r.visible ? "bg-brand-600" : "bg-gray-300"
+                r.visible ? "bg-brand-600" : "bg-border"
               }`}
               title={r.visible ? "Enabled (shown in picker)" : "Disabled (hidden)"}
             >
               <span
-                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+                className={`inline-block h-5 w-5 transform rounded-full bg-card shadow transition ${
                   r.visible ? "translate-x-5" : "translate-x-0.5"
                 }`}
               />
@@ -103,13 +103,13 @@ export default function TemplateAdminControls({
         >
           {status.kind === "saving" ? "Saving…" : "Save changes"}
         </button>
-        <span className="text-xs text-gray-400">
+        <span className="text-xs text-muted-foreground/70">
           {enabledCount} of {rows.length} enabled
         </span>
         {status.message && (
           <span
             className={`text-sm ${
-              status.kind === "error" ? "text-red-600" : "text-emerald-600"
+              status.kind === "error" ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"
             }`}
           >
             {status.message}

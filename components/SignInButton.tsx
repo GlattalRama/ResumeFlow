@@ -18,7 +18,7 @@ export default function SignInButton({
         setLoading(true);
         signIn("google", { callbackUrl });
       }}
-      className="inline-flex w-full items-center justify-center gap-3 rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-60"
+      className="inline-flex w-full items-center justify-center gap-3 rounded-md border border-input bg-card px-4 py-2.5 text-sm font-medium text-foreground/80 shadow-sm transition hover:bg-muted/50 disabled:opacity-60"
     >
       <GoogleIcon />
       {loading ? "Redirecting…" : "Sign in with Google"}

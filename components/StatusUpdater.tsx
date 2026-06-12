@@ -37,9 +37,9 @@ export default function StatusUpdater({
   return (
     <div className="flex flex-wrap items-end gap-2">
       <div>
-        <label className="block text-xs font-medium text-gray-600">Status</label>
+        <label className="block text-xs font-medium text-muted-foreground">Status</label>
         <select
-          className="mt-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
+          className="mt-1 rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
           value={status}
           onChange={(e) => setStatus(e.target.value as ApplicationStatus)}
         >
@@ -51,7 +51,7 @@ export default function StatusUpdater({
         </select>
       </div>
       <input
-        className="min-w-[12rem] flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
+        className="min-w-[12rem] flex-1 rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
         placeholder="Optional comment for history"
         value={comment}
         onChange={(e) => setComment(e.target.value)}

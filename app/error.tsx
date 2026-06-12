@@ -41,14 +41,14 @@ export default function Error({
 
   return (
     <div className="flex min-h-[70vh] items-center justify-center">
-      <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-sm">
         <div className="mb-6 flex flex-col items-center text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-mark.png" alt="" className="h-12 w-auto" />
-          <h1 className="mt-3 text-xl font-bold text-gray-900">
+          <h1 className="mt-3 text-xl font-bold text-foreground">
             Something went wrong
           </h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Your session may have expired. Sign out and back in to reconnect to
             your Google Drive, or retry the page.
           </p>
@@ -66,14 +66,14 @@ export default function Error({
           <button
             type="button"
             onClick={() => reset()}
-            className="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50"
+            className="inline-flex w-full items-center justify-center rounded-md border border-input bg-card px-4 py-2.5 text-sm font-medium text-foreground/80 shadow-sm transition hover:bg-muted/50"
           >
             Try again
           </button>
         </div>
 
         {error.digest ? (
-          <p className="mt-6 text-center text-[11px] text-gray-400">
+          <p className="mt-6 text-center text-[11px] text-muted-foreground/70">
             Error reference: {error.digest}
           </p>
         ) : null}

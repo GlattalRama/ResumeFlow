@@ -98,7 +98,7 @@ function Bars({
               title={`${labels[i]}: ${v}`}
             />
           </div>
-          <span className="w-full truncate text-center text-[10px] text-gray-400">
+          <span className="w-full truncate text-center text-[10px] text-muted-foreground/70">
             {labels[i]}
           </span>
         </div>
@@ -123,14 +123,14 @@ function MetricCard({
   grad: string;
 }) {
   return (
-    <div className="group rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
+    <div className="group rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-          <p className="mt-1 text-3xl font-bold tracking-tight text-gray-900">
+          <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+          <p className="mt-1 text-3xl font-bold tracking-tight text-foreground">
             {total}
           </p>
-          <p className="text-[11px] text-gray-400">all-time total</p>
+          <p className="text-[11px] text-muted-foreground/70">all-time total</p>
         </div>
         <span
           className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${grad} text-white shadow-sm transition group-hover:scale-110`}
@@ -171,30 +171,30 @@ export default async function AnalyticsDashboard({
   return (
     <div className="space-y-6">
       {/* ---- Header ---- */}
-      <section className="relative overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
-        <div className="pointer-events-none absolute -right-10 -top-16 h-48 w-48 rounded-full bg-brand-100/60 blur-3xl" />
+      <section className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-sm">
+        <div className="pointer-events-none absolute -right-10 -top-16 h-48 w-48 rounded-full bg-brand-100/60 dark:bg-brand-500/15 blur-3xl" />
         <div className="relative flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="bg-gradient-to-r from-brand-600 to-violet-600 bg-clip-text text-3xl font-bold tracking-tight text-transparent">
               Analytics
             </h1>
-            <p className="mt-1 flex items-center gap-2 text-sm text-gray-500">
+            <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
               Aggregate usage — no resume content is stored.
-              <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">
+              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 {storeBackend()}
               </span>
             </p>
           </div>
-          <nav className="inline-flex rounded-xl bg-gray-100 p-1">
+          <nav className="inline-flex rounded-xl bg-muted p-1">
             {PERIODS.map((p) => (
               <Link
                 key={p}
                 href={`/admin/analytics?period=${p}`}
                 className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
                   p === period
-                    ? "bg-white text-brand-700 shadow-sm"
-                    : "text-gray-500 hover:text-gray-800"
+                    ? "bg-card text-brand-700 dark:text-brand-300 shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {PERIOD_LABELS[p]}
@@ -258,26 +258,26 @@ export default async function AnalyticsDashboard({
 
       {/* ---- Breakdowns ---- */}
       <section className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-          <h3 className="text-sm font-semibold text-gray-900">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <h3 className="text-sm font-semibold text-foreground">
             Exports by format
           </h3>
-          <p className="mb-4 text-xs text-gray-400">all-time</p>
+          <p className="mb-4 text-xs text-muted-foreground/70">all-time</p>
           <ul className="space-y-3">
             {EXPORT_FORMATS.map((fmt) => {
               const n = totals.resume_exported[fmt];
               return (
                 <li key={fmt} className="flex items-center gap-3">
-                  <span className="w-12 shrink-0 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <span className="w-12 shrink-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     {fmt}
                   </span>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100">
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-rose-400 to-red-500"
                       style={{ width: `${Math.round((n / exportMax) * 100)}%` }}
                     />
                   </div>
-                  <span className="w-8 shrink-0 text-right text-sm font-semibold tabular-nums text-gray-700">
+                  <span className="w-8 shrink-0 text-right text-sm font-semibold tabular-nums text-foreground/80">
                     {n}
                   </span>
                 </li>
@@ -286,23 +286,23 @@ export default async function AnalyticsDashboard({
           </ul>
         </div>
 
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-          <h3 className="text-sm font-semibold text-gray-900">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <h3 className="text-sm font-semibold text-foreground">
             Logins by country
           </h3>
-          <p className="mb-4 text-xs text-gray-400">all-time, where known</p>
+          <p className="mb-4 text-xs text-muted-foreground/70">all-time, where known</p>
           {countries.length === 0 ? (
-            <p className="py-6 text-center text-sm text-gray-400">
+            <p className="py-6 text-center text-sm text-muted-foreground/70">
               No data yet.
             </p>
           ) : (
             <ul className="space-y-3">
               {countries.slice(0, 12).map((c) => (
                 <li key={c.code} className="flex items-center gap-3">
-                  <span className="w-12 shrink-0 text-sm text-gray-600">
+                  <span className="w-12 shrink-0 text-sm text-muted-foreground">
                     {flagEmoji(c.code)} {c.code}
                   </span>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100">
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-violet-500"
                       style={{
@@ -310,7 +310,7 @@ export default async function AnalyticsDashboard({
                       }}
                     />
                   </div>
-                  <span className="w-8 shrink-0 text-right text-sm font-semibold tabular-nums text-gray-700">
+                  <span className="w-8 shrink-0 text-right text-sm font-semibold tabular-nums text-foreground/80">
                     {c.count}
                   </span>
                 </li>

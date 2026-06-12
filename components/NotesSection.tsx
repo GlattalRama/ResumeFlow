@@ -53,7 +53,7 @@ export default function NotesSection({
     <div>
       <div className="flex flex-wrap gap-2">
         <select
-          className="rounded-md border border-gray-300 px-2 py-2 text-sm"
+          className="rounded-md border border-input bg-card text-foreground px-2 py-2 text-sm"
           value={type}
           onChange={(e) => setType(e.target.value as NoteType)}
         >
@@ -64,7 +64,7 @@ export default function NotesSection({
           ))}
         </select>
         <input
-          className="min-w-[12rem] flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
+          className="min-w-[12rem] flex-1 rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
           placeholder="Add a note…"
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -81,25 +81,25 @@ export default function NotesSection({
 
       <ul className="mt-4 space-y-2">
         {sorted.length === 0 && (
-          <li className="text-sm text-gray-400">No notes yet.</li>
+          <li className="text-sm text-muted-foreground/70">No notes yet.</li>
         )}
         {sorted.map((n) => (
           <li
             key={n.id}
-            className="flex items-start justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3"
+            className="flex items-start justify-between gap-3 rounded-lg border border-border bg-muted/50 p-3"
           >
             <div>
-              <span className="mr-2 rounded bg-gray-200 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-600">
+              <span className="mr-2 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                 {TYPE_LABEL[n.type]}
               </span>
-              <span className="text-sm text-gray-800">{n.text}</span>
-              <p className="mt-1 text-[11px] text-gray-400">
+              <span className="text-sm text-foreground">{n.text}</span>
+              <p className="mt-1 text-[11px] text-muted-foreground/70">
                 {new Date(n.createdAt).toLocaleString()}
               </p>
             </div>
             <button
               onClick={() => remove(n.id)}
-              className="text-xs text-gray-400 hover:text-red-600"
+              className="text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
             >
               Delete
             </button>

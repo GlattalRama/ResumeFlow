@@ -37,22 +37,22 @@ export default async function ApplicationsPage() {
         <div className="space-y-3">
           {apps.map((a) => (
             <Link key={a.id} href={`/applications/${a.id}`}>
-              <Card className="transition hover:border-brand-300 hover:shadow-md">
+              <Card className="transition hover:border-brand-300 dark:hover:border-brand-400/60 hover:shadow-md">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-foreground">
                       {a.jobTitle || "Untitled role"}
-                      <span className="font-normal text-gray-500">
+                      <span className="font-normal text-muted-foreground">
                         {" "}
                         · {a.company || "Unknown company"}
                       </span>
                     </p>
-                    <p className="mt-0.5 text-xs text-gray-500">
+                    <p className="mt-0.5 text-xs text-muted-foreground">
                       {a.jobId ? `Job ID ${a.jobId}` : "No job ID"}
                       {a.appliedDate ? ` · Applied ${a.appliedDate}` : ""}
                     </p>
                     {a.nextAction && (
-                      <p className="mt-1 text-xs text-amber-700">
+                      <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
                         Next: {a.nextAction}
                         {a.nextActionDate ? ` (${a.nextActionDate})` : ""}
                       </p>

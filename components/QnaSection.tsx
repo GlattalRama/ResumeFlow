@@ -6,7 +6,7 @@ import type { QnaDifficulty, QnaItem } from "@/lib/types";
 import { QNA_DIFFICULTIES } from "@/lib/constants";
 
 const inputClass =
-  "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500";
+  "w-full rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500";
 
 export default function QnaSection({
   applicationId,
@@ -67,7 +67,7 @@ export default function QnaSection({
   return (
     <div>
       {/* Add form */}
-      <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+      <div className="rounded-lg border border-border bg-muted/50 p-3">
         <div className="grid gap-2">
           <input
             className={inputClass}
@@ -84,13 +84,13 @@ export default function QnaSection({
           />
           <div className="flex flex-wrap gap-2">
             <input
-              className="w-40 rounded-md border border-gray-300 px-3 py-2 text-sm"
+              className="w-40 rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm"
               placeholder="Category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             />
             <select
-              className="rounded-md border border-gray-300 px-2 py-2 text-sm"
+              className="rounded-md border border-input bg-card text-foreground px-2 py-2 text-sm"
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value as QnaDifficulty)}
             >
@@ -114,27 +114,27 @@ export default function QnaSection({
       {/* Grouped list */}
       <div className="mt-4 space-y-5">
         {Object.keys(grouped).length === 0 && (
-          <p className="text-sm text-gray-400">No questions yet.</p>
+          <p className="text-sm text-muted-foreground/70">No questions yet.</p>
         )}
         {Object.entries(grouped).map(([cat, qs]) => (
           <div key={cat}>
-            <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-500">
-              {cat} <span className="font-normal text-gray-400">({qs.length})</span>
+            <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              {cat} <span className="font-normal text-muted-foreground/70">({qs.length})</span>
             </h3>
             <ul className="space-y-2">
               {qs.map((q) => (
                 <li
                   key={q.id}
-                  className="rounded-lg border border-gray-200 bg-white p-3"
+                  className="rounded-lg border border-border bg-card p-3"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <p className="font-medium text-gray-900">{q.question}</p>
-                    <span className="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] uppercase text-gray-500">
+                    <p className="font-medium text-foreground">{q.question}</p>
+                    <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">
                       {q.difficulty}
                     </span>
                   </div>
                   <textarea
-                    className="mt-2 w-full rounded-md border border-gray-200 px-2 py-1.5 text-sm text-gray-700 focus:border-brand-400 focus:outline-none"
+                    className="mt-2 w-full rounded-md border border-border px-2 py-1.5 text-sm text-foreground/80 focus:border-brand-400 focus:outline-none"
                     rows={2}
                     defaultValue={q.answer}
                     placeholder="Write your answer…"
@@ -144,7 +144,7 @@ export default function QnaSection({
                     }}
                   />
                   <div className="mt-2 flex items-center justify-between">
-                    <label className="flex items-center gap-1.5 text-xs text-gray-600">
+                    <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <input
                         type="checkbox"
                         checked={q.practiced}
@@ -156,7 +156,7 @@ export default function QnaSection({
                     </label>
                     <button
                       onClick={() => remove(q.id)}
-                      className="text-xs text-gray-400 hover:text-red-600"
+                      className="text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
                     >
                       Delete
                     </button>

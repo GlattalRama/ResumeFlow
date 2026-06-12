@@ -43,28 +43,28 @@ export default async function ResumesPage() {
           {resumes.map((r) => (
             <div key={r.id} className="relative">
               <Link href={`/resumes/${r.id}`} className="block h-full">
-                <Card className="h-full transition hover:border-brand-300 hover:shadow-md">
+                <Card className="h-full transition hover:border-brand-300 dark:hover:border-brand-400/60 hover:shadow-md">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="font-semibold text-gray-900">
+                      <p className="font-semibold text-foreground">
                         {r.versionName}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         v{r.versionNumber}
                         {r.targetRole ? ` · ${r.targetRole}` : ""}
                       </p>
                     </div>
-                    <span className="rounded bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-700">
+                    <span className="rounded bg-brand-50 dark:bg-brand-500/15 px-2 py-0.5 text-[11px] font-medium text-brand-700 dark:text-brand-300">
                       {templateName(r.selectedTemplate)}
                     </span>
                   </div>
-                  <p className="mt-3 line-clamp-2 text-xs text-gray-500">
+                  <p className="mt-3 line-clamp-2 text-xs text-muted-foreground">
                     {r.resumeData.basics.name || "—"}
                     {r.resumeData.basics.title
                       ? ` · ${r.resumeData.basics.title}`
                       : ""}
                   </p>
-                  <p className="mt-3 text-[11px] text-gray-400">
+                  <p className="mt-3 text-[11px] text-muted-foreground/70">
                     Updated {new Date(r.updatedAt).toLocaleDateString()}
                   </p>
                 </Card>

@@ -2,12 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: light;
+@layer base {
+  :root {
+    color-scheme: light;
+    --background: 210 20% 98%; /* gray-50 page background */
+    --foreground: 221 39% 11%; /* gray-900 */
+    --card: 0 0% 100%;
+    --card-foreground: 221 39% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 221 39% 11%;
+    --primary: 243 75% 59%; /* brand-600 #4f46e5 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 215 14% 34%;
+    --muted: 220 14% 96%; /* gray-100 */
+    --muted-foreground: 220 9% 46%; /* gray-500 */
+    --accent: 220 14% 96%;
+    --accent-foreground: 221 39% 11%;
+    --destructive: 0 72% 51%; /* red-600 */
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%; /* gray-200 */
+    --input: 216 12% 84%; /* gray-300 */
+    --ring: 239 84% 67%; /* brand-500 */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    color-scheme: dark;
+    --background: 222 47% 7%;
+    --foreground: 214 32% 91%;
+    --card: 222 41% 10%;
+    --card-foreground: 214 32% 91%;
+    --popover: 222 41% 10%;
+    --popover-foreground: 214 32% 91%;
+    --primary: 234 89% 74%; /* brand-400 — lighter for contrast on dark */
+    --primary-foreground: 222 47% 7%;
+    --secondary: 220 28% 16%;
+    --secondary-foreground: 214 20% 80%;
+    --muted: 220 28% 15%;
+    --muted-foreground: 218 11% 60%;
+    --accent: 220 28% 17%;
+    --accent-foreground: 214 32% 91%;
+    --destructive: 0 72% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 24% 19%;
+    --input: 220 20% 26%;
+    --ring: 234 89% 74%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
 }
 
-body {
-  @apply bg-gray-50 text-gray-900 antialiased;
+/* The resume sheet is a printed document: it stays light regardless of the
+   app theme (dark chrome around a white page, like a PDF viewer). Re-pin the
+   light token values so anything token-based inside the sheet resolves light. */
+.a4-sheet {
+  color-scheme: light;
+  --background: 0 0% 100%;
+  --foreground: 221 39% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 221 39% 11%;
+  --muted: 220 14% 96%;
+  --muted-foreground: 220 9% 46%;
+  --accent: 220 14% 96%;
+  --accent-foreground: 221 39% 11%;
+  --border: 220 13% 91%;
+  --input: 216 12% 84%;
 }
 
 /* Adjustable gap between consecutive list / row items in a resume. The gap is

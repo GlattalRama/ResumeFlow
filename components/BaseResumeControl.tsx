@@ -19,7 +19,7 @@ export default function BaseResumeControl({
 
   if (isBase) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-900">
         ★ Base Resume
       </span>
     );
@@ -46,7 +46,7 @@ export default function BaseResumeControl({
       type="button"
       onClick={setBase}
       disabled={busy}
-      className="rounded-md border border-gray-200 bg-white px-2 py-0.5 text-[11px] font-medium text-gray-500 shadow-sm transition hover:border-brand-300 hover:text-brand-700 disabled:opacity-50"
+      className="rounded-md border border-border bg-card px-2 py-0.5 text-[11px] font-medium text-muted-foreground shadow-sm transition hover:border-brand-300 dark:hover:border-brand-400/60 hover:text-brand-700 dark:hover:text-brand-300 disabled:opacity-50"
     >
       {busy ? "Setting…" : "Set as base"}
     </button>

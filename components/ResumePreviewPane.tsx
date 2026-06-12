@@ -38,7 +38,7 @@ export default function ResumePreviewPane({
   return (
     <>
       <div className="no-print mb-4 flex flex-wrap items-center justify-between gap-3">
-        <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-700">
+        <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-foreground/80">
           <input
             type="checkbox"
             checked={atsSafe}
@@ -46,7 +46,7 @@ export default function ResumePreviewPane({
             className="h-4 w-4"
           />
           ATS-safe mode
-          <span className="font-normal text-gray-400">
+          <span className="font-normal text-muted-foreground/70">
             (single column, no photo — affects preview, PDF &amp; DOCX)
           </span>
         </label>
@@ -62,7 +62,7 @@ export default function ResumePreviewPane({
       </div>
 
       <div className="mx-auto max-w-4xl">
-        <div className="print-area rounded-xl bg-gray-100 p-4 print:bg-white print:p-0">
+        <div className="print-area rounded-xl bg-muted p-4 print:bg-white print:p-0">
           <A4Preview margins={margins}>
             <ResumeTemplateRenderer
               resumeData={resumeData}
