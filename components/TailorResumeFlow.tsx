@@ -7,6 +7,7 @@ import type { TailorReasons } from "@/lib/aiTailor";
 import { buildTailorChanges, applyTailorChoices } from "@/lib/tailorDiff";
 import { scoreResume } from "@/lib/atsScore";
 import { TailorChangeCard, ScoreDelta } from "./TailorReview";
+import TailorComparePane from "./TailorComparePane";
 import { buttonClass } from "./ui";
 
 type ResumeOption = { id: string; label: string };
@@ -42,6 +43,8 @@ export default function TailorResumeFlow({
   const [sourceRecord, setSourceRecord] = useState<ResumeVersion | null>(null);
   // Keys of changes the user chose to keep original for (see lib/tailorDiff).
   const [rejected, setRejected] = useState<Set<string>>(new Set());
+  // Review presentation: per-change diff cards, or both sheets side by side.
+  const [view, setView] = useState<"changes" | "compare">("changes");
   const [error, setError] = useState("");
 
   const hasResumes = resumeOptions.length > 0;
@@ -51,6 +54,7 @@ export default function TailorResumeFlow({
     setResult(null);
     setSourceRecord(null);
     setRejected(new Set());
+    setView("changes");
     setError("");
     setSourceId(defaultSourceId);
   }
@@ -190,7 +194,11 @@ export default function TailorResumeFlow({
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[85vh] w-full max-w-2xl overflow-auto rounded-2xl bg-card p-6 shadow-xl">
+          <div
+            className={`max-h-[85vh] w-full overflow-auto rounded-2xl bg-card p-6 shadow-xl transition-all ${
+              phase === "review" && view === "compare" ? "max-w-6xl" : "max-w-2xl"
+            }`}
+          >
             <div className="mb-4 flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-bold text-foreground">
@@ -293,9 +301,48 @@ export default function TailorResumeFlow({
               scoreBefore &&
               scoreAfter && (
                 <div className="space-y-4">
-                  <ScoreDelta before={scoreBefore} after={scoreAfter} />
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <ScoreDelta before={scoreBefore} after={scoreAfter} />
+                    <div className="flex shrink-0 items-center rounded-lg border border-border bg-muted p-0.5 text-xs font-semibold">
+                      <button
+                        type="button"
+                        onClick={() => setView("changes")}
+                        aria-pressed={view === "changes"}
+                        className={`rounded-md px-3 py-1.5 transition ${
+                          view === "changes"
+                            ? "bg-card text-brand-700 dark:text-brand-300 shadow-sm"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        Changes ({changes.length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setView("compare")}
+                        aria-pressed={view === "compare"}
+                        className={`rounded-md px-3 py-1.5 transition ${
+                          view === "compare"
+                            ? "bg-card text-brand-700 dark:text-brand-300 shadow-sm"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        Side by side
+                      </button>
+                    </div>
+                  </div>
 
-                  {changes.length === 0 ? (
+                  {view === "compare" && sourceRecord && finalData ? (
+                    <TailorComparePane
+                      source={sourceRecord.resumeData}
+                      tailored={finalData}
+                      selectedTemplate={sourceRecord.selectedTemplate}
+                      templateStyle={sourceRecord.templateStyle}
+                      sectionState={sourceRecord.sectionState}
+                      changedKeys={changes
+                        .filter((c) => !rejected.has(c.key))
+                        .map((c) => c.key)}
+                    />
+                  ) : changes.length === 0 ? (
                     <div className="rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
                       The tailoring produced no changes — your resume already
                       reads well for this job description.
@@ -348,6 +395,7 @@ export default function TailorResumeFlow({
                         setResult(null);
                         setSourceRecord(null);
                         setRejected(new Set());
+                        setView("changes");
                         setPhase("pick");
                       }}
                       disabled={phase === "saving"}

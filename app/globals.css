@@ -116,6 +116,17 @@
   }
 }
 
+/* Tailoring compare view: accepted-change regions on the tailored sheet.
+   Green (vs the indigo editing highlight) to read as "improved". */
+@media screen {
+  .rf-compare .rf-changed {
+    border-radius: 2px;
+    outline: 2px solid hsl(142 71% 45% / 0.5);
+    outline-offset: 3px;
+    background-color: hsl(142 71% 45% / 0.05);
+  }
+}
+
 /* Brief flash on the form entry targeted from the preview. */
 @keyframes rf-flash {
   from {
