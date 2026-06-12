@@ -21,6 +21,8 @@ export default function TailorComparePane({
   templateStyle,
   sectionState,
   changedKeys,
+  labelLeft = "Original",
+  labelRight = "Tailored — accepted changes outlined",
 }: {
   source: ResumeData;
   tailored: ResumeData;
@@ -28,6 +30,8 @@ export default function TailorComparePane({
   templateStyle?: TemplateStyleSettings;
   sectionState?: ResumeSectionState[] | null;
   changedKeys: string[];
+  labelLeft?: string;
+  labelRight?: string;
 }) {
   const tailoredRef = useRef<HTMLDivElement>(null);
   const template = normalizeTemplateId(selectedTemplate);
@@ -86,8 +90,8 @@ export default function TailorComparePane({
 
   return (
     <div className="grid gap-3 md:grid-cols-2">
-      {pane("Original", source)}
-      {pane("Tailored — accepted changes outlined", tailored, tailoredRef)}
+      {pane(labelLeft, source)}
+      {pane(labelRight, tailored, tailoredRef)}
     </div>
   );
 }

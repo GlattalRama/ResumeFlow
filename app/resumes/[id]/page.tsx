@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { getItem } from "@/lib/store";
 import { TEMPLATES, normalizeTemplateId } from "@/lib/constants";
 import { resolveBaseResumeId, isBaseResume } from "@/lib/baseResume";
+import { listSnapshots } from "@/lib/resumeHistory";
 import ResumePreviewPane from "@/components/ResumePreviewPane";
+import HistorySection from "@/components/HistorySection";
 
 export const dynamic = "force-dynamic";
 
@@ -13,9 +15,10 @@ export default async function ResumePreviewPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [resume, baseResumeId] = await Promise.all([
+  const [resume, baseResumeId, snapshots] = await Promise.all([
     getItem("resumes", id),
     resolveBaseResumeId(),
+    listSnapshots(id),
   ]);
   if (!resume) notFound();
   const isBase = isBaseResume(resume.id, baseResumeId);
@@ -55,6 +58,8 @@ export default async function ResumePreviewPage({
         isBase={isBase}
         baseSet={baseResumeId !== null}
       />
+
+      <HistorySection resume={resume} snapshots={snapshots} />
     </div>
   );
 }

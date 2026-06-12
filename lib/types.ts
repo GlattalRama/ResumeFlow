@@ -461,6 +461,23 @@ export interface UserSettings {
 }
 
 // Map collection name -> stored entity type.
+// A point-in-time copy of a resume version's content, captured automatically
+// around saves (throttled) and before restores. Restoring copies these fields
+// back onto the live version.
+export interface ResumeSnapshot {
+  id: string;
+  resumeId: string;
+  savedAt: string;
+  reason: "save" | "pre-restore";
+  versionName: string;
+  targetRole: string;
+  selectedTemplate: TemplateId;
+  templateStyle?: TemplateStyleSettings;
+  formCardState?: ResumeFormCardState[];
+  sectionState?: ResumeSectionState[];
+  resumeData: ResumeData;
+}
+
 export interface Collections {
   resumes: ResumeVersion;
   applications: Application;
@@ -469,6 +486,7 @@ export interface Collections {
   statusHistory: StatusHistoryEntry;
   documents: DocumentMeta;
   settings: UserSettings;
+  resumeSnapshots: ResumeSnapshot;
 }
 
 export type CollectionName = keyof Collections;

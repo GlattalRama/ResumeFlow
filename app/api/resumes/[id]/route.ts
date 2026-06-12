@@ -13,6 +13,7 @@ import {
   resolveTemplateStyle,
 } from "@/lib/constants";
 import { resolveBaseResumeId } from "@/lib/baseResume";
+import { captureSnapshot, purgeSnapshots } from "@/lib/resumeHistory";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -27,6 +28,15 @@ export async function GET(_req: Request, { params }: Ctx) {
 export async function PUT(req: Request, { params }: Ctx) {
   const { id } = await params;
   const body = await req.json();
+
+  // Version history: snapshot the pre-save state (throttled + deduplicated in
+  // captureSnapshot). Best-effort — a history failure must never block a save.
+  try {
+    const current = await getItem("resumes", id);
+    if (current) await captureSnapshot(current, "save");
+  } catch (err) {
+    console.error("resume snapshot capture failed:", err);
+  }
 
   const patch: Record<string, unknown> = { updatedAt: new Date().toISOString() };
   if (body.versionName !== undefined) patch.versionName = body.versionName;
@@ -101,5 +111,11 @@ export async function DELETE(_req: Request, { params }: Ctx) {
 
   const ok = await deleteItem("resumes", id);
   if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  // Best-effort: a deleted resume's history has nothing to restore onto.
+  try {
+    await purgeSnapshots(id);
+  } catch (err) {
+    console.error("resume snapshot purge failed:", err);
+  }
   return NextResponse.json({ ok: true });
 }
