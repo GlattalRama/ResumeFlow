@@ -3,27 +3,33 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { PageMargins } from "@/lib/types";
 
-// Renders resume content as an A4 sheet and overlays dashed page-break guide
-// lines at each A4 page boundary so the user can see where the document splits
-// when printed / exported to PDF.
+// Renders resume content as true A4 page sheets — separate white pages with a
+// gap between them, like Word's page view or a PDF reader.
+//
+// Two copies of the content are rendered:
+//   • A hidden continuous "flow" copy: the measurement source (spacer heights,
+//     page count) and the ONLY copy visible when printing, so the PDF is the
+//     same continuous fragmented flow as before.
+//   • Visible per-page "slices": each an A4-sized sheet showing its window of
+//     the flow via a translateY offset inside an overflow-hidden viewport.
 //
 // Responsibilities (page geometry lives here, not in the templates):
 //   • Sets the A4 width and applies the user's page margins as on-screen padding.
-//   • Auto-scales the sheet down to fit the available container width (so the
-//     whole page is visible) while keeping the true A4 layout — content is laid
-//     out at full A4 width and only visually scaled, so pagination stays exact.
-//   • Draws a guide line + "Page N" label at every page boundary.
+//   • Auto-scales the sheets down to fit the available container width while
+//     keeping the true A4 layout — content is laid out at full A4 width and
+//     only visually scaled, so pagination stays exact.
 //   • Fills forced page breaks: any element the template marks with
 //     `data-pb-spacer` is grown so the content after it starts on a new page.
 //   • Injects a print stylesheet so the PDF uses the same margins as @page
-//     margins (and drops the on-screen scaling/padding).
+//     margins (and drops the on-screen scaling/padding/slicing).
 //
 // Sizing uses the CSS reference of 96dpi (1in = 96px = 25.4mm), so the sheet is
-// a true A4 aspect ratio on screen. Guides + spacers are screen-only — they
-// never appear in the printed/PDF output.
+// a true A4 aspect ratio on screen.
 const PX_PER_MM = 96 / 25.4;
 const A4_WIDTH_PX = Math.round(210 * PX_PER_MM); // ≈ 794px
 const A4_HEIGHT_PX = 297 * PX_PER_MM; // ≈ 1122.5px
+// Visual gap between page sheets on screen (screen-only, never printed).
+const PAGE_GAP_PX = 24;
 
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
@@ -40,9 +46,12 @@ export default function A4Preview({
   children: React.ReactNode;
 }) {
   const outerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [lines, setLines] = useState<number[]>([]);
-  const [sheetHeight, setSheetHeight] = useState(0);
+  // Hidden continuous copy: measurement source + print DOM.
+  const flowRef = useRef<HTMLDivElement>(null);
+  // Visible page slices (each duplicates the children).
+  const pagesRef = useRef<HTMLDivElement>(null);
+  const [pageCount, setPageCount] = useState(1);
+  const [spacerHeights, setSpacerHeights] = useState<number[]>([]);
   const [containerWidth, setContainerWidth] = useState(0);
 
   const padTopPx = margins.top * PX_PER_MM;
@@ -55,13 +64,12 @@ export default function A4Preview({
     containerWidth > 0 ? Math.min(1, containerWidth / A4_WIDTH_PX) : 1;
   const scale = fitScale * zoom;
 
-  // Recompute forced-break spacers + page-break guide lines + sheet height.
-  // Reading getBoundingClientRect between mutations reflects the new layout
-  // synchronously, so spacers can be resolved top-to-bottom in one pass. This
-  // all happens at the unscaled A4 width, so the transform scale never affects
-  // the measurements.
+  // Measure the hidden flow copy: resolve forced-break spacers top-to-bottom
+  // (reading getBoundingClientRect between mutations reflects the new layout
+  // synchronously), then derive the page count from the flowed height. All at
+  // the unscaled A4 width, so the visual scale never affects measurements.
   useIsomorphicLayoutEffect(() => {
-    const el = contentRef.current;
+    const el = flowRef.current;
     if (!el) return;
 
     const recompute = () => {
@@ -70,25 +78,28 @@ export default function A4Preview({
         el.querySelectorAll<HTMLElement>("[data-pb-spacer]")
       );
       spacers.forEach((s) => (s.style.height = "0px"));
+      const heights: number[] = [];
       for (const spacer of spacers) {
         const y = spacer.getBoundingClientRect().top - contentTop - padTopPx;
-        if (y <= 0) continue;
-        const rem = y % printablePx;
-        const fill = rem < 0.5 ? 0 : printablePx - rem;
+        let fill = 0;
+        if (y > 0) {
+          const rem = y % printablePx;
+          fill = rem < 0.5 ? 0 : printablePx - rem;
+        }
         spacer.style.height = `${fill}px`;
+        heights.push(fill);
       }
 
       const flowed = el.scrollHeight - padTopPx - padBottomPx;
-      const next: number[] = [];
-      for (let k = 1; k * printablePx < flowed - 0.5; k++) {
-        next.push(padTopPx + k * printablePx);
-      }
-      setLines((prev) =>
-        prev.length === next.length && prev.every((v, i) => v === next[i])
+      let pages = 1;
+      while (pages * printablePx < flowed - 0.5) pages++;
+      setPageCount(pages);
+      setSpacerHeights((prev) =>
+        prev.length === heights.length &&
+        prev.every((v, i) => v === heights[i])
           ? prev
-          : next
+          : heights
       );
-      setSheetHeight(el.offsetHeight);
     };
 
     recompute();
@@ -97,7 +108,22 @@ export default function A4Preview({
     return () => ro.disconnect();
   }, [padTopPx, padBottomPx, printablePx, children]);
 
-  // Track the available width so the sheet can scale to fit it.
+  // Mirror the resolved spacer heights into every visible page slice — the
+  // slices are independent renders of the same children, so their spacers
+  // exist in the same order as the flow copy's.
+  useIsomorphicLayoutEffect(() => {
+    const root = pagesRef.current;
+    if (!root) return;
+    root.querySelectorAll<HTMLElement>("[data-pb-slice]").forEach((slice) => {
+      slice
+        .querySelectorAll<HTMLElement>("[data-pb-spacer]")
+        .forEach((s, i) => {
+          s.style.height = `${spacerHeights[i] ?? 0}px`;
+        });
+    });
+  }, [spacerHeights, pageCount]);
+
+  // Track the available width so the sheets can scale to fit it.
   useIsomorphicLayoutEffect(() => {
     const el = outerRef.current;
     if (!el) return;
@@ -108,11 +134,15 @@ export default function A4Preview({
     return () => ro.disconnect();
   }, []);
 
+  const padding = `${margins.top}mm ${margins.right}mm ${margins.bottom}mm ${margins.left}mm`;
+  const columnHeight =
+    pageCount * A4_HEIGHT_PX + (pageCount - 1) * PAGE_GAP_PX;
+
   const pageStyle = `@media print {
   @page { margin: ${margins.top}mm ${margins.right}mm ${margins.bottom}mm ${margins.left}mm; }
   .a4-frame { width: auto !important; height: auto !important; }
-  .a4-sheet { position: static !important; transform: none !important; width: auto !important; box-shadow: none !important; }
-  .a4-sheet-content { padding: 0 !important; }
+  .a4-screen-pages { display: none !important; }
+  .a4-print-flow { position: static !important; visibility: visible !important; width: auto !important; padding: 0 !important; }
 }`;
 
   return (
@@ -123,43 +153,67 @@ export default function A4Preview({
         {/* Reserves the scaled footprint so surrounding layout flows correctly. */}
         <div
           className="a4-frame relative mx-auto"
-          style={{ width: A4_WIDTH_PX * scale, height: sheetHeight * scale }}
+          style={{ width: A4_WIDTH_PX * scale, height: columnHeight * scale }}
         >
+          {/* Hidden continuous flow: measurement source and the print DOM.
+              visibility:hidden keeps layout (measurable) without painting;
+              the print stylesheet makes it the only visible copy on paper. */}
           <div
-            className="a4-sheet absolute left-0 top-0 bg-white shadow-sm"
+            ref={flowRef}
+            className="a4-print-flow a4-sheet absolute left-0 top-0"
+            style={{
+              width: A4_WIDTH_PX,
+              padding,
+              visibility: "hidden",
+              pointerEvents: "none",
+            }}
+          >
+            {children}
+          </div>
+
+          {/* Screen-only page slices: real separated sheets, like Word. */}
+          <div
+            ref={pagesRef}
+            className="a4-screen-pages absolute left-0 top-0"
             style={{
               width: A4_WIDTH_PX,
               transform: `scale(${scale})`,
               transformOrigin: "top left",
             }}
           >
-            <div
-              ref={contentRef}
-              className="a4-sheet-content relative"
-              style={{
-                padding: `${margins.top}mm ${margins.right}mm ${margins.bottom}mm ${margins.left}mm`,
-              }}
-            >
-              {children}
-
-              {lines.map((top, i) => (
+            {Array.from({ length: pageCount }, (_, k) => (
+              <div
+                key={k}
+                data-pb-slice
+                // The slices repeat the same content; expose only the first
+                // to assistive tech to avoid duplicate reading.
+                aria-hidden={k > 0 || undefined}
+                className="a4-sheet relative overflow-hidden bg-white shadow-md"
+                style={{
+                  width: A4_WIDTH_PX,
+                  height: A4_HEIGHT_PX,
+                  marginTop: k === 0 ? 0 : PAGE_GAP_PX,
+                }}
+              >
+                {/* Viewport clipped to this page's printable band; the inner
+                    copy keeps the exact flow layout (same padding) and is
+                    shifted up so page k's window shows through. */}
                 <div
-                  key={i}
-                  aria-hidden
-                  className="pointer-events-none absolute z-10 print:hidden"
-                  style={{
-                    top,
-                    left: -margins.left * PX_PER_MM,
-                    right: -margins.right * PX_PER_MM,
-                  }}
+                  className="absolute inset-x-0 overflow-hidden"
+                  style={{ top: padTopPx, height: printablePx }}
                 >
-                  <div className="border-t-2 border-dashed border-red-400/70" />
-                  <span className="absolute -top-[9px] right-1 rounded-sm bg-red-400 px-1 text-[9px] font-medium leading-tight text-white">
-                    Page {i + 2}
-                  </span>
+                  <div
+                    style={{
+                      width: A4_WIDTH_PX,
+                      padding,
+                      transform: `translateY(${-(padTopPx + k * printablePx)}px)`,
+                    }}
+                  >
+                    {children}
+                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
