@@ -3,14 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
 
 const LINKS = [
   { href: "/", label: "Dashboard" },
   { href: "/resumes", label: "Resumes" },
   { href: "/applications", label: "Applications" },
-  { href: "/settings", label: "Settings" },
+  { href: "/work-journal", label: "Work Journal" },
+  { href: "/interview-prep", label: "Interview Coach" },
+  { href: "/settings", label: "AI Settings" },
+];
+
+const ADMIN_LINKS = [
+  { href: "/admin/analytics", label: "Analytics" },
+  { href: "/admin/templates", label: "Templates" },
 ];
 
 export default function Nav() {
@@ -32,13 +39,6 @@ export default function Nav() {
   const onSignIn = pathname === "/signin";
 
   const isAdmin = Boolean((session as { isAdmin?: boolean } | null)?.isAdmin);
-  const links = isAdmin
-    ? [
-        ...LINKS,
-        { href: "/admin/analytics", label: "Analytics" },
-        { href: "/admin/templates", label: "Templates" },
-      ]
-    : LINKS;
 
   const user = session?.user;
   const authed = status === "authenticated" && !!user;
@@ -57,7 +57,7 @@ export default function Nav() {
         {/* ---- Desktop nav ---- */}
         {!onSignIn && (
           <nav className="hidden items-center gap-1 md:flex">
-            {links.map((link) => (
+            {LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -70,6 +70,7 @@ export default function Nav() {
                 {link.label}
               </Link>
             ))}
+            {isAdmin && <AdminDropdown pathname={pathname} />}
           </nav>
         )}
 
@@ -128,7 +129,7 @@ export default function Nav() {
       {!onSignIn && user && menuOpen && (
         <nav className="border-t border-border bg-background px-4 py-3 md:hidden">
           <div className="flex flex-col gap-1">
-            {links.map((link) => (
+            {LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -141,6 +142,26 @@ export default function Nav() {
                 {link.label}
               </Link>
             ))}
+            {isAdmin && (
+              <>
+                <p className="mt-2 px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Admin
+                </p>
+                {ADMIN_LINKS.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`rounded-md px-3 py-2.5 text-sm font-medium transition ${
+                      isActive(link.href)
+                        ? "bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-200"
+                        : "text-foreground/80 hover:bg-accent"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </>
+            )}
           </div>
 
           <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
@@ -175,6 +196,81 @@ export default function Nav() {
         </nav>
       )}
     </header>
+  );
+}
+
+function AdminDropdown({ pathname }: { pathname: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const active = pathname.startsWith("/admin");
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(e: PointerEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition ${
+          active
+            ? "bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-200"
+            : "text-muted-foreground hover:bg-accent hover:text-foreground"
+        }`}
+      >
+        Admin
+        <svg
+          className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+          aria-hidden="true"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full z-40 mt-1 w-40 rounded-md border border-border bg-background p-1 shadow-lg"
+        >
+          {ADMIN_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              role="menuitem"
+              className={`block rounded-md px-3 py-2 text-sm font-medium transition ${
+                pathname.startsWith(link.href)
+                  ? "bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-200"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
