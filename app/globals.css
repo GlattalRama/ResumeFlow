@@ -90,6 +90,16 @@
   outline-color: hsl(239 84% 67% / 0.55);
 }
 
+/* The section currently open in the editor: a steady soft outline + faint
+   tint so you can see where edits land. Screen-only by construction (the
+   marker class is applied only inside the screen page slices). */
+@media screen {
+  .rf-click-edit .rf-active-section {
+    outline-color: hsl(239 84% 67% / 0.4);
+    background-color: hsl(239 84% 67% / 0.05);
+  }
+}
+
 /* Adjustable gap between consecutive list / row items in a resume. The gap is
    driven by the --rf-bullet-gap CSS variable set on the template root (from the
    per-version line-spacing setting); falls back to the previous fixed spacing. */

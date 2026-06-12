@@ -1398,6 +1398,35 @@ export default function ResumeBuilder({
     }
   }
 
+  // The reverse of click-to-edit: highlight the active section on the preview
+  // sheet and keep it scrolled into view, so you always see where your edits
+  // land. Scoped to the screen page slices — never the hidden print copy.
+  const previewRef = useRef<HTMLDivElement>(null);
+  const activeCardId = orderedCards[safeCurrent]?.cardId;
+  useEffect(() => {
+    // No dependency array: the slices' DOM is recreated whenever content or
+    // page count changes, so re-apply the marker class after every render.
+    const root = previewRef.current;
+    if (!root) return;
+    root
+      .querySelectorAll<HTMLElement>(".a4-screen-pages [data-rf-section]")
+      .forEach((el) => {
+        el.classList.toggle(
+          "rf-active-section",
+          el.dataset.rfSection === activeCardId
+        );
+      });
+  });
+  useEffect(() => {
+    const root = previewRef.current;
+    if (!root || !activeCardId) return;
+    root
+      .querySelector<HTMLElement>(
+        `.a4-screen-pages [data-rf-section="${activeCardId}"]`
+      )
+      ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [activeCardId, mobileView]);
+
   // Click-to-edit: clicking a section inside the live preview focuses its form
   // card (and flips to the edit pane on mobile). Templates tag their section
   // wrappers with data-rf-section, whose value is the matching cardId.
@@ -1719,6 +1748,7 @@ export default function ResumeBuilder({
           </div>
           <div className="overflow-hidden rounded-xl border border-border bg-muted shadow-sm">
             <div
+              ref={previewRef}
               className="rf-click-edit max-h-[80vh] overflow-auto p-3"
               onClick={onPreviewClick}
             >
