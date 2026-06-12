@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { ApplicationStatus } from "@/lib/types";
 import { STATUS_STYLES } from "@/lib/constants";
 
@@ -41,11 +42,13 @@ export function Card({
 }
 
 export function StatusBadge({ status }: { status: ApplicationStatus }) {
+  // Status VALUES stay English in the data; only the display is localized.
+  const t = useTranslations("status");
   return (
     <span
       className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLES[status]}`}
     >
-      {status}
+      {t(status)}
     </span>
   );
 }

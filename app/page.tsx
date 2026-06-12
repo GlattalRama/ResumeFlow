@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 import { readAll } from "@/lib/store";
 import { getSession } from "@/lib/serverSession";
 import {
@@ -43,6 +44,9 @@ export default async function DashboardPage() {
       readAll("statusHistory"),
       getSession(),
     ]);
+  const t = await getTranslations("dashboard");
+  const tStatus = await getTranslations("status");
+  const locale = await getLocale();
 
   const firstName = session?.user?.name?.trim().split(/\s+/)[0];
 
@@ -53,33 +57,33 @@ export default async function DashboardPage() {
 
   const metrics = [
     {
-      label: "Resume Versions",
+      label: t("metricResumes"),
       value: resumes.length,
-      helper: "Tailored resume documents",
+      helper: t("metricResumesHelper"),
       href: "/resumes",
       icon: <DocIcon />,
       grad: "from-indigo-500 to-violet-500",
     },
     {
-      label: "Applications",
+      label: t("metricApplications"),
       value: applications.length,
-      helper: "Jobs you're tracking",
+      helper: t("metricApplicationsHelper"),
       href: "/applications",
       icon: <BriefcaseIcon />,
       grad: "from-sky-500 to-blue-600",
     },
     {
-      label: "Active Applications",
+      label: t("metricActive"),
       value: activeCount,
-      helper: "Not rejected or withdrawn",
+      helper: t("metricActiveHelper"),
       href: "/applications",
       icon: <BoltIcon />,
       grad: "from-emerald-500 to-teal-500",
     },
     {
-      label: "Interview Prep Items",
+      label: t("metricPrep"),
       value: qna.length,
-      helper: "Saved Q&A to practice",
+      helper: t("metricPrepHelper"),
       href: "/applications",
       icon: <ChatIcon />,
       grad: "from-amber-500 to-orange-500",
@@ -109,8 +113,8 @@ export default async function DashboardPage() {
   const appById = new Map(applications.map((a) => [a.id, a]));
   const appLabel = (a: Application | undefined) =>
     a
-      ? `${a.jobTitle || "Untitled role"} · ${a.company || "Unknown company"}`
-      : "an application";
+      ? `${a.jobTitle || t("untitledRole")} · ${a.company || t("unknownCompany")}`
+      : t("anApplication");
 
   type ActivityItem = {
     at: string;
@@ -123,14 +127,14 @@ export default async function DashboardPage() {
   for (const r of resumes) {
     events.push({
       at: r.createdAt,
-      text: `Created resume “${r.versionName || "Untitled"}”`,
+      text: t("createdResume", { name: r.versionName || t("untitled") }),
       href: `/resumes/${r.id}`,
       tone: "text-brand-600 dark:text-brand-300 bg-brand-50 dark:bg-brand-500/15",
     });
     if (r.updatedAt && r.updatedAt !== r.createdAt) {
       events.push({
         at: r.updatedAt,
-        text: `Updated resume “${r.versionName || "Untitled"}”`,
+        text: t("updatedResume", { name: r.versionName || t("untitled") }),
         href: `/resumes/${r.id}`,
         tone: "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40",
       });
@@ -139,7 +143,7 @@ export default async function DashboardPage() {
   for (const a of applications) {
     events.push({
       at: a.createdAt,
-      text: `Added application — ${appLabel(a)}`,
+      text: t("addedApplication", { label: appLabel(a) }),
       href: `/applications/${a.id}`,
       tone: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40",
     });
@@ -148,7 +152,7 @@ export default async function DashboardPage() {
     const a = appById.get(s.applicationId);
     events.push({
       at: s.changedAt,
-      text: `Moved ${appLabel(a)} to ${s.newStatus}`,
+      text: t("movedTo", { label: appLabel(a), status: tStatus(s.newStatus) }),
       href: a ? `/applications/${a.id}` : undefined,
       tone: "text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/40",
     });
@@ -157,7 +161,7 @@ export default async function DashboardPage() {
     const a = appById.get(n.applicationId);
     events.push({
       at: n.createdAt,
-      text: `Added a note on ${appLabel(a)}`,
+      text: t("addedNote", { label: appLabel(a) }),
       href: a ? `/applications/${a.id}` : undefined,
       tone: "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40",
     });
@@ -166,7 +170,7 @@ export default async function DashboardPage() {
     const a = appById.get(q.applicationId);
     events.push({
       at: q.createdAt,
-      text: `Added interview Q&A for ${appLabel(a)}`,
+      text: t("addedQna", { label: appLabel(a) }),
       href: a ? `/interview-prep/${a.id}` : undefined,
       tone: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40",
     });
@@ -185,21 +189,20 @@ export default async function DashboardPage() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="max-w-xl">
             <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              Welcome back{firstName ? `, ${firstName}` : ""} 👋
+              {firstName ? t("welcome", { name: firstName }) : t("welcomeAnon")}
             </h1>
             <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-              Manage your resumes, applications, and interview preparation in one
-              place.
+              {t("subtitle")}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Link href="/resumes/new" className={buttonClass("primary")}>
               <PlusIcon className="mr-1.5 h-4 w-4" />
-              New Resume
+              {t("newResume")}
             </Link>
             <Link href="/applications/new" className={buttonClass("secondary")}>
               <PlusIcon className="mr-1.5 h-4 w-4" />
-              New Application
+              {t("newApplication")}
             </Link>
           </div>
         </div>
@@ -238,22 +241,22 @@ export default async function DashboardPage() {
       <section className="grid gap-4 lg:grid-cols-3">
         <SectionCard
           className="lg:col-span-2"
-          title="Application pipeline"
-          subtitle="Applications by status"
+          title={t("pipelineTitle")}
+          subtitle={t("pipelineSubtitle")}
           action={
             <Link
               href="/applications"
               className="text-xs font-semibold text-brand-600 dark:text-brand-300 hover:underline"
             >
-              View all →
+              {t("viewAll")}
             </Link>
           }
         >
           {applications.length === 0 ? (
             <EmptyState
-              title="No applications yet"
-              hint="Add a job application to start building your pipeline."
-              cta={{ href: "/applications/new", label: "Add application" }}
+              title={t("emptyAppsTitle")}
+              hint={t("emptyAppsHint")}
+              cta={{ href: "/applications/new", label: t("addApplication") }}
             />
           ) : (
             <ul className="space-y-3.5">
@@ -262,7 +265,7 @@ export default async function DashboardPage() {
                 return (
                   <li key={p.status} className="flex items-center gap-3">
                     <span className="w-20 shrink-0 text-xs font-medium text-muted-foreground sm:w-28">
-                      {p.status}
+                      {tStatus(p.status)}
                     </span>
                     <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-muted">
                       <div
@@ -288,10 +291,10 @@ export default async function DashboardPage() {
           )}
         </SectionCard>
 
-        <SectionCard title="Recent activity" subtitle="Latest changes">
+        <SectionCard title={t("activityTitle")} subtitle={t("activitySubtitle")}>
           {recentActivity.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground/70">
-              No activity yet. Create a resume or application to get started.
+              {t("noActivity")}
             </p>
           ) : (
             <ul className="relative space-y-1 before:absolute before:bottom-2 before:left-[13px] before:top-2 before:w-px before:bg-muted">
@@ -307,7 +310,7 @@ export default async function DashboardPage() {
                       <p className="text-sm leading-snug text-foreground/80">
                         {e.text}
                       </p>
-                      <p className="text-xs text-muted-foreground/70">{timeAgo(e.at)}</p>
+                      <p className="text-xs text-muted-foreground/70">{timeAgo(e.at, t)}</p>
                     </div>
                   </div>
                 );
@@ -334,22 +337,22 @@ export default async function DashboardPage() {
       {/* ---- Recent applications + Recent resume versions ---- */}
       <section className="grid gap-4 lg:grid-cols-2">
         <SectionCard
-          title="Recent applications"
-          subtitle="Most recently updated"
+          title={t("recentAppsTitle")}
+          subtitle={t("recentSubtitle")}
           action={
             <Link
               href="/applications"
               className="text-xs font-semibold text-brand-600 dark:text-brand-300 hover:underline"
             >
-              View all →
+              {t("viewAll")}
             </Link>
           }
         >
           {recentApps.length === 0 ? (
             <EmptyState
-              title="No applications yet"
-              hint="Track a job you've applied to."
-              cta={{ href: "/applications/new", label: "Add application" }}
+              title={t("emptyAppsTitle")}
+              hint={t("trackAJob")}
+              cta={{ href: "/applications/new", label: t("addApplication") }}
             />
           ) : (
             <ul className="divide-y divide-border">
@@ -361,16 +364,19 @@ export default async function DashboardPage() {
                   >
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-foreground">
-                        {a.jobTitle || "Untitled role"}
+                        {a.jobTitle || t("untitledRole")}
                         <span className="font-normal text-muted-foreground">
                           {" "}
-                          · {a.company || "Unknown company"}
+                          · {a.company || t("unknownCompany")}
                         </span>
                       </p>
                       <p className="mt-0.5 truncate text-xs text-muted-foreground/70">
                         {resumeNameById.get(a.resumeVersionUsed) ??
-                          "No resume linked"}{" "}
-                        · Updated {shortDate(a.updatedAt || a.createdAt)}
+                          t("noResumeLinked")}{" "}
+                        ·{" "}
+                        {t("updatedOn", {
+                          date: shortDate(a.updatedAt || a.createdAt, locale),
+                        })}
                       </p>
                     </div>
                     <StatusBadge status={a.status} />
@@ -382,22 +388,22 @@ export default async function DashboardPage() {
         </SectionCard>
 
         <SectionCard
-          title="Recent resume versions"
-          subtitle="Most recently updated"
+          title={t("recentResumesTitle")}
+          subtitle={t("recentSubtitle")}
           action={
             <Link
               href="/resumes"
               className="text-xs font-semibold text-brand-600 dark:text-brand-300 hover:underline"
             >
-              View all →
+              {t("viewAll")}
             </Link>
           }
         >
           {recentResumes.length === 0 ? (
             <EmptyState
-              title="No resumes yet"
-              hint="Create your first resume version to get started."
-              cta={{ href: "/resumes/new", label: "Create resume" }}
+              title={t("emptyResumesTitle")}
+              hint={t("emptyResumesHint")}
+              cta={{ href: "/resumes/new", label: t("createResume") }}
             />
           ) : (
             <ul className="divide-y divide-border">
@@ -406,19 +412,21 @@ export default async function DashboardPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-foreground">
-                        {r.versionName || "Untitled version"}
+                        {r.versionName || t("untitledVersion")}
                       </p>
                       <p className="mt-0.5 truncate text-xs text-muted-foreground/70">
-                        {r.targetRole || "No target role"} ·{" "}
-                        {templateName(r.selectedTemplate)} · Updated{" "}
-                        {shortDate(r.updatedAt || r.createdAt)}
+                        {r.targetRole || t("noTargetRole")} ·{" "}
+                        {templateName(r.selectedTemplate)} ·{" "}
+                        {t("updatedOn", {
+                          date: shortDate(r.updatedAt || r.createdAt, locale),
+                        })}
                       </p>
                     </div>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    <QuickAction href={`/resumes/${r.id}`} label="Preview" />
-                    <QuickAction href={`/resumes/${r.id}/edit`} label="Edit" />
-                    <QuickAction href={`/resumes/${r.id}`} label="Export" />
+                    <QuickAction href={`/resumes/${r.id}`} label={t("preview")} />
+                    <QuickAction href={`/resumes/${r.id}/edit`} label={t("edit")} />
+                    <QuickAction href={`/resumes/${r.id}`} label={t("export")} />
                   </div>
                 </li>
               ))}
@@ -477,28 +485,31 @@ function templateName(id: string): string {
   return TEMPLATES.find((t) => t.id === normalized)?.name ?? normalized;
 }
 
-// "2d ago" style relative time. Returns "" for invalid/empty input.
-function timeAgo(iso: string): string {
+// "2d ago" style relative time, localized via the dashboard.timeAgo messages.
+// Returns "" for invalid/empty input.
+type TimeAgoT = (key: string, values?: Record<string, number>) => string;
+function timeAgo(iso: string, t: TimeAgoT): string {
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return "";
   const diffMs = Date.now() - then;
   const min = Math.round(diffMs / 60000);
-  if (min < 1) return "just now";
-  if (min < 60) return `${min}m ago`;
+  if (min < 1) return t("timeAgo.justNow");
+  if (min < 60) return t("timeAgo.minutes", { n: min });
   const hr = Math.round(min / 60);
-  if (hr < 24) return `${hr}h ago`;
+  if (hr < 24) return t("timeAgo.hours", { n: hr });
   const day = Math.round(hr / 24);
-  if (day < 30) return `${day}d ago`;
+  if (day < 30) return t("timeAgo.days", { n: day });
   const mo = Math.round(day / 30);
-  if (mo < 12) return `${mo}mo ago`;
-  return `${Math.round(mo / 12)}y ago`;
+  if (mo < 12) return t("timeAgo.months", { n: mo });
+  return t("timeAgo.years", { n: Math.round(mo / 12) });
 }
 
-// "Jun 7, 2026" style absolute date. Returns "—" for invalid/empty input.
-function shortDate(iso: string): string {
+// "Jun 7, 2026" style absolute date in the active locale. Returns "—" for
+// invalid/empty input.
+function shortDate(iso: string, locale: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("en-US", {
+  return d.toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",

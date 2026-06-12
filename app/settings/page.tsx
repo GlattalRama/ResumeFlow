@@ -1,15 +1,14 @@
+import { getTranslations } from "next-intl/server";
 import SettingsForm from "@/components/SettingsForm";
 
 export const dynamic = "force-dynamic";
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const t = await getTranslations("settings");
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="text-2xl font-bold text-foreground">AI Settings</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Connect your own AI key to enable “Improve with AI” suggestions across
-        your resume sections.
-      </p>
+      <h1 className="text-2xl font-bold text-foreground">{t("title")}</h1>
+      <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
       <div className="mt-6">
         <SettingsForm />
       </div>

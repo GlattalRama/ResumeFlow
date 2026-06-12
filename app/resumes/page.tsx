@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 import { readAll } from "@/lib/store";
 import { TEMPLATES, normalizeTemplateId } from "@/lib/constants";
 import { resolveBaseResumeId, isBaseResume } from "@/lib/baseResume";
@@ -19,24 +20,26 @@ export default async function ResumesPage() {
     ),
     resolveBaseResumeId(),
   ]);
+  const t = await getTranslations("resumes");
+  const locale = await getLocale();
 
   return (
     <div>
       <PageHeader
-        title="Resume versions"
-        subtitle="Create and manage tailored versions of your resume."
+        title={t("title")}
+        subtitle={t("subtitle")}
         action={
           <Link href="/resumes/new" className={buttonClass("primary")}>
-            + New resume
+            {t("new")}
           </Link>
         }
       />
 
       {resumes.length === 0 ? (
         <EmptyState
-          title="No resume versions yet"
-          hint="Create your first resume version to get started."
-          cta={{ href: "/resumes/new", label: "Create resume" }}
+          title={t("emptyTitle")}
+          hint={t("emptyHint")}
+          cta={{ href: "/resumes/new", label: t("create") }}
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -65,7 +68,9 @@ export default async function ResumesPage() {
                       : ""}
                   </p>
                   <p className="mt-3 text-[11px] text-muted-foreground/70">
-                    Updated {new Date(r.updatedAt).toLocaleDateString()}
+                    {t("updatedOn", {
+                      date: new Date(r.updatedAt).toLocaleDateString(locale),
+                    })}
                   </p>
                 </Card>
               </Link>

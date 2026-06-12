@@ -4,26 +4,30 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import ThemeToggle from "@/components/ThemeToggle";
+import LanguagePicker from "@/components/LanguagePicker";
 
+// `key` is the label's id in the "nav" messages namespace.
 const LINKS = [
-  { href: "/", label: "Dashboard" },
-  { href: "/resumes", label: "Resumes" },
-  { href: "/applications", label: "Applications" },
-  { href: "/work-journal", label: "Work Journal" },
-  { href: "/interview-coach", label: "Interview Coach" },
-  { href: "/settings", label: "AI Settings" },
-];
+  { href: "/", key: "dashboard" },
+  { href: "/resumes", key: "resumes" },
+  { href: "/applications", key: "applications" },
+  { href: "/work-journal", key: "workJournal" },
+  { href: "/interview-coach", key: "interviewCoach" },
+  { href: "/settings", key: "aiSettings" },
+] as const;
 
 const ADMIN_LINKS = [
-  { href: "/admin/analytics", label: "Analytics" },
-  { href: "/admin/templates", label: "Templates" },
-];
+  { href: "/admin/analytics", key: "analytics" },
+  { href: "/admin/templates", key: "templates" },
+] as const;
 
 export default function Nav() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
+  const t = useTranslations("nav");
 
   // Close the mobile menu whenever the route changes.
   useEffect(() => {
@@ -67,7 +71,7 @@ export default function Nav() {
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"
                 }`}
               >
-                {link.label}
+                {t(link.key)}
               </Link>
             ))}
             {isAdmin && <AdminDropdown pathname={pathname} />}
@@ -76,12 +80,13 @@ export default function Nav() {
 
         {/* ---- Desktop account ---- */}
         <div className="hidden items-center gap-3 md:flex">
+          <LanguagePicker />
           <ThemeToggle />
           {user && (
             <>
               <div className="hidden text-right lg:block">
                 <p className="text-sm font-medium leading-tight text-foreground">
-                  {user.name ?? "Signed in"}
+                  {user.name ?? t("signedIn")}
                 </p>
                 {user.email && (
                   <p className="text-xs leading-tight text-muted-foreground">
@@ -102,7 +107,7 @@ export default function Nav() {
                 onClick={() => signOut({ callbackUrl: "/signin" })}
                 className="rounded-md border border-input px-3 py-1.5 text-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-foreground"
               >
-                Sign out
+                {t("signOut")}
               </button>
             </>
           )}
@@ -114,7 +119,7 @@ export default function Nav() {
             <ThemeToggle />
             <button
               type="button"
-              aria-label="Toggle menu"
+              aria-label={t("toggleMenu")}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((v) => !v)}
               className="grid h-9 w-9 place-items-center rounded-md border border-input text-foreground/80"
@@ -139,13 +144,13 @@ export default function Nav() {
                     : "text-foreground/80 hover:bg-accent"
                 }`}
               >
-                {link.label}
+                {t(link.key)}
               </Link>
             ))}
             {isAdmin && (
               <>
                 <p className="mt-2 px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Admin
+                  {t("admin")}
                 </p>
                 {ADMIN_LINKS.map((link) => (
                   <Link
@@ -157,11 +162,14 @@ export default function Nav() {
                         : "text-foreground/80 hover:bg-accent"
                     }`}
                   >
-                    {link.label}
+                    {t(link.key)}
                   </Link>
                 ))}
               </>
             )}
+            <div className="mt-2 px-3">
+              <LanguagePicker />
+            </div>
           </div>
 
           <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
@@ -176,7 +184,7 @@ export default function Nav() {
               )}
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium leading-tight text-foreground">
-                  {user.name ?? "Signed in"}
+                  {user.name ?? t("signedIn")}
                 </p>
                 {user.email && (
                   <p className="truncate text-xs leading-tight text-muted-foreground">
@@ -190,7 +198,7 @@ export default function Nav() {
               onClick={() => signOut({ callbackUrl: "/signin" })}
               className="shrink-0 rounded-md border border-input px-3 py-1.5 text-sm font-medium text-muted-foreground transition hover:bg-accent"
             >
-              Sign out
+              {t("signOut")}
             </button>
           </div>
         </nav>
@@ -203,6 +211,7 @@ function AdminDropdown({ pathname }: { pathname: string }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const active = pathname.startsWith("/admin");
+  const t = useTranslations("nav");
 
   useEffect(() => {
     setOpen(false);
@@ -237,7 +246,7 @@ function AdminDropdown({ pathname }: { pathname: string }) {
             : "text-muted-foreground hover:bg-accent hover:text-foreground"
         }`}
       >
-        Admin
+        {t("admin")}
         <svg
           className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`}
           fill="none"
@@ -265,7 +274,7 @@ function AdminDropdown({ pathname }: { pathname: string }) {
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
               }`}
             >
-              {link.label}
+              {t(link.key)}
             </Link>
           ))}
         </div>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { readAll } from "@/lib/store";
 import {
   Card,
@@ -14,24 +15,25 @@ export default async function ApplicationsPage() {
   const apps = (await readAll("applications")).sort((a, b) =>
     b.createdAt.localeCompare(a.createdAt)
   );
+  const t = await getTranslations("applications");
 
   return (
     <div>
       <PageHeader
-        title="Applications"
-        subtitle="Track every job you've applied to and what's next."
+        title={t("title")}
+        subtitle={t("subtitle")}
         action={
           <Link href="/applications/new" className={buttonClass("primary")}>
-            + New application
+            {t("new")}
           </Link>
         }
       />
 
       {apps.length === 0 ? (
         <EmptyState
-          title="No applications yet"
-          hint="Add a job application to start tracking it."
-          cta={{ href: "/applications/new", label: "Add application" }}
+          title={t("emptyTitle")}
+          hint={t("emptyHint")}
+          cta={{ href: "/applications/new", label: t("add") }}
         />
       ) : (
         <div className="space-y-3">
@@ -41,19 +43,21 @@ export default async function ApplicationsPage() {
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
                     <p className="font-semibold text-foreground">
-                      {a.jobTitle || "Untitled role"}
+                      {a.jobTitle || t("untitledRole")}
                       <span className="font-normal text-muted-foreground">
                         {" "}
-                        · {a.company || "Unknown company"}
+                        · {a.company || t("unknownCompany")}
                       </span>
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      {a.jobId ? `Job ID ${a.jobId}` : "No job ID"}
-                      {a.appliedDate ? ` · Applied ${a.appliedDate}` : ""}
+                      {a.jobId ? t("jobId", { id: a.jobId }) : t("noJobId")}
+                      {a.appliedDate
+                        ? ` · ${t("appliedOn", { date: a.appliedDate })}`
+                        : ""}
                     </p>
                     {a.nextAction && (
                       <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
-                        Next: {a.nextAction}
+                        {t("next", { action: a.nextAction })}
                         {a.nextActionDate ? ` (${a.nextActionDate})` : ""}
                       </p>
                     )}

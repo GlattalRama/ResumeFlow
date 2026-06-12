@@ -1,38 +1,14 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import SignInButton from "@/components/SignInButton";
 import { getSession, getAccessToken } from "@/lib/serverSession";
 import { hasGoogleCredentials } from "@/lib/googleConfig";
 
 export const dynamic = "force-dynamic";
 
-// Highlights shown on the sign-in landing hero.
-const FEATURES = [
-  {
-    title: "AI-tailored resumes",
-    desc: "Match every resume to the job description in seconds.",
-  },
-  {
-    title: "Beat the ATS",
-    desc: "Clean, parseable templates that applicant-tracking systems can read.",
-  },
-  {
-    title: "Track every application",
-    desc: "See all your roles in one clear pipeline, from saved to offer.",
-  },
-  {
-    title: "Interview prep",
-    desc: "Get AI-generated questions and answer guidance for each job.",
-  },
-  {
-    title: "Export anywhere",
-    desc: "Download polished PDF, Word, and PowerPoint versions.",
-  },
-  {
-    title: "Private by design",
-    desc: "Your data is saved to your own Google Drive — not our servers.",
-  },
-];
+// Highlights shown on the sign-in landing hero (messages: signin.featureNTitle/Desc).
+const FEATURE_KEYS = [1, 2, 3, 4, 5, 6] as const;
 
 export default async function SignInPage({
   searchParams,
@@ -41,6 +17,7 @@ export default async function SignInPage({
 }) {
   const { callbackUrl } = await searchParams;
   const target = callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : "/";
+  const t = await getTranslations("signin");
 
   const credsConfigured = hasGoogleCredentials();
 
@@ -73,32 +50,33 @@ export default async function SignInPage({
         <div className="max-w-xl">
           <span className="inline-flex items-center gap-2 rounded-full border border-[#0033a0]/20 bg-[#0033a0]/5 px-3 py-1 text-xs font-semibold text-[#0033a0] dark:border-blue-400/30 dark:bg-blue-400/10 dark:text-blue-300">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-            AI-powered resume builder &amp; job tracker
+            {t("badge")}
           </span>
 
           <h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl">
-            Land more interviews with resumes built to{" "}
-            <span className="text-[#0033a0] dark:text-blue-300">beat the ATS</span>.
+            {t.rich("headline", {
+              accent: (chunks) => (
+                <span className="text-[#0033a0] dark:text-blue-300">{chunks}</span>
+              ),
+            })}
           </h1>
 
           <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Resumeflow-ATS helps you tailor each resume to the job, track every
-            application, and prepare for interviews — all in one place, with your
-            data saved privately to your own Google Drive.
+            {t("sub")}
           </p>
 
           <ul className="mt-8 grid gap-4 sm:grid-cols-2">
-            {FEATURES.map((f) => (
-              <li key={f.title} className="flex gap-3">
+            {FEATURE_KEYS.map((n) => (
+              <li key={n} className="flex gap-3">
                 <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-300">
                   <CheckIcon />
                 </span>
                 <div>
                   <p className="text-sm font-semibold text-foreground">
-                    {f.title}
+                    {t(`feature${n}Title`)}
                   </p>
                   <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                    {f.desc}
+                    {t(`feature${n}Desc`)}
                   </p>
                 </div>
               </li>
@@ -113,10 +91,10 @@ export default async function SignInPage({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo-mark.png" alt="" className="h-14 w-auto" />
               <h2 className="mt-3 text-xl font-bold text-foreground">
-                Get started free
+                {t("getStarted")}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Sign in to create your first tailored resume in minutes.
+                {t("getStartedSub")}
               </p>
             </div>
 
@@ -135,23 +113,22 @@ export default async function SignInPage({
                   href={target}
                   className="inline-flex w-full items-center justify-center rounded-md bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
                 >
-                  Continue in local mode
+                  {t("localMode")}
                 </Link>
               </div>
             )}
 
             <p className="mt-6 text-center text-[11px] text-muted-foreground/70">
-              We request access only to Resumeflow-ATS&apos;s own app data folder
-              in your Google Drive.
+              {t("scopeNote")}
             </p>
 
             <p className="mt-3 text-center text-[11px] text-muted-foreground/70">
               <Link href="/privacy" className="hover:underline">
-                Privacy Policy
+                {t("privacy")}
               </Link>
               <span className="mx-1.5">·</span>
               <Link href="/terms" className="hover:underline">
-                Terms of Service
+                {t("terms")}
               </Link>
             </p>
           </div>

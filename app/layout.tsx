@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Providers from "@/components/Providers";
@@ -47,15 +49,20 @@ export default async function RootLayout({
     redirect(`/signin?callbackUrl=${encodeURIComponent(pathname)}`);
   }
 
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
     // suppressHydrationWarning: next-themes sets the theme class on <html>
     // before hydration, which the server can't know about.
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body>
-        <Providers>
-          <Nav />
-          <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
-        </Providers>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <Providers>
+            <Nav />
+            <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+          </Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
