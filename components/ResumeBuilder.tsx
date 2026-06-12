@@ -254,8 +254,12 @@ export default function ResumeBuilder({
   const [currentCard, setCurrentCard] = useState(0);
   // The specific list entry being edited (e.g. one Work Experience role), as
   // "cardId:index". When set, the preview highlight narrows from the whole
-  // section to just that entry. Cleared on ordinary section navigation.
+  // section to just that entry and that entry is the expanded accordion card.
+  // Cleared on ordinary section navigation.
   const [activeItem, setActiveItem] = useState<string | null>(null);
+  // Set when activeItem was chosen away from the form (preview click, Add):
+  // the matching form entry scrolls into view and flashes once.
+  const pendingFormScroll = useRef(false);
   // Autosave status (edit mode only).
   const [saveStatus, setSaveStatus] = useState<
     "idle" | "saving" | "saved" | "error"
@@ -1176,15 +1180,38 @@ export default function ResumeBuilder({
     },
     experience: {
       count: data.experience.length,
-      headerRight: <AddButton onClick={addExperience} />,
+      headerRight: (
+        <AddButton
+          onClick={() => {
+            addExperience();
+            setActiveItem(`experience:${data.experience.length}`);
+            pendingFormScroll.current = true;
+          }}
+        />
+      ),
       body: (
         <div className="space-y-3">
-          {data.experience.map((exp, i) => (
+          {data.experience.map((exp, i) => {
+            const itemKey = `experience:${i}`;
+            const expanded =
+              activeItem === itemKey ||
+              (activeItem == null && data.experience.length === 1);
+            return (
             <ItemCard
               key={i}
-              onRemove={() => removeExperience(i)}
-              dataKey={`experience:${i}`}
-              onActive={() => setActiveItem(`experience:${i}`)}
+              dataKey={itemKey}
+              summary={
+                [exp.role, exp.company].filter(Boolean).join(" · ") ||
+                "New role"
+              }
+              detail={[exp.startDate, exp.endDate].filter(Boolean).join(" – ")}
+              expanded={expanded}
+              onToggle={() => setActiveItem(expanded ? null : itemKey)}
+              onActive={() => setActiveItem(itemKey)}
+              onRemove={() => {
+                removeExperience(i);
+                setActiveItem(null);
+              }}
             >
               <div className="grid gap-2 sm:grid-cols-2">
                 <Field label="Role" value={exp.role} onChange={(v) => updateExperience(i, { role: v })} />
@@ -1220,21 +1247,46 @@ export default function ResumeBuilder({
                 />
               </div>
             </ItemCard>
-          ))}
+            );
+          })}
         </div>
       ),
     },
     education: {
       count: data.education.length,
-      headerRight: <AddButton onClick={addEducation} />,
+      headerRight: (
+        <AddButton
+          onClick={() => {
+            addEducation();
+            setActiveItem(`education:${data.education.length}`);
+            pendingFormScroll.current = true;
+          }}
+        />
+      ),
       body: (
         <div className="space-y-3">
-          {data.education.map((ed, i) => (
+          {data.education.map((ed, i) => {
+            const itemKey = `education:${i}`;
+            const expanded =
+              activeItem === itemKey ||
+              (activeItem == null && data.education.length === 1);
+            return (
             <ItemCard
               key={i}
-              onRemove={() => removeEducation(i)}
-              dataKey={`education:${i}`}
-              onActive={() => setActiveItem(`education:${i}`)}
+              dataKey={itemKey}
+              summary={
+                [[ed.degree, ed.field].filter(Boolean).join(", "), ed.school]
+                  .filter(Boolean)
+                  .join(" · ") || "New education"
+              }
+              detail={[ed.startDate, ed.endDate].filter(Boolean).join(" – ")}
+              expanded={expanded}
+              onToggle={() => setActiveItem(expanded ? null : itemKey)}
+              onActive={() => setActiveItem(itemKey)}
+              onRemove={() => {
+                removeEducation(i);
+                setActiveItem(null);
+              }}
             >
               <div className="grid gap-2 sm:grid-cols-2">
                 <Field label="School" value={ed.school} onChange={(v) => updateEducation(i, { school: v })} />
@@ -1246,21 +1298,41 @@ export default function ResumeBuilder({
                 </div>
               </div>
             </ItemCard>
-          ))}
+            );
+          })}
         </div>
       ),
     },
     projects: {
       count: data.projects.length,
-      headerRight: <AddButton onClick={addProject} />,
+      headerRight: (
+        <AddButton
+          onClick={() => {
+            addProject();
+            setActiveItem(`projects:${data.projects.length}`);
+            pendingFormScroll.current = true;
+          }}
+        />
+      ),
       body: (
         <div className="space-y-3">
-          {data.projects.map((p, i) => (
+          {data.projects.map((p, i) => {
+            const itemKey = `projects:${i}`;
+            const expanded =
+              activeItem === itemKey ||
+              (activeItem == null && data.projects.length === 1);
+            return (
             <ItemCard
               key={i}
-              onRemove={() => removeProject(i)}
-              dataKey={`projects:${i}`}
-              onActive={() => setActiveItem(`projects:${i}`)}
+              dataKey={itemKey}
+              summary={p.name || "New project"}
+              expanded={expanded}
+              onToggle={() => setActiveItem(expanded ? null : itemKey)}
+              onActive={() => setActiveItem(itemKey)}
+              onRemove={() => {
+                removeProject(i);
+                setActiveItem(null);
+              }}
             >
               <div className="grid gap-2">
                 <Field label="Name" value={p.name} onChange={(v) => updateProject(i, { name: v })} />
@@ -1276,7 +1348,8 @@ export default function ResumeBuilder({
                 </div>
               </div>
             </ItemCard>
-          ))}
+            );
+          })}
         </div>
       ),
     },
@@ -1478,7 +1551,6 @@ export default function ResumeBuilder({
 
   // When an item was picked by clicking the preview, scroll its form entry
   // into view (after the section card has rendered) and flash it briefly.
-  const pendingFormScroll = useRef(false);
   useEffect(() => {
     if (!pendingFormScroll.current) return;
     pendingFormScroll.current = false;
@@ -2878,11 +2950,19 @@ function ColorField({
   );
 }
 
+// A collapsible list entry (one job / degree / project). Collapsed it shows a
+// one-line summary header; expanded it shows the edit fields. Expansion is
+// accordion-style and shares state with the preview's item highlight: the
+// expanded entry IS the activeItem, so preview clicks expand exactly it.
 function ItemCard({
   children,
   onRemove,
   dataKey,
   onActive,
+  summary,
+  detail,
+  expanded,
+  onToggle,
 }: {
   children: React.ReactNode;
   onRemove: () => void;
@@ -2891,22 +2971,52 @@ function ItemCard({
   // fires when the user works in this entry so the preview narrows to it.
   dataKey?: string;
   onActive?: () => void;
+  // Collapsed-state header line (e.g. "Role · Company") plus an optional
+  // muted right-hand detail (e.g. the date range).
+  summary: string;
+  detail?: string;
+  expanded: boolean;
+  onToggle: () => void;
 }) {
   return (
     <div
-      className="relative rounded-lg border border-border bg-muted/50 p-3"
+      className="rounded-lg border border-border bg-muted/50"
       data-rf-form-item={dataKey}
       onFocusCapture={onActive}
       onClickCapture={onActive}
     >
-      <button
-        type="button"
-        onClick={onRemove}
-        className="absolute right-2 top-2 text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
-      >
-        Remove
-      </button>
-      {children}
+      <div className="flex items-center justify-between gap-2 px-3 py-2">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={expanded}
+          className="flex min-w-0 flex-1 items-center gap-2 text-left"
+        >
+          <span
+            className="text-xs text-muted-foreground/70 transition-transform"
+            style={{ transform: expanded ? "none" : "rotate(-90deg)" }}
+            aria-hidden
+          >
+            ▾
+          </span>
+          <span className="truncate text-sm font-medium text-foreground/80">
+            {summary}
+          </span>
+          {detail && (
+            <span className="hidden shrink-0 text-xs text-muted-foreground/70 sm:block">
+              {detail}
+            </span>
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="shrink-0 text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
+        >
+          Remove
+        </button>
+      </div>
+      {expanded && <div className="border-t border-border p-3">{children}</div>}
     </div>
   );
 }
