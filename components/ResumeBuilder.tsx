@@ -42,6 +42,8 @@ import TemplateSelector from "./TemplateSelector";
 import RichTextEditor from "./RichTextEditor";
 import ImproveButton from "./ImproveButton";
 import { htmlToLines, linesToHtml } from "@/lib/richText";
+import { scoreResume } from "@/lib/atsScore";
+import AtsScorePanel, { ScoreRing, scoreBandClass } from "./AtsScorePanel";
 import { buttonClass } from "./ui";
 
 const inputClass =
@@ -111,7 +113,8 @@ const COLOR_THEMES = [
 
 // Form-card ids that configure the document rather than hold resume content.
 // The desktop rail groups these under "Setup"; the rest are "Content".
-const CONFIG_CARD_IDS = new Set(["template", "style", "sections", "version"]);
+// "ats" is the analysis card — grouped with Setup, surfaced via the score ring.
+const CONFIG_CARD_IDS = new Set(["template", "style", "sections", "version", "ats"]);
 
 interface Props {
   mode: "create" | "edit";
@@ -260,6 +263,32 @@ export default function ResumeBuilder({
   // Set when activeItem was chosen away from the form (preview click, Add):
   // the matching form entry scrolls into view and flashes once.
   const pendingFormScroll = useRef(false);
+  // Job description for the ATS keyword match. Kept client-side per resume
+  // (localStorage) until the tailoring flow moves it onto the version record.
+  const jdStorageKey = `rf-jd-${initial?.id ?? "new"}`;
+  const [jobDescription, setJobDescription] = useState("");
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(jdStorageKey);
+      if (saved) setJobDescription(saved);
+    } catch {
+      /* storage unavailable (private mode) — score still works, JD just won't persist */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  function onJobDescriptionChange(value: string) {
+    setJobDescription(value);
+    try {
+      localStorage.setItem(jdStorageKey, value);
+    } catch {
+      /* see above */
+    }
+  }
+  // Live ATS score: pure local computation, recomputed as the user types.
+  const atsResult = useMemo(
+    () => scoreResume(data, jobDescription),
+    [data, jobDescription]
+  );
   // Autosave status (edit mode only).
   const [saveStatus, setSaveStatus] = useState<
     "idle" | "saving" | "saved" | "error"
@@ -1056,6 +1085,24 @@ export default function ResumeBuilder({
         </div>
       ),
     },
+    ats: {
+      headerRight: (
+        <span
+          className={`text-sm font-bold tabular-nums ${scoreBandClass(
+            atsResult.overall
+          )}`}
+        >
+          {atsResult.overall}/100
+        </span>
+      ),
+      body: (
+        <AtsScorePanel
+          result={atsResult}
+          jobDescription={jobDescription}
+          onJobDescriptionChange={onJobDescriptionChange}
+        />
+      ),
+    },
     basics: {
       body: (
         <>
@@ -1439,6 +1486,7 @@ export default function ResumeBuilder({
   const nextCardMeta =
     safeCurrent < orderedCards.length - 1 ? orderedCards[safeCurrent + 1] : null;
   const railEntries = orderedCards.map((card, i) => ({ card, i }));
+  const atsCardIndex = orderedCards.findIndex((c) => c.cardId === "ats");
   const setupEntries = railEntries.filter(({ card }) =>
     CONFIG_CARD_IDS.has(card.cardId)
   );
@@ -1668,6 +1716,28 @@ export default function ResumeBuilder({
       <div className="grid gap-4 lg:grid-cols-[11.5rem_minmax(0,10fr)_minmax(0,11fr)] lg:items-start lg:gap-5">
         {/* Desktop rail: section navigation, completion, and save actions. */}
         <aside className="hidden lg:sticky lg:top-20 lg:block lg:self-start">
+          {/* Live ATS score — the rail's headline. Opens the score panel. */}
+          <button
+            type="button"
+            onClick={() => goToCard(atsCardIndex)}
+            className={`mb-4 flex w-full items-center gap-3 rounded-xl border p-3 text-left shadow-sm transition ${
+              activeCardId === "ats"
+                ? "border-brand-500 bg-brand-50 dark:bg-brand-500/15"
+                : "border-border bg-card hover:border-brand-300 dark:hover:border-brand-400/60"
+            }`}
+          >
+            <ScoreRing value={atsResult.overall} size={44} />
+            <span className="min-w-0">
+              <span className="block text-xs font-semibold text-foreground">
+                ATS Score
+              </span>
+              <span className="block truncate text-[11px] text-muted-foreground">
+                {atsResult.hasJobDescription
+                  ? `${atsResult.matchedCount}/${atsResult.keywords.length} keywords matched`
+                  : "Add a job description"}
+              </span>
+            </span>
+          </button>
           <nav aria-label="Resume sections" className="space-y-4">
             {renderRailGroup("Setup", setupEntries, false)}
             {renderRailGroup("Content", contentEntries, true)}
@@ -1845,6 +1915,20 @@ export default function ResumeBuilder({
               </p>
             </div>
             <div className="flex items-center gap-2">
+              {/* Live ATS score chip — jumps to the score panel. */}
+              <button
+                type="button"
+                onClick={() => {
+                  goToCard(atsCardIndex);
+                  setMobileView("edit");
+                }}
+                title="Open the ATS score panel"
+                className={`rounded-full border border-border bg-card px-2 py-0.5 text-[11px] font-bold tabular-nums shadow-sm ${scoreBandClass(
+                  atsResult.overall
+                )}`}
+              >
+                ATS {atsResult.overall}
+              </button>
               {/* Mobile zoom controls (desktop shows the sheet full-size). */}
               <div className="flex items-center gap-1 lg:hidden">
                 <button

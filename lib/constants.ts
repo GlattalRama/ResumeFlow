@@ -298,6 +298,7 @@ export const RESUME_FORM_CARDS: { cardId: string; title: string }[] = [
   { cardId: "style", title: "Font & Colors" },
   { cardId: "sections", title: "Document Sections" },
   { cardId: "version", title: "Version" },
+  { cardId: "ats", title: "ATS Score" },
   { cardId: "basics", title: "Basics" },
   { cardId: "summary", title: "Summary" },
   { cardId: "areas", title: "Areas of Expertise" },
