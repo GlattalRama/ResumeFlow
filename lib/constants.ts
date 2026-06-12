@@ -127,6 +127,19 @@ export const STATUS_STYLES: Record<ApplicationStatus, string> = {
 export const NOTE_TYPES = ["general", "recruiter", "interview", "todo"] as const;
 export const QNA_DIFFICULTIES = ["easy", "medium", "hard"] as const;
 
+// Interview Coach question groups, in display order. "General" is for manual
+// questions; the JD-based generator assigns the rest (see lib/aiInterviewCoach).
+export const INTERVIEW_QUESTION_CATEGORIES = [
+  "General",
+  "Resume Based",
+  "Job Description Based",
+  "Technical",
+  "Behavioral",
+  "HR",
+  "Gap / Risk",
+  "Salary / Notice Period",
+] as const;
+
 // ---- Template style customization ----
 
 // Font choices offered in the resume builder. `value` is a CSS font-family

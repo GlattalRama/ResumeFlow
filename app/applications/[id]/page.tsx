@@ -22,12 +22,11 @@ export default async function ApplicationDetailPage({
   const app = await getItem("applications", id);
   if (!app) notFound();
 
-  const [notes, history, documents, qna, resumes, baseResumeId] =
+  const [notes, history, documents, resumes, baseResumeId] =
     await Promise.all([
       readByApplication("notes", id),
       readByApplication("statusHistory", id),
       readByApplication("documents", id),
-      readByApplication("qna", id),
       readAll("resumes"),
       resolveBaseResumeId(),
     ]);
@@ -192,22 +191,23 @@ export default async function ApplicationDetailPage({
         />
       </Card>
 
-      {/* Interview prep link */}
+      {/* Interview Coach link */}
       <Card>
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-semibold text-foreground/80">
-              Interview preparation
+              Interview Coach
             </h2>
             <p className="text-xs text-muted-foreground">
-              {qna.length} question{qna.length === 1 ? "" : "s"} prepared
+              Prepare questions and answers for this application — grounded in
+              your resume, Work Journal, and this job description.
             </p>
           </div>
           <Link
-            href={`/interview-prep/${app.id}`}
-            className="rounded-md border border-input px-4 py-2 text-sm font-medium text-foreground/80 hover:bg-muted/50"
+            href={`/interview-coach?application=${app.id}`}
+            className="shrink-0 rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
           >
-            Open prep →
+            Prepare Interview
           </Link>
         </div>
       </Card>

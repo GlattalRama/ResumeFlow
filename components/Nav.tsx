@@ -11,7 +11,7 @@ const LINKS = [
   { href: "/resumes", label: "Resumes" },
   { href: "/applications", label: "Applications" },
   { href: "/work-journal", label: "Work Journal" },
-  { href: "/interview-prep", label: "Interview Coach" },
+  { href: "/interview-coach", label: "Interview Coach" },
   { href: "/settings", label: "AI Settings" },
 ];
 

@@ -440,6 +440,79 @@ export interface WorkJournalNote {
   updatedAt: string;
 }
 
+// ---- Interview Coach ----
+
+export type InterviewAnswerFormat = "paragraph" | "star" | "bullets";
+
+export type InterviewAnswerTone = "neutral" | "confident" | "professional";
+
+// Lifecycle of an answer: empty/being written → AI-generated → hand-edited →
+// locked in as the answer the user will actually give.
+export type InterviewEntryStatus =
+  | "draft"
+  | "aiGenerated"
+  | "userEdited"
+  | "final";
+
+// Where the question came from.
+export type InterviewQuestionSource =
+  | "manual"
+  | "jobDescription"
+  | "baseResume"
+  | "workJournal"
+  | "applicationNotes";
+
+// Grouping for generated questions (Flow B) plus "General" for manual ones.
+export type InterviewQuestionCategory =
+  | "General"
+  | "Resume Based"
+  | "Job Description Based"
+  | "Technical"
+  | "Behavioral"
+  | "HR"
+  | "Gap / Risk"
+  | "Salary / Notice Period";
+
+// One accepted AI revision of an answer. `before`/`after` are full answer
+// texts; `instruction` is the revision instruction the AI was given.
+export interface InterviewAnswerRevision {
+  id: string;
+  action: string;
+  before: string;
+  after: string;
+  instruction: string;
+  createdAt: string;
+}
+
+export interface InterviewCoachEntry {
+  id: string;
+  // Optional links to the application/resume the question was prepared for
+  // ("" when none — e.g. a generic manual question).
+  selectedApplicationId: string;
+  selectedResumeId: string;
+  question: string;
+  // The current saved answer ("" until written/generated). Never overwritten
+  // by AI without explicit user acceptance.
+  answer: string;
+  // The first AI-generated answer, kept for reference once the user edits.
+  originalAiAnswer: string;
+  answerFormat: InterviewAnswerFormat;
+  tone: InterviewAnswerTone;
+  status: InterviewEntryStatus;
+  source: InterviewQuestionSource;
+  category: InterviewQuestionCategory;
+  // Which evidence pools the last AI generation actually drew from.
+  usedBaseResume: boolean;
+  usedWorkJournal: boolean;
+  // Short references to the specific evidence the answer used (e.g. a journal
+  // note title or resume bullet) — and what was missing.
+  evidenceUsed: string[];
+  gaps: string[];
+  aiRevisionHistory: InterviewAnswerRevision[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ---- Status history ----
 
 export interface StatusHistoryEntry {
@@ -523,6 +596,7 @@ export interface Collections {
   settings: UserSettings;
   resumeSnapshots: ResumeSnapshot;
   workJournal: WorkJournalNote;
+  interviewCoach: InterviewCoachEntry;
 }
 
 export type CollectionName = keyof Collections;
