@@ -405,6 +405,41 @@ export interface QnaItem {
   createdAt: string;
 }
 
+// ---- Work Journal ----
+
+// One captured work memory: a project, achievement, or problem solved —
+// recorded while it's fresh so it can later be turned into resume bullets and
+// interview stories. All prose fields are plain text; empty string when unset.
+export interface WorkJournalNote {
+  id: string;
+  title: string;
+  company: string;
+  client: string;
+  project: string;
+  role: string;
+  // Free-form period, e.g. "Jan 2025 – Mar 2025".
+  period: string;
+  whatIDid: string;
+  toolsTechnologies: string;
+  problemSolved: string;
+  impactResult: string;
+  metrics: string;
+  tags: string[];
+  // User-curated flag: this note is polished enough to source resume content.
+  resumeReady: boolean;
+  // Where a bullet from this note was last added: resume version id and a
+  // section locator like "experience:2" (index into resumeData.experience).
+  // Empty strings when the note hasn't been pushed to a resume.
+  linkedResumeId: string;
+  linkedSection: string;
+  // AI-generated bullets the user saved on the note (after review).
+  generatedResumeBullets: string[];
+  // AI-generated STAR story the user saved on the note (after review).
+  starStory: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ---- Status history ----
 
 export interface StatusHistoryEntry {
@@ -487,6 +522,7 @@ export interface Collections {
   documents: DocumentMeta;
   settings: UserSettings;
   resumeSnapshots: ResumeSnapshot;
+  workJournal: WorkJournalNote;
 }
 
 export type CollectionName = keyof Collections;
