@@ -53,7 +53,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { resumeData, sectionChanges } = await tailorResumeData(
+    const { resumeData, sectionChanges, reasons } = await tailorResumeData(
       source.resumeData,
       {
         company: app.company,
@@ -76,7 +76,7 @@ export async function POST(req: Request) {
       sectionChanges,
     };
 
-    return NextResponse.json({ resumeData, sectionChanges, metadata });
+    return NextResponse.json({ resumeData, sectionChanges, reasons, metadata });
   } catch (err) {
     if (!access.usingUserKey && isCreditsError(err)) {
       void notifyOwnerCreditsExhausted(

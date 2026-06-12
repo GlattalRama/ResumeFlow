@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { ResumeData, TailoredResumeMetadata } from "@/lib/types";
+import type { ResumeData, ResumeVersion, TailoredResumeMetadata } from "@/lib/types";
+import type { TailorReasons } from "@/lib/aiTailor";
+import { buildTailorChanges, applyTailorChoices } from "@/lib/tailorDiff";
+import { scoreResume } from "@/lib/atsScore";
+import { TailorChangeCard, ScoreDelta } from "./TailorReview";
 import { buttonClass } from "./ui";
 
 type ResumeOption = { id: string; label: string };
@@ -10,28 +14,14 @@ type ResumeOption = { id: string; label: string };
 type TailorResponse = {
   resumeData: ResumeData;
   sectionChanges: TailoredResumeMetadata["sectionChanges"];
+  reasons?: TailorReasons;
   metadata: TailoredResumeMetadata;
 };
 
-// Visual accent per change outcome in the review summary.
-const CHANGE_BADGE: Record<string, string> = {
-  rephrased: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 ring-blue-200 dark:ring-blue-900",
-  reordered: "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 ring-indigo-200 dark:ring-indigo-900",
-  emphasized: "bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 ring-violet-200 dark:ring-violet-900",
-  unchanged: "bg-muted/50 text-muted-foreground ring-border",
-  rejected: "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 ring-amber-200 dark:ring-amber-900",
-};
-
-const SECTION_LABEL: Record<string, string> = {
-  summary: "Summary",
-  experience: "Work Experience",
-  skills: "Skills",
-  areasOfExpertise: "Areas of Expertise",
-};
-
 // Tailoring flow launched from an application: pick a source resume (defaulting
-// to the Base Resume), generate a job-tailored draft, review the section-level
-// changes, then accept (creates a new resume version) or discard.
+// to the Base Resume), generate a job-tailored draft, review each change as an
+// accept/reject diff card with a live ATS score delta, then save as a NEW
+// resume version (the source is never modified) or discard.
 export default function TailorResumeFlow({
   applicationId,
   resumeOptions,
@@ -49,6 +39,9 @@ export default function TailorResumeFlow({
     "pick"
   );
   const [result, setResult] = useState<TailorResponse | null>(null);
+  const [sourceRecord, setSourceRecord] = useState<ResumeVersion | null>(null);
+  // Keys of changes the user chose to keep original for (see lib/tailorDiff).
+  const [rejected, setRejected] = useState<Set<string>>(new Set());
   const [error, setError] = useState("");
 
   const hasResumes = resumeOptions.length > 0;
@@ -56,6 +49,8 @@ export default function TailorResumeFlow({
   function reset() {
     setPhase("pick");
     setResult(null);
+    setSourceRecord(null);
+    setRejected(new Set());
     setError("");
     setSourceId(defaultSourceId);
   }
@@ -65,23 +60,44 @@ export default function TailorResumeFlow({
     reset();
   }
 
+  function toggleRejected(key: string) {
+    setRejected((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
   async function generate() {
     if (!sourceId) return;
     setPhase("generating");
     setError("");
     try {
-      const res = await fetch("/api/ai/tailor", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sourceResumeId: sourceId, applicationId }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
+      // The source record is needed for diffing, the score baseline, and to
+      // carry template/layout settings onto the saved variant.
+      const [tailorRes, srcRes] = await Promise.all([
+        fetch("/api/ai/tailor", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sourceResumeId: sourceId, applicationId }),
+        }),
+        fetch(`/api/resumes/${sourceId}`),
+      ]);
+      const data = await tailorRes.json().catch(() => ({}));
+      if (!tailorRes.ok) {
         setError(data.error || "Tailoring failed. Please try again.");
         setPhase("pick");
         return;
       }
+      if (!srcRes.ok) {
+        setError("Could not load the source resume. Please try again.");
+        setPhase("pick");
+        return;
+      }
+      setSourceRecord((await srcRes.json()) as ResumeVersion);
       setResult(data as TailorResponse);
+      setRejected(new Set());
       setPhase("review");
     } catch {
       setError("Network error. Please try again.");
@@ -89,16 +105,43 @@ export default function TailorResumeFlow({
     }
   }
 
+  // Review derivations: the change cards, the choice-applied final data, and
+  // the before/after ATS scores (after reflects current accept/reject state).
+  const changes = useMemo(
+    () =>
+      result && sourceRecord
+        ? buildTailorChanges(sourceRecord.resumeData, result.resumeData, result.reasons)
+        : [],
+    [result, sourceRecord]
+  );
+  const finalData = useMemo(
+    () =>
+      result && sourceRecord
+        ? applyTailorChoices(sourceRecord.resumeData, result.resumeData, rejected)
+        : null,
+    [result, sourceRecord, rejected]
+  );
+  const jd = result?.metadata.jobDescriptionSnapshot ?? "";
+  const scoreBefore = useMemo(
+    () => (sourceRecord ? scoreResume(sourceRecord.resumeData, jd) : null),
+    [sourceRecord, jd]
+  );
+  const scoreAfter = useMemo(
+    () => (finalData ? scoreResume(finalData, jd) : null),
+    [finalData, jd]
+  );
+  // Guardrail rejections (the verifier kept the source because a proposal
+  // failed a fact check) — surfaced so the user knows why something is absent.
+  const guardrailNotes =
+    result?.sectionChanges.filter((c) => c.changeType === "rejected") ?? [];
+  const acceptedCount = changes.length - rejected.size;
+
   async function accept() {
-    if (!result) return;
+    if (!result || !sourceRecord || !finalData) return;
     setPhase("saving");
     setError("");
     try {
-      // Carry the source version's template + layout settings onto the new one.
-      const src = await fetch(`/api/resumes/${sourceId}`).then((r) =>
-        r.ok ? r.json() : null
-      );
-      const { metadata, resumeData } = result;
+      const { metadata } = result;
       const name =
         `${metadata.jobTitle || "Tailored"} – ${metadata.company || "role"}`.slice(
           0,
@@ -109,12 +152,12 @@ export default function TailorResumeFlow({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           versionName: name,
-          targetRole: metadata.jobTitle || src?.targetRole || "",
-          selectedTemplate: src?.selectedTemplate,
-          templateStyle: src?.templateStyle,
-          formCardState: src?.formCardState,
-          sectionState: src?.sectionState,
-          resumeData,
+          targetRole: metadata.jobTitle || sourceRecord.targetRole || "",
+          selectedTemplate: sourceRecord.selectedTemplate,
+          templateStyle: sourceRecord.templateStyle,
+          formCardState: sourceRecord.formCardState,
+          sectionState: sourceRecord.sectionState,
+          resumeData: finalData,
           origin: "tailored",
           sourceResumeId: sourceId,
           tailoredMetadata: metadata,
@@ -147,7 +190,7 @@ export default function TailorResumeFlow({
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[85vh] w-full max-w-lg overflow-auto rounded-2xl bg-card p-6 shadow-xl">
+          <div className="max-h-[85vh] w-full max-w-2xl overflow-auto rounded-2xl bg-card p-6 shadow-xl">
             <div className="mb-4 flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-bold text-foreground">
@@ -155,7 +198,8 @@ export default function TailorResumeFlow({
                 </h3>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   AI rephrases and reorders your existing content — it never
-                  invents facts. Review before saving.
+                  invents facts. Review each change; your source resume is not
+                  modified.
                 </p>
               </div>
               <button
@@ -243,81 +287,94 @@ export default function TailorResumeFlow({
               </div>
             )}
 
-            {/* Review */}
-            {(phase === "review" || phase === "saving") && result && (
-              <div className="space-y-4">
-                <div>
-                  <p className="mb-2 text-sm font-medium text-foreground/80">
-                    What changed
-                  </p>
-                  <ul className="space-y-2">
-                    {result.sectionChanges.map((c) => (
-                      <li
-                        key={c.section}
-                        className="flex items-start gap-2 text-sm"
-                      >
-                        <span
-                          className={`mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ring-1 ${
-                            CHANGE_BADGE[c.changeType] ?? CHANGE_BADGE.unchanged
-                          }`}
-                        >
-                          {c.changeType}
-                        </span>
-                        <span className="text-foreground/80">
-                          <span className="font-medium">
-                            {SECTION_LABEL[c.section] ?? c.section}:
-                          </span>{" "}
+            {/* Review: score delta + accept/reject diff cards */}
+            {(phase === "review" || phase === "saving") &&
+              result &&
+              scoreBefore &&
+              scoreAfter && (
+                <div className="space-y-4">
+                  <ScoreDelta before={scoreBefore} after={scoreAfter} />
+
+                  {changes.length === 0 ? (
+                    <div className="rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
+                      The tailoring produced no changes — your resume already
+                      reads well for this job description.
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-muted-foreground">
+                        {changes.length}{" "}
+                        {changes.length === 1 ? "proposed change" : "proposed changes"}{" "}
+                        — review each one. Rejecting keeps your original wording.
+                      </p>
+                      {changes.map((change) => (
+                        <TailorChangeCard
+                          key={change.key}
+                          change={change}
+                          rejected={rejected.has(change.key)}
+                          onToggle={() => toggleRejected(change.key)}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {guardrailNotes.length > 0 && (
+                    <div className="rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/40 p-3 text-xs leading-relaxed text-amber-800 dark:text-amber-200">
+                      <p className="font-semibold">Held back by fact checks:</p>
+                      {guardrailNotes.map((c, i) => (
+                        <p key={i} className="mt-0.5">
                           {c.note}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                        </p>
+                      ))}
+                    </div>
+                  )}
 
-                {result.resumeData.basics.summary && (
-                  <div>
-                    <p className="mb-1 text-sm font-medium text-foreground/80">
-                      Tailored summary
-                    </p>
-                    <p className="rounded-lg border border-border bg-muted/50 p-3 text-xs text-foreground/80">
-                      {result.resumeData.basics.summary}
-                    </p>
+                  {error && (
+                    <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                  )}
+
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={close}
+                      disabled={phase === "saving"}
+                      className={buttonClass("secondary")}
+                    >
+                      Discard
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setResult(null);
+                        setSourceRecord(null);
+                        setRejected(new Set());
+                        setPhase("pick");
+                      }}
+                      disabled={phase === "saving"}
+                      className={buttonClass("secondary")}
+                    >
+                      Regenerate
+                    </button>
+                    <button
+                      type="button"
+                      onClick={accept}
+                      disabled={phase === "saving" || acceptedCount === 0}
+                      title={
+                        acceptedCount === 0
+                          ? "Every change is rejected — there's nothing to save."
+                          : undefined
+                      }
+                      className={buttonClass("primary")}
+                    >
+                      {phase === "saving"
+                        ? "Saving…"
+                        : changes.length === 0
+                          ? "Save as new version"
+                          : `Save as new version (${acceptedCount} of ${changes.length})`}
+                    </button>
                   </div>
-                )}
-
-                {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
-
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={close}
-                    disabled={phase === "saving"}
-                    className={buttonClass("secondary")}
-                  >
-                    Discard
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setResult(null);
-                      setPhase("pick");
-                    }}
-                    disabled={phase === "saving"}
-                    className={buttonClass("secondary")}
-                  >
-                    Regenerate
-                  </button>
-                  <button
-                    type="button"
-                    onClick={accept}
-                    disabled={phase === "saving"}
-                    className={buttonClass("primary")}
-                  >
-                    {phase === "saving" ? "Saving…" : "Accept & save as new version"}
-                  </button>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </div>
       )}

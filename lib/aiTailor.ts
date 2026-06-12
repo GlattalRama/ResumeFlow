@@ -24,18 +24,32 @@ export interface TailorJob {
   jobDescription: string;
 }
 
+// Model-supplied one-line justifications per change, keyed for the review UI
+// ("why was this rewritten"). Advisory only — never part of verification.
+export interface TailorReasons {
+  summary?: string;
+  experience?: Record<number, string>;
+  skills?: string;
+  areasOfExpertise?: string;
+  skillCategories?: string;
+}
+
 export interface TailorResult {
   resumeData: ResumeData;
   sectionChanges: SectionChange[];
+  reasons: TailorReasons;
 }
 
 // Raw, unverified proposals from the model. Any field may be absent (that
 // section's AI call failed or was skipped) — absent ⇒ keep the source verbatim.
 export interface TailorProposals {
-  summary?: string;
-  experienceHighlights?: { index: number; highlights: string[] }[];
-  skills?: string[];
-  areasOfExpertise?: string[];
+  summary?: { text: string; reason?: string };
+  experienceHighlights?: { index: number; highlights: string[]; reason?: string }[];
+  skills?: { items: string[]; reason?: string };
+  areasOfExpertise?: { items: string[]; reason?: string };
+  // Technical Skills rows, proposed as their display labels ("Category: value");
+  // verified by identity against the source rows and mapped back.
+  skillCategories?: { items: string[]; reason?: string };
 }
 
 // ── small text utilities ──────────────────────────────────────────────────
@@ -137,11 +151,12 @@ export function assembleTailoredResume(
   proposals: TailorProposals
 ): TailorResult {
   const changes: SectionChange[] = [];
+  const reasons: TailorReasons = {};
   // Start from a verbatim copy; mutable fields are overwritten below.
   const out: ResumeData = { ...source };
 
   // SUMMARY — rephrase; reject if it introduces figures absent from the resume.
-  const proposedSummary = proposals.summary?.trim();
+  const proposedSummary = proposals.summary?.text?.trim();
   if (proposedSummary) {
     const sourceNums = numberTokens(allSourceText(source));
     const invented = [...numberTokens(proposedSummary)].filter(
@@ -158,10 +173,11 @@ export function assembleTailoredResume(
       });
     } else {
       out.basics = { ...source.basics, summary: proposedSummary };
+      if (proposals.summary?.reason) reasons.summary = proposals.summary.reason;
       changes.push({
         section: "summary",
         changeType: "rephrased",
-        note: "Rewritten to foreground job-relevant strengths.",
+        note: proposals.summary?.reason || "Rewritten to foreground job-relevant strengths.",
       });
     }
   } else {
@@ -173,12 +189,12 @@ export function assembleTailoredResume(
   // Company / role / location / dates are never sent to the model; copied as-is.
   const sourceExp = source.experience || [];
   const byIndex = new Map(
-    (proposals.experienceHighlights || []).map((e) => [e.index, e.highlights])
+    (proposals.experienceHighlights || []).map((e) => [e.index, e])
   );
   let expChanged = false;
   let expRejected = false;
   out.experience = sourceExp.map((exp, i) => {
-    const prop = byIndex.get(i);
+    const prop = byIndex.get(i)?.highlights;
     if (!prop) return exp;
     const cleaned = prop.map((h) => stripHtml(h)).filter(Boolean);
     const srcHls = exp.highlights || [];
@@ -191,6 +207,10 @@ export function assembleTailoredResume(
       return exp; // keep source highlights
     }
     expChanged = true;
+    const reason = byIndex.get(i)?.reason;
+    if (reason) {
+      reasons.experience = { ...(reasons.experience ?? {}), [i]: reason };
+    }
     return { ...exp, highlights: cleaned };
   });
   if (expChanged && expRejected) {
@@ -218,33 +238,75 @@ export function assembleTailoredResume(
   // SKILLS and AREAS OF EXPERTISE — reorder / select from existing items only.
   out.skills = verifyReorder(
     source.skills || [],
-    proposals.skills,
+    proposals.skills?.items,
     changes,
     "skills",
     "Skills"
   );
+  if (proposals.skills?.reason && out.skills !== source.skills) {
+    reasons.skills = proposals.skills.reason;
+  }
   out.areasOfExpertise = verifyReorder(
     source.areasOfExpertise || [],
-    proposals.areasOfExpertise,
+    proposals.areasOfExpertise?.items,
     changes,
     "areasOfExpertise",
     "Areas of Expertise"
   );
+  if (
+    proposals.areasOfExpertise?.reason &&
+    out.areasOfExpertise !== source.areasOfExpertise
+  ) {
+    reasons.areasOfExpertise = proposals.areasOfExpertise.reason;
+  }
 
-  return { resumeData: out, sectionChanges: changes };
+  // TECHNICAL SKILLS rows — reorder/select by display-label identity, then map
+  // the verified labels back to the original row objects.
+  {
+    const srcRows = source.skillCategories || [];
+    const labels = srcRows.map(skillRowLabel);
+    const verified = verifyReorder(
+      labels,
+      proposals.skillCategories?.items,
+      changes,
+      "skillCategories",
+      "Technical Skills"
+    );
+    const rowByLabel = new Map(srcRows.map((r) => [norm(skillRowLabel(r)), r]));
+    out.skillCategories =
+      verified === labels ? srcRows : verified.map((l) => rowByLabel.get(norm(l))!);
+    if (proposals.skillCategories?.reason && verified !== labels) {
+      reasons.skillCategories = proposals.skillCategories.reason;
+    }
+  }
+
+  return { resumeData: out, sectionChanges: changes, reasons };
+}
+
+// Display label used as the identity of a Technical Skills row when sending it
+// to the model and verifying the reorder proposal.
+export function skillRowLabel(row: { category: string; value: string }): string {
+  return row.category.trim() ? `${row.category.trim()}: ${row.value}` : row.value;
 }
 
 // ── AI proposal generation ────────────────────────────────────────────────
 
-const summarySchema = jsonSchema<{ summary: string }>({
+const summarySchema = jsonSchema<{ summary: string; reason: string }>({
   type: "object",
-  properties: { summary: { type: "string" } },
-  required: ["summary"],
+  properties: {
+    summary: { type: "string" },
+    reason: {
+      type: "string",
+      description:
+        "One short sentence explaining how the rewrite targets the job (e.g. which JD requirement it foregrounds).",
+    },
+  },
+  required: ["summary", "reason"],
   additionalProperties: false,
 });
 
 const highlightsSchema = jsonSchema<{
-  entries: { index: number; highlights: string[] }[];
+  entries: { index: number; highlights: string[]; reason: string }[];
 }>({
   type: "object",
   properties: {
@@ -255,8 +317,13 @@ const highlightsSchema = jsonSchema<{
         properties: {
           index: { type: "number" },
           highlights: { type: "array", items: { type: "string" } },
+          reason: {
+            type: "string",
+            description:
+              "One short sentence: which job requirement these rewritten bullets now speak to.",
+          },
         },
-        required: ["index", "highlights"],
+        required: ["index", "highlights", "reason"],
         additionalProperties: false,
       },
     },
@@ -265,10 +332,17 @@ const highlightsSchema = jsonSchema<{
   additionalProperties: false,
 });
 
-const listSchema = jsonSchema<{ items: string[] }>({
+const listSchema = jsonSchema<{ items: string[]; reason: string }>({
   type: "object",
-  properties: { items: { type: "array", items: { type: "string" } } },
-  required: ["items"],
+  properties: {
+    items: { type: "array", items: { type: "string" } },
+    reason: {
+      type: "string",
+      description:
+        "One short sentence explaining the reordering/selection against the job.",
+    },
+  },
+  required: ["items", "reason"],
   additionalProperties: false,
 });
 
@@ -293,21 +367,21 @@ export async function tailorResumeData(
 ): Promise<TailorResult> {
   const header = jobHeader(job);
 
-  const summaryCall = async (): Promise<string | undefined> => {
+  const summaryCall = async (): Promise<TailorProposals["summary"]> => {
     if (!source.basics.summary?.trim()) return undefined;
     const { object } = await generateObject({
       model,
       schema: summarySchema,
       system:
-        "You are a professional resume writer. Rewrite the candidate's professional summary to target the job below: concise (2-3 sentences), active voice, leading with the strengths most relevant to this role. Do NOT invent facts or figures not present in the original. Return PLAIN TEXT only.",
+        "You are a professional resume writer. Rewrite the candidate's professional summary to target the job below: concise (2-3 sentences), active voice, leading with the strengths most relevant to this role. Do NOT invent facts or figures not present in the original. Return PLAIN TEXT only, plus a one-sentence reason tying the rewrite to the job description.",
       prompt: `${header}\n\nCurrent summary:\n${stripHtml(source.basics.summary)}`,
-      maxOutputTokens: 400,
+      maxOutputTokens: 500,
     });
-    return object.summary;
+    return { text: object.summary, reason: object.reason };
   };
 
   const highlightsCall = async (): Promise<
-    { index: number; highlights: string[] }[] | undefined
+    TailorProposals["experienceHighlights"]
   > => {
     const exp = source.experience || [];
     const entries = exp
@@ -323,9 +397,9 @@ export async function tailorResumeData(
       model,
       schema: highlightsSchema,
       system:
-        "You are a professional resume writer. For each work-experience entry, rewrite its highlight bullets to emphasize relevance to the job below. Rules: keep the SAME `index`; return NO MORE bullets than the entry started with; rephrase only — do NOT invent metrics, tools, employers, or achievements that aren't in the original bullets; one achievement per string, no leading dashes. Return plain text.",
+        "You are a professional resume writer. For each work-experience entry, rewrite its highlight bullets to emphasize relevance to the job below. Rules: keep the SAME `index`; return NO MORE bullets than the entry started with; rephrase only — do NOT invent metrics, tools, employers, or achievements that aren't in the original bullets; one achievement per string, no leading dashes. Per entry, also give a one-sentence reason tying the rewrite to the job description. Return plain text.",
       prompt: `${header}\n\nEntries (JSON):\n${JSON.stringify(entries)}`,
-      maxOutputTokens: 1200,
+      maxOutputTokens: 1600,
     });
     return object.entries;
   };
@@ -333,16 +407,16 @@ export async function tailorResumeData(
   const listCall = async (
     items: string[],
     kind: string
-  ): Promise<string[] | undefined> => {
+  ): Promise<{ items: string[]; reason?: string } | undefined> => {
     if (!items || items.length === 0) return undefined;
     const { object } = await generateObject({
       model,
       schema: listSchema,
-      system: `You are a professional resume writer. From the candidate's ${kind} list, REORDER and optionally drop items so the most relevant to the job below come first. You MUST NOT add any item that is not already in the list, and MUST NOT reword items. Return the items exactly as given (same spelling), reordered/selected.`,
+      system: `You are a professional resume writer. From the candidate's ${kind} list, REORDER and optionally drop items so the most relevant to the job below come first. You MUST NOT add any item that is not already in the list, and MUST NOT reword items. Return the items exactly as given (same spelling), reordered/selected, plus a one-sentence reason tying the ordering to the job description.`,
       prompt: `${header}\n\n${kind} (JSON array):\n${JSON.stringify(items)}`,
-      maxOutputTokens: 500,
+      maxOutputTokens: 600,
     });
-    return object.items;
+    return { items: object.items, reason: object.reason };
   };
 
   // Failure-isolate each section: a thrown/failed call yields `undefined`, which
@@ -356,12 +430,18 @@ export async function tailorResumeData(
     }
   };
 
-  const [summary, experienceHighlights, skills, areasOfExpertise] =
+  const [summary, experienceHighlights, skills, areasOfExpertise, skillCategories] =
     await Promise.all([
       settle(summaryCall()),
       settle(highlightsCall()),
       settle(listCall(source.skills || [], "skills")),
       settle(listCall(source.areasOfExpertise || [], "areas of expertise")),
+      settle(
+        listCall(
+          (source.skillCategories || []).map(skillRowLabel),
+          "technical skill rows"
+        )
+      ),
     ]);
 
   return assembleTailoredResume(source, {
@@ -369,5 +449,6 @@ export async function tailorResumeData(
     experienceHighlights,
     skills,
     areasOfExpertise,
+    skillCategories,
   });
 }
