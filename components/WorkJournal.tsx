@@ -94,6 +94,7 @@ export default function WorkJournal({
   resumes: ResumePickerOption[];
 }) {
   const t = useTranslations("workJournal");
+  const locale = useLocale();
   const [notes, setNotes] = useState(initialNotes);
   const [query, setQuery] = useState("");
   const [tagFilter, setTagFilter] = useState<string | null>(null);
@@ -172,6 +173,26 @@ export default function WorkJournal({
   const editingNote =
     formTarget && formTarget !== "new" ? notes.find((n) => n.id === formTarget) : null;
 
+  // Seed a new entry from the most recently touched note so logging several
+  // achievements under the same role/engagement doesn't mean retyping the
+  // context. The resume schema has no client/project, so a prior note is the
+  // only source carrying all four. Period defaults to the current month/year
+  // and stays editable.
+  const newEntryInitial = useMemo<NoteFormValues>(() => {
+    const recent = notes.reduce<WorkJournalNote | null>(
+      (best, n) => (!best || n.updatedAt.localeCompare(best.updatedAt) > 0 ? n : best),
+      null
+    );
+    return {
+      ...EMPTY_FORM,
+      role: recent?.role ?? "",
+      company: recent?.company ?? "",
+      client: recent?.client ?? "",
+      project: recent?.project ?? "",
+      period: new Date().toLocaleDateString(locale, { month: "short", year: "numeric" }),
+    };
+  }, [notes, locale]);
+
   return (
     <div>
       <PageHeader
@@ -228,7 +249,7 @@ export default function WorkJournal({
         <div className="mb-4">
           <NoteForm
             key={formTarget}
-            initial={editingNote ? toForm(editingNote) : EMPTY_FORM}
+            initial={editingNote ? toForm(editingNote) : newEntryInitial}
             heading={editingNote ? t("editEntry") : t("newEntryHeading")}
             onCancel={() => setFormTarget(null)}
             onSave={async (values) => {
