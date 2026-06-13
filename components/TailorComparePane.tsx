@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import type {
   ResumeData,
   ResumeSectionState,
@@ -21,8 +22,8 @@ export default function TailorComparePane({
   templateStyle,
   sectionState,
   changedKeys,
-  labelLeft = "Original",
-  labelRight = "Tailored — accepted changes outlined",
+  labelLeft,
+  labelRight,
 }: {
   source: ResumeData;
   tailored: ResumeData;
@@ -33,6 +34,7 @@ export default function TailorComparePane({
   labelLeft?: string;
   labelRight?: string;
 }) {
+  const t = useTranslations("ai");
   const tailoredRef = useRef<HTMLDivElement>(null);
   const template = normalizeTemplateId(selectedTemplate);
   const margins = resolveTemplateStyle(templateStyle).pageMargins;
@@ -90,8 +92,8 @@ export default function TailorComparePane({
 
   return (
     <div className="grid gap-3 md:grid-cols-2">
-      {pane(labelLeft, source)}
-      {pane(labelRight, tailored, tailoredRef)}
+      {pane(labelLeft ?? t("tailor.original"), source)}
+      {pane(labelRight ?? t("tailor.tailoredOutlined"), tailored, tailoredRef)}
     </div>
   );
 }

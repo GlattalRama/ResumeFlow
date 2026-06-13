@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import type { WorkJournalNote } from "@/lib/types";
 import { Card, EmptyState, PageHeader, buttonClass } from "@/components/ui";
 
@@ -92,6 +93,7 @@ export default function WorkJournal({
   initialNotes: WorkJournalNote[];
   resumes: ResumePickerOption[];
 }) {
+  const t = useTranslations("workJournal");
   const [notes, setNotes] = useState(initialNotes);
   const [query, setQuery] = useState("");
   const [tagFilter, setTagFilter] = useState<string | null>(null);
@@ -144,7 +146,7 @@ export default function WorkJournal({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formPayload(values)),
     });
-    if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error || "Save failed");
+    if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error || t("saveFailed"));
     const created: WorkJournalNote = await res.json();
     setNotes((prev) => [created, ...prev]);
     setFormTarget(null);
@@ -157,12 +159,12 @@ export default function WorkJournal({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patch),
     });
-    if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error || "Save failed");
+    if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error || t("saveFailed"));
     replaceNote(await res.json());
   }
 
   async function deleteNote(id: string) {
-    if (!window.confirm("Delete this journal entry? This can't be undone.")) return;
+    if (!window.confirm(t("confirmDelete"))) return;
     const res = await fetch(`/api/work-journal/${id}`, { method: "DELETE" });
     if (res.ok) setNotes((prev) => prev.filter((n) => n.id !== id));
   }
@@ -173,15 +175,15 @@ export default function WorkJournal({
   return (
     <div>
       <PageHeader
-        title="Work Journal"
-        subtitle="Capture projects, achievements, and STAR stories while they're fresh — then turn them into resume bullets."
+        title={t("title")}
+        subtitle={t("subtitle")}
         action={
           <button
             type="button"
             className={buttonClass("primary")}
             onClick={() => setFormTarget("new")}
           >
-            + New entry
+            {t("newEntry")}
           </button>
         }
       />
@@ -191,7 +193,7 @@ export default function WorkJournal({
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search entries…"
+          placeholder={t("searchPlaceholder")}
           className={`${inputClass} max-w-xs`}
         />
         <button
@@ -203,7 +205,7 @@ export default function WorkJournal({
               : "border-input text-muted-foreground hover:bg-accent"
           }`}
         >
-          ✓ Resume-ready
+          {t("resumeReadyCheck")}
         </button>
         {allTags.map((t) => (
           <button
@@ -227,7 +229,7 @@ export default function WorkJournal({
           <NoteForm
             key={formTarget}
             initial={editingNote ? toForm(editingNote) : EMPTY_FORM}
-            heading={editingNote ? "Edit entry" : "New entry"}
+            heading={editingNote ? t("editEntry") : t("newEntryHeading")}
             onCancel={() => setFormTarget(null)}
             onSave={async (values) => {
               if (editingNote) {
@@ -244,12 +246,8 @@ export default function WorkJournal({
       {/* List */}
       {visible.length === 0 ? (
         <EmptyState
-          title={notes.length === 0 ? "No journal entries yet" : "No entries match"}
-          hint={
-            notes.length === 0
-              ? "Write down what you worked on — the project, the problem, the impact — before you forget the details."
-              : "Try a different search or clear the filters."
-          }
+          title={notes.length === 0 ? t("emptyTitle") : t("noMatchTitle")}
+          hint={notes.length === 0 ? t("emptyHint") : t("noMatchHint")}
         />
       ) : (
         <div className="space-y-3">
@@ -287,6 +285,7 @@ function NoteForm({
   onSave: (values: NoteFormValues) => Promise<void>;
   onCancel: () => void;
 }) {
+  const t = useTranslations("workJournal");
   const [values, setValues] = useState(initial);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -297,7 +296,7 @@ function NoteForm({
 
   async function submit() {
     if (!values.title.trim()) {
-      setError("Give the entry a title.");
+      setError(t("errorNoTitle"));
       return;
     }
     setBusy(true);
@@ -305,7 +304,7 @@ function NoteForm({
     try {
       await onSave(values);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Save failed");
+      setError(err instanceof Error ? err.message : t("saveFailed"));
     } finally {
       setBusy(false);
     }
@@ -340,23 +339,23 @@ function NoteForm({
     <Card>
       <h2 className="mb-4 font-semibold text-foreground">{heading}</h2>
       <div className="grid gap-4 sm:grid-cols-2">
-        {text("title", "Title *", "e.g. Migrated batch jobs to cloud scheduler")}
-        {text("role", "Your role", "e.g. Senior Mainframe Developer")}
-        {text("company", "Company")}
-        {text("client", "Client")}
-        {text("project", "Project")}
-        {text("period", "Period", "e.g. Jan 2026 – Mar 2026")}
+        {text("title", t("labelTitle"), t("phTitle"))}
+        {text("role", t("labelRole"), t("phRole"))}
+        {text("company", t("labelCompany"))}
+        {text("client", t("labelClient"))}
+        {text("project", t("labelProject"))}
+        {text("period", t("labelPeriod"), t("phPeriod"))}
       </div>
       <div className="mt-4 space-y-4">
-        {area("whatIDid", "What I did", "The work itself — be specific.")}
-        {area("problemSolved", "Problem solved", "What was broken, slow, risky, or missing?")}
-        {area("impactResult", "Impact / result", "What changed because of your work?")}
+        {area("whatIDid", t("labelWhatIDid"), t("phWhatIDid"))}
+        {area("problemSolved", t("labelProblemSolved"), t("phProblemSolved"))}
+        {area("impactResult", t("labelImpactResult"), t("phImpactResult"))}
         <div className="grid gap-4 sm:grid-cols-2">
-          {text("toolsTechnologies", "Tools & technologies", "e.g. COBOL, JCL, DB2, AWS")}
-          {text("metrics", "Metrics", "e.g. 40% faster, $200k saved, 0 defects")}
+          {text("toolsTechnologies", t("labelTools"), t("phTools"))}
+          {text("metrics", t("labelMetrics"), t("phMetrics"))}
         </div>
         <div className="grid items-end gap-4 sm:grid-cols-2">
-          {text("tags", "Tags (comma-separated)", "e.g. migration, leadership")}
+          {text("tags", t("labelTags"), t("phTags"))}
           <label className="flex items-center gap-2 text-sm text-foreground/80">
             <input
               type="checkbox"
@@ -364,7 +363,7 @@ function NoteForm({
               onChange={(e) => set("resumeReady", e.target.checked)}
               className="h-4 w-4 rounded border-input"
             />
-            Resume-ready
+            {t("resumeReady")}
           </label>
         </div>
       </div>
@@ -373,10 +372,10 @@ function NoteForm({
       )}
       <div className="mt-4 flex gap-2">
         <button type="button" onClick={submit} disabled={busy} className={buttonClass("primary")}>
-          {busy ? "Saving…" : "Save entry"}
+          {busy ? t("saving") : t("saveEntry")}
         </button>
         <button type="button" onClick={onCancel} className={buttonClass("secondary")}>
-          Cancel
+          {t("cancel")}
         </button>
       </div>
     </Card>
@@ -402,6 +401,8 @@ function NoteCard({
   onDelete: () => void;
   onPatch: (patch: Record<string, unknown>) => Promise<void>;
 }) {
+  const t = useTranslations("workJournal");
+  const locale = useLocale();
   const [aiBusy, setAiBusy] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [preview, setPreview] = useState<AiPreview | null>(null);
@@ -421,12 +422,12 @@ function NoteCard({
         body: JSON.stringify({ noteId: note.id, action }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || "AI request failed");
+      if (!res.ok) throw new Error(data?.error || t("aiRequestFailed"));
       if (action === "bullets") setPreview({ kind: "bullets", bullets: data.bullets });
       else if (action === "improve") setPreview({ kind: "improve", fields: data.fields });
       else setPreview({ kind: "star", star: data.star });
     } catch (err) {
-      setAiError(err instanceof Error ? err.message : "AI request failed");
+      setAiError(err instanceof Error ? err.message : t("aiRequestFailed"));
     } finally {
       setAiBusy(null);
     }
@@ -475,7 +476,7 @@ function NoteCard({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            title={note.resumeReady ? "Marked resume-ready" : "Mark as resume-ready"}
+            title={note.resumeReady ? t("titleMarkedReady") : t("titleMarkReady")}
             onClick={() => onPatch({ resumeReady: !note.resumeReady })}
             className={`rounded-full border px-2.5 py-0.5 text-xs font-medium transition ${
               note.resumeReady
@@ -483,7 +484,7 @@ function NoteCard({
                 : "border-input text-muted-foreground hover:bg-accent"
             }`}
           >
-            {note.resumeReady ? "✓ Resume-ready" : "Mark ready"}
+            {note.resumeReady ? t("resumeReadyCheck") : t("markReady")}
           </button>
           <button
             type="button"
@@ -491,24 +492,24 @@ function NoteCard({
             aria-expanded={expanded}
             className="rounded-md border border-input px-2 py-0.5 text-xs text-muted-foreground hover:bg-accent"
           >
-            {expanded ? "Collapse" : "Open"}
+            {expanded ? t("collapse") : t("open")}
           </button>
         </div>
       </div>
 
       {expanded && (
         <div className="mt-4 space-y-4 border-t border-border pt-4">
-          <NoteField label="What I did" value={note.whatIDid} />
-          <NoteField label="Problem solved" value={note.problemSolved} />
-          <NoteField label="Impact / result" value={note.impactResult} />
-          <NoteField label="Tools & technologies" value={note.toolsTechnologies} />
-          <NoteField label="Metrics" value={note.metrics} />
-          {note.starStory && <NoteField label="STAR story" value={note.starStory} />}
+          <NoteField label={t("labelWhatIDid")} value={note.whatIDid} />
+          <NoteField label={t("labelProblemSolved")} value={note.problemSolved} />
+          <NoteField label={t("labelImpactResult")} value={note.impactResult} />
+          <NoteField label={t("labelTools")} value={note.toolsTechnologies} />
+          <NoteField label={t("labelMetrics")} value={note.metrics} />
+          {note.starStory && <NoteField label={t("labelStarStory")} value={note.starStory} />}
 
           {/* Saved bullets + add-to-resume */}
           {note.generatedResumeBullets.length > 0 && (
             <div>
-              <p className={labelClass}>Resume bullets</p>
+              <p className={labelClass}>{t("resumeBullets")}</p>
               <ul className="space-y-2">
                 {note.generatedResumeBullets.map((b, i) => (
                   <BulletRow key={`${i}-${b}`} noteId={note.id} bullet={b} resumes={resumes} />
@@ -525,7 +526,7 @@ function NoteCard({
               onClick={() => runAi("bullets")}
               className={buttonClass("secondary")}
             >
-              {aiBusy === "bullets" ? "Generating…" : "✦ Generate resume bullets"}
+              {aiBusy === "bullets" ? t("generating") : t("generateBullets")}
             </button>
             <button
               type="button"
@@ -533,7 +534,7 @@ function NoteCard({
               onClick={() => runAi("improve")}
               className={buttonClass("secondary")}
             >
-              {aiBusy === "improve" ? "Improving…" : "✦ Improve wording"}
+              {aiBusy === "improve" ? t("improving") : t("improveWording")}
             </button>
             <button
               type="button"
@@ -541,14 +542,14 @@ function NoteCard({
               onClick={() => runAi("star")}
               className={buttonClass("secondary")}
             >
-              {aiBusy === "star" ? "Writing…" : "✦ Generate STAR story"}
+              {aiBusy === "star" ? t("writing") : t("generateStar")}
             </button>
             <span className="flex-1" />
             <button type="button" onClick={onEdit} className={buttonClass("secondary")}>
-              Edit
+              {t("edit")}
             </button>
             <button type="button" onClick={onDelete} className={buttonClass("danger")}>
-              Delete
+              {t("delete")}
             </button>
           </div>
 
@@ -560,9 +561,9 @@ function NoteCard({
           {preview && (
             <div className="rounded-lg border border-brand-200 bg-brand-50/50 p-4 dark:border-brand-800 dark:bg-brand-500/10">
               <p className="mb-2 text-sm font-semibold text-foreground">
-                {preview.kind === "bullets" && "Suggested resume bullets"}
-                {preview.kind === "improve" && "Improved wording"}
-                {preview.kind === "star" && "STAR story"}
+                {preview.kind === "bullets" && t("suggestedBullets")}
+                {preview.kind === "improve" && t("improvedWording")}
+                {preview.kind === "star" && t("labelStarStory")}
               </p>
               {preview.kind === "bullets" && (
                 <ul className="list-disc space-y-1 pl-5 text-sm text-foreground">
@@ -575,9 +576,9 @@ function NoteCard({
                 <div className="space-y-3 text-sm">
                   {(
                     [
-                      ["What I did", note.whatIDid, preview.fields.whatIDid],
-                      ["Problem solved", note.problemSolved, preview.fields.problemSolved],
-                      ["Impact / result", note.impactResult, preview.fields.impactResult],
+                      [t("labelWhatIDid"), note.whatIDid, preview.fields.whatIDid],
+                      [t("labelProblemSolved"), note.problemSolved, preview.fields.problemSolved],
+                      [t("labelImpactResult"), note.impactResult, preview.fields.impactResult],
                     ] as const
                   )
                     .filter(([, before, after]) => before && after && before !== after)
@@ -594,33 +595,33 @@ function NoteCard({
               )}
               {preview.kind === "star" && (
                 <div className="space-y-2 text-sm text-foreground">
-                  <p><span className="font-medium">Situation:</span> {preview.star.situation}</p>
-                  <p><span className="font-medium">Task:</span> {preview.star.task}</p>
-                  <p><span className="font-medium">Action:</span> {preview.star.action}</p>
-                  <p><span className="font-medium">Result:</span> {preview.star.result}</p>
+                  <p><span className="font-medium">{t("starSituation")}</span> {preview.star.situation}</p>
+                  <p><span className="font-medium">{t("starTask")}</span> {preview.star.task}</p>
+                  <p><span className="font-medium">{t("starAction")}</span> {preview.star.action}</p>
+                  <p><span className="font-medium">{t("starResult")}</span> {preview.star.result}</p>
                 </div>
               )}
               <div className="mt-3 flex gap-2">
                 <button type="button" onClick={acceptPreview} className={buttonClass("primary")}>
-                  {preview.kind === "bullets" ? "Save bullets to note" : "Accept"}
+                  {preview.kind === "bullets" ? t("saveBulletsToNote") : t("accept")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setPreview(null)}
                   className={buttonClass("secondary")}
                 >
-                  Dismiss
+                  {t("dismiss")}
                 </button>
               </div>
             </div>
           )}
 
           <p className="text-xs text-muted-foreground">
-            Updated {new Date(note.updatedAt).toLocaleDateString()}
+            {t("updatedOn", { date: new Date(note.updatedAt).toLocaleDateString(locale) })}
             {note.linkedResumeId &&
-              ` · bullet added to ${
-                resumes.find((r) => r.id === note.linkedResumeId)?.name ?? "a resume"
-              }`}
+              ` · ${t("bulletAddedTo", {
+                name: resumes.find((r) => r.id === note.linkedResumeId)?.name ?? t("fallbackResume"),
+              })}`}
           </p>
         </div>
       )}
@@ -648,6 +649,7 @@ function BulletRow({
   bullet: string;
   resumes: ResumePickerOption[];
 }) {
+  const t = useTranslations("workJournal");
   const base = resumes.find((r) => r.isBase);
   const [open, setOpen] = useState(false);
   const [resumeId, setResumeId] = useState(base?.id ?? resumes[0]?.id ?? "");
@@ -667,13 +669,13 @@ function BulletRow({
         body: JSON.stringify({ noteId, resumeId, experienceIndex: expIndex, bullet }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || "Could not add bullet");
-      setStatus({ ok: true, message: `Added to ${selected?.name ?? "resume"}.` });
+      if (!res.ok) throw new Error(data?.error || t("couldNotAddBullet"));
+      setStatus({ ok: true, message: t("addedTo", { name: selected?.name ?? t("resumeFallback") }) });
       setOpen(false);
     } catch (err) {
       setStatus({
         ok: false,
-        message: err instanceof Error ? err.message : "Could not add bullet",
+        message: err instanceof Error ? err.message : t("couldNotAddBullet"),
       });
     } finally {
       setBusy(false);
@@ -690,7 +692,7 @@ function BulletRow({
             onClick={() => navigator.clipboard?.writeText(bullet)}
             className="rounded-md border border-input px-2 py-0.5 text-xs text-muted-foreground hover:bg-accent"
           >
-            Copy
+            {t("copy")}
           </button>
           <button
             type="button"
@@ -698,7 +700,7 @@ function BulletRow({
             disabled={resumes.length === 0}
             className="rounded-md border border-input px-2 py-0.5 text-xs text-muted-foreground hover:bg-accent disabled:opacity-50"
           >
-            Add to resume…
+            {t("addToResume")}
           </button>
         </div>
       </div>
@@ -715,13 +717,13 @@ function BulletRow({
             {resumes.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.name}
-                {r.isBase ? " (Base Resume)" : ""}
+                {r.isBase ? ` ${t("baseResumeSuffix")}` : ""}
               </option>
             ))}
           </select>
           {selected.experience.length === 0 ? (
             <span className="text-xs text-muted-foreground">
-              That resume has no experience entries.
+              {t("noExperienceEntries")}
             </span>
           ) : (
             <>
@@ -742,7 +744,7 @@ function BulletRow({
                 disabled={busy}
                 className={buttonClass("primary")}
               >
-                {busy ? "Adding…" : "Add bullet"}
+                {busy ? t("adding") : t("addBullet")}
               </button>
             </>
           )}

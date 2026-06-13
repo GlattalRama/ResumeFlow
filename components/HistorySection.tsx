@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import type { ResumeSnapshot, ResumeVersion } from "@/lib/types";
 import { buildTailorChanges } from "@/lib/tailorDiff";
 import TailorComparePane from "./TailorComparePane";
@@ -13,7 +14,8 @@ import { buttonClass } from "./ui";
 // always reversible.
 
 // Coarse "what differs vs current" summary per snapshot row. JSON comparison
-// per content group — cheap and complete.
+// per content group — cheap and complete. Returns translation keys under
+// "resumeDetail.history.groups" for display.
 function changedGroups(snap: ResumeSnapshot, current: ResumeVersion): string[] {
   const pick = (
     v: Pick<
@@ -26,20 +28,20 @@ function changedGroups(snap: ResumeSnapshot, current: ResumeVersion): string[] {
       | "resumeData"
     >
   ): [string, unknown][] => [
-    ["Basics & summary", v.resumeData.basics],
-    ["Areas of expertise", v.resumeData.areasOfExpertise],
-    ["Experience", v.resumeData.experience],
-    ["Education", v.resumeData.education],
-    ["Projects", v.resumeData.projects],
-    ["Skills", [v.resumeData.skillCategories, v.resumeData.skills]],
-    ["Certifications", v.resumeData.certifications],
-    ["Languages", v.resumeData.languages],
-    ["Custom sections", v.resumeData.customSections],
+    ["basicsSummary", v.resumeData.basics],
+    ["areasOfExpertise", v.resumeData.areasOfExpertise],
+    ["experience", v.resumeData.experience],
+    ["education", v.resumeData.education],
+    ["projects", v.resumeData.projects],
+    ["skills", [v.resumeData.skillCategories, v.resumeData.skills]],
+    ["certifications", v.resumeData.certifications],
+    ["languages", v.resumeData.languages],
+    ["customSections", v.resumeData.customSections],
     [
-      "Template & style",
+      "templateStyle",
       [v.selectedTemplate, v.templateStyle ?? null, v.sectionState ?? null],
     ],
-    ["Name / target role", [v.versionName, v.targetRole]],
+    ["nameTargetRole", [v.versionName, v.targetRole]],
   ];
   const a = pick(snap);
   const b = pick(current);
@@ -55,6 +57,8 @@ export default function HistorySection({
   resume: ResumeVersion;
   snapshots: ResumeSnapshot[];
 }) {
+  const t = useTranslations("resumeDetail.history");
+  const locale = useLocale();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [compareId, setCompareId] = useState<string | null>(null);
@@ -64,12 +68,8 @@ export default function HistorySection({
   const comparing = snapshots.find((s) => s.id === compareId) ?? null;
 
   async function restore(snapshot: ResumeSnapshot) {
-    const when = new Date(snapshot.savedAt).toLocaleString();
-    if (
-      !window.confirm(
-        `Restore the resume to its state from ${when}? Your current state is snapshotted first, so you can undo this from history.`
-      )
-    ) {
+    const when = new Date(snapshot.savedAt).toLocaleString(locale);
+    if (!window.confirm(t("restoreConfirm", { when }))) {
       return;
     }
     setBusyId(snapshot.id);
@@ -82,13 +82,13 @@ export default function HistorySection({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error || "Restore failed.");
+        setError(data.error || t("restoreFailed"));
         return;
       }
       setCompareId(null);
       router.refresh();
     } catch {
-      setError("Network error during restore.");
+      setError(t("restoreNetworkError"));
     } finally {
       setBusyId(null);
     }
@@ -103,7 +103,7 @@ export default function HistorySection({
         className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left"
       >
         <span className="text-sm font-semibold text-foreground/80">
-          Version history{" "}
+          {t("title")}{" "}
           <span className="font-normal text-muted-foreground/70">
             ({snapshots.length})
           </span>
@@ -121,8 +121,7 @@ export default function HistorySection({
         <div className="border-t border-border px-4 py-3">
           {snapshots.length === 0 ? (
             <p className="text-xs text-muted-foreground">
-              No snapshots yet. They're captured automatically as you edit — at
-              most one every 10 minutes — and before every restore.
+              {t("empty")}
             </p>
           ) : (
             <ul className="space-y-2">
@@ -136,17 +135,21 @@ export default function HistorySection({
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground/80">
-                          {new Date(snap.savedAt).toLocaleString()}
+                          {new Date(snap.savedAt).toLocaleString(locale)}
                           {snap.reason === "pre-restore" && (
                             <span className="ml-1.5 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-900">
-                              before restore
+                              {t("beforeRestore")}
                             </span>
                           )}
                         </p>
                         <p className="truncate text-xs text-muted-foreground">
                           {groups.length === 0
-                            ? "Identical to current"
-                            : `Differs in: ${groups.join(", ")}`}
+                            ? t("identicalToCurrent")
+                            : t("differsIn", {
+                                groups: groups
+                                  .map((key) => t(`groups.${key}`))
+                                  .join(", "),
+                              })}
                         </p>
                       </div>
                       <div className="flex shrink-0 gap-2">
@@ -158,7 +161,7 @@ export default function HistorySection({
                           disabled={groups.length === 0}
                           className="rounded-md border border-input px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/50 disabled:opacity-40"
                         >
-                          {compareId === snap.id ? "Hide compare" : "Compare"}
+                          {compareId === snap.id ? t("hideCompare") : t("compare")}
                         </button>
                         <button
                           type="button"
@@ -166,7 +169,7 @@ export default function HistorySection({
                           disabled={busyId !== null || groups.length === 0}
                           className="rounded-md border border-brand-200 dark:border-brand-500/40 bg-brand-50 dark:bg-brand-500/15 px-2.5 py-1 text-xs font-medium text-brand-700 dark:text-brand-300 hover:bg-brand-100 dark:hover:bg-brand-500/20 disabled:opacity-40"
                         >
-                          {busyId === snap.id ? "Restoring…" : "Restore"}
+                          {busyId === snap.id ? t("restoring") : t("restore")}
                         </button>
                       </div>
                     </div>
@@ -186,9 +189,9 @@ export default function HistorySection({
         <div className="border-t border-border px-4 py-3">
           <div className="mb-2 flex items-center justify-between gap-2">
             <p className="text-xs font-medium text-muted-foreground">
-              Comparing snapshot from{" "}
-              {new Date(comparing.savedAt).toLocaleString()} with the current
-              state
+              {t("comparingFrom", {
+                when: new Date(comparing.savedAt).toLocaleString(locale),
+              })}
             </p>
             <button
               type="button"
@@ -196,7 +199,7 @@ export default function HistorySection({
               disabled={busyId !== null}
               className={buttonClass("primary")}
             >
-              {busyId === comparing.id ? "Restoring…" : "Restore this snapshot"}
+              {busyId === comparing.id ? t("restoring") : t("restoreThisSnapshot")}
             </button>
           </div>
           <TailorComparePane
@@ -210,8 +213,10 @@ export default function HistorySection({
               resume.resumeData,
               undefined
             ).map((c) => c.key)}
-            labelLeft={`Snapshot — ${new Date(comparing.savedAt).toLocaleDateString()}`}
-            labelRight="Current — differences outlined"
+            labelLeft={t("labelSnapshot", {
+              date: new Date(comparing.savedAt).toLocaleDateString(locale),
+            })}
+            labelRight={t("labelCurrent")}
           />
         </div>
       )}

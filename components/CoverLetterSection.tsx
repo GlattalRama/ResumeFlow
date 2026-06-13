@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import type { CoverLetterMeta } from "@/lib/types";
 import { COVER_LETTER_TONES } from "@/lib/aiCoverLetter";
@@ -31,6 +32,7 @@ export default function CoverLetterSection({
   defaultSourceId: string;
 }) {
   const router = useRouter();
+  const t = useTranslations("ai");
   const [letter, setLetter] = useState(initialLetter);
   const [meta, setMeta] = useState<CoverLetterMeta | null>(initialMeta);
   const [savedLetter, setSavedLetter] = useState(initialLetter);
@@ -60,14 +62,14 @@ export default function CoverLetterSection({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error || "Generation failed. Please try again.");
+        setError(data.error || t("coverLetter.errors.generation"));
         return;
       }
       setLetter(data.letter);
       setMeta(data.meta);
       setWarnings(data.unverifiedFigures ?? []);
     } catch {
-      setError("Network error. Please try again.");
+      setError(t("coverLetter.errors.network"));
     } finally {
       setBusy("");
     }
@@ -83,13 +85,13 @@ export default function CoverLetterSection({
         body: JSON.stringify({ coverLetter: letter, coverLetterMeta: meta }),
       });
       if (!res.ok) {
-        setError("Could not save the cover letter.");
+        setError(t("coverLetter.errors.save"));
         return;
       }
       setSavedLetter(letter);
       router.refresh();
     } catch {
-      setError("Network error while saving.");
+      setError(t("coverLetter.errors.networkSave"));
     } finally {
       setBusy("");
     }
@@ -101,7 +103,7 @@ export default function CoverLetterSection({
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      setError("Couldn't access the clipboard — select and copy manually.");
+      setError(t("coverLetter.errors.clipboard"));
     }
   }
 
@@ -128,7 +130,9 @@ export default function CoverLetterSection({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `Cover Letter - ${company || "application"}.docx`;
+    a.download = t("coverLetter.fileName", {
+      company: company || t("coverLetter.fileNameFallback"),
+    });
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -140,12 +144,14 @@ export default function CoverLetterSection({
         onChange={(e) => setSourceId(e.target.value)}
         disabled={busy === "generating"}
         className={`${inputClass} min-w-[12rem] flex-1`}
-        aria-label="Source resume"
+        aria-label={t("coverLetter.sourceAria")}
       >
-        <option value="">Choose a resume…</option>
+        <option value="">{t("coverLetter.choosePlaceholder")}</option>
         {resumeOptions.map((o) => (
           <option key={o.id} value={o.id}>
-            {o.id === defaultSourceId ? `${o.label} — default` : o.label}
+            {o.id === defaultSourceId
+              ? t("coverLetter.defaultOption", { label: o.label })
+              : o.label}
           </option>
         ))}
       </select>
@@ -154,11 +160,11 @@ export default function CoverLetterSection({
         onChange={(e) => setTone(e.target.value)}
         disabled={busy === "generating"}
         className={inputClass}
-        aria-label="Tone"
+        aria-label={t("coverLetter.toneAria")}
       >
-        {COVER_LETTER_TONES.map((t) => (
-          <option key={t.id} value={t.id}>
-            {t.label}
+        {COVER_LETTER_TONES.map((tn) => (
+          <option key={tn.id} value={tn.id}>
+            {t(`coverLetter.tone.${tn.id}`)}
           </option>
         ))}
       </select>
@@ -169,10 +175,10 @@ export default function CoverLetterSection({
         className={buttonClass("primary")}
       >
         {busy === "generating"
-          ? "Writing…"
+          ? t("coverLetter.writing")
           : letter
-            ? "Regenerate"
-            : "Generate cover letter"}
+            ? t("coverLetter.regenerate")
+            : t("coverLetter.generate")}
       </button>
     </div>
   );
@@ -181,9 +187,7 @@ export default function CoverLetterSection({
     <div className="space-y-3">
       {!letter && (
         <p className="text-xs text-muted-foreground">
-          Drafts a letter from your resume and this job&apos;s description —
-          using only facts from your resume. You edit before sending; nothing
-          is saved until you press Save.
+          {t("coverLetter.intro")}
         </p>
       )}
       {generatorRow}
@@ -195,28 +199,30 @@ export default function CoverLetterSection({
             onChange={(e) => setLetter(e.target.value)}
             rows={14}
             className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm leading-relaxed text-foreground focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-            aria-label="Cover letter text"
+            aria-label={t("coverLetter.letterAria")}
           />
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-[11px] text-muted-foreground/70">
-              {wordCount} words
+              {t("coverLetter.wordCount", { count: wordCount })}
               {meta &&
-                ` · generated ${new Date(meta.generatedAt).toLocaleDateString()} (${
-                  COVER_LETTER_TONES.find((t) => t.id === meta.tone)?.label ??
-                  meta.tone
-                })`}
-              {dirty && " · unsaved edits"}
+                ` · ${t("coverLetter.generatedMeta", {
+                  date: new Date(meta.generatedAt).toLocaleDateString(),
+                  tone: COVER_LETTER_TONES.some((tn) => tn.id === meta.tone)
+                    ? t(`coverLetter.tone.${meta.tone}`)
+                    : meta.tone,
+                })}`}
+              {dirty && ` · ${t("coverLetter.unsavedEdits")}`}
             </p>
             <div className="flex flex-wrap gap-2">
               <button type="button" onClick={copy} className={buttonClass("secondary")}>
-                {copied ? "Copied ✓" : "Copy"}
+                {copied ? t("coverLetter.copied") : t("coverLetter.copy")}
               </button>
               <button
                 type="button"
                 onClick={downloadDocx}
                 className={buttonClass("secondary")}
               >
-                Download .docx
+                {t("coverLetter.download")}
               </button>
               <button
                 type="button"
@@ -224,7 +230,11 @@ export default function CoverLetterSection({
                 disabled={busy === "saving" || !dirty}
                 className={buttonClass("primary")}
               >
-                {busy === "saving" ? "Saving…" : dirty ? "Save" : "Saved ✓"}
+                {busy === "saving"
+                  ? t("coverLetter.saving")
+                  : dirty
+                    ? t("coverLetter.save")
+                    : t("coverLetter.saved")}
               </button>
             </div>
           </div>
@@ -233,8 +243,8 @@ export default function CoverLetterSection({
 
       {warnings.length > 0 && (
         <div className="rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/40 p-3 text-xs text-amber-800 dark:text-amber-200">
-          Double-check these figures — they weren&apos;t found in your resume or
-          the job description: <span className="font-semibold">{warnings.join(", ")}</span>
+          {t("coverLetter.unverifiedWarning")}{" "}
+          <span className="font-semibold">{warnings.join(", ")}</span>
         </div>
       )}
 

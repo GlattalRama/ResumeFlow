@@ -2,18 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 // Note: "Tailor Resume for this Job" is handled by the dedicated
 // TailorResumeFlow (it produces a full new resume version, not just text).
-const ACTIONS: { action: string; label: string; persists?: boolean }[] = [
-  { action: "generate-qna", label: "Generate Interview Q&A", persists: true },
-  { action: "interview-briefing", label: "Generate Interview Briefing" },
-  { action: "cover-letter", label: "Generate Cover Letter" },
-  { action: "follow-up", label: "Generate Follow-up Message" },
+// Labels are looked up under ai.actions.labels keyed by the action id.
+const ACTIONS: { action: string; persists?: boolean }[] = [
+  { action: "generate-qna", persists: true },
+  { action: "interview-briefing" },
+  { action: "cover-letter" },
+  { action: "follow-up" },
 ];
 
 export default function AiActions({ applicationId }: { applicationId: string }) {
   const router = useRouter();
+  const t = useTranslations("ai");
   const [busy, setBusy] = useState<string>("");
   const [output, setOutput] = useState<string>("");
   const [note, setNote] = useState<string>("");
@@ -32,17 +35,17 @@ export default function AiActions({ applicationId }: { applicationId: string }) 
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error || "Something went wrong. Please try again.");
+        setError(data.error || t("actions.errors.generic"));
         return;
       }
       if (persists) {
-        setNote(data.message || "Done.");
+        setNote(data.message || t("actions.done"));
         router.refresh();
       } else {
         setOutput(data.text || "");
       }
     } catch {
-      setError("Network error. Please try again.");
+      setError(t("actions.errors.network"));
     } finally {
       setBusy("");
     }
@@ -51,7 +54,7 @@ export default function AiActions({ applicationId }: { applicationId: string }) 
   return (
     <div>
       <p className="mb-1 text-xs text-muted-foreground/70">
-        Generated from your resume and this job — review before using.
+        {t("actions.intro")}
       </p>
       <div className="flex flex-wrap gap-2">
         {ACTIONS.map((a) => (
@@ -62,7 +65,9 @@ export default function AiActions({ applicationId }: { applicationId: string }) 
             disabled={!!busy}
             className="rounded-md border border-brand-200 dark:border-brand-500/40 bg-brand-50 dark:bg-brand-500/15 px-3 py-1.5 text-xs font-medium text-brand-700 dark:text-brand-300 transition hover:bg-brand-100 dark:hover:bg-brand-500/20 disabled:opacity-50"
           >
-            {busy === a.action ? "Working…" : a.label}
+            {busy === a.action
+              ? t("actions.working")
+              : t(`actions.labels.${a.action}`)}
           </button>
         ))}
       </div>

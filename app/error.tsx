@@ -10,6 +10,7 @@
 // while still providing a plain "Try again" for transient failures.
 import { useEffect, useState } from "react";
 import { signIn, signOut } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 export default function Error({
   error,
@@ -18,6 +19,7 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations("ai");
   const [reauthing, setReauthing] = useState(false);
 
   useEffect(() => {
@@ -46,11 +48,10 @@ export default function Error({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-mark.png" alt="" className="h-12 w-auto" />
           <h1 className="mt-3 text-xl font-bold text-foreground">
-            Something went wrong
+            {t("error.title")}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Your session may have expired. Sign out and back in to reconnect to
-            your Google Drive, or retry the page.
+            {t("error.description")}
           </p>
         </div>
 
@@ -61,20 +62,20 @@ export default function Error({
             disabled={reauthing}
             className="inline-flex w-full items-center justify-center rounded-md bg-brand-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-brand-700 disabled:opacity-60"
           >
-            {reauthing ? "Signing in…" : "Sign out & sign in again"}
+            {reauthing ? t("error.signingIn") : t("error.reauth")}
           </button>
           <button
             type="button"
             onClick={() => reset()}
             className="inline-flex w-full items-center justify-center rounded-md border border-input bg-card px-4 py-2.5 text-sm font-medium text-foreground/80 shadow-sm transition hover:bg-muted/50"
           >
-            Try again
+            {t("error.tryAgain")}
           </button>
         </div>
 
         {error.digest ? (
           <p className="mt-6 text-center text-[11px] text-muted-foreground/70">
-            Error reference: {error.digest}
+            {t("error.reference", { digest: error.digest })}
           </p>
         ) : null}
       </div>

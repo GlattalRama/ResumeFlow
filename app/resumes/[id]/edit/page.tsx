@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { getItem } from "@/lib/store";
 import { PageHeader } from "@/components/ui";
 import ResumeBuilder from "@/components/ResumeBuilder";
@@ -29,10 +30,11 @@ export default async function EditResumePage({
     ? visible
     : [...visible, ...TEMPLATES.filter((t) => t.id === currentId)];
 
+  const t = await getTranslations("builder");
   return (
     <div>
       <PageHeader
-        title="Edit resume"
+        title={t("page.editTitle")}
         subtitle={`${resume.versionName} · v${resume.versionNumber}`}
       />
       <ResumeBuilder

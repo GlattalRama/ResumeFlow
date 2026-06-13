@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import type {
   CustomSection,
   CustomSectionItem,
@@ -52,10 +53,10 @@ const labelClass = "block text-xs font-medium text-muted-foreground mb-1";
 
 // One-tap layout density presets: each sets the body size, page margins, and
 // line spacing together. "Balanced" mirrors defaultTemplateStyle().
+// Labels/descriptions are translated at render time via the preset id
+// (builder.style.presets.<id>).
 type LayoutPreset = {
   id: string;
-  label: string;
-  desc: string;
   fontSize: number;
   margins: number;
   lineSpacing: TemplateStyleSettings["lineSpacing"];
@@ -63,24 +64,18 @@ type LayoutPreset = {
 const LAYOUT_PRESETS: LayoutPreset[] = [
   {
     id: "compact",
-    label: "Compact",
-    desc: "Fits the most per page",
     fontSize: 12,
     margins: 10,
     lineSpacing: { section: 0.6, text: 1.35, bullet: 0.05 },
   },
   {
     id: "balanced",
-    label: "Balanced",
-    desc: "The default look",
     fontSize: 13,
     margins: 12,
     lineSpacing: { section: 1, text: 1.6, bullet: 0.15 },
   },
   {
     id: "spacious",
-    label: "Spacious",
-    desc: "Airy and easy to scan",
     fontSize: 13.5,
     margins: 16,
     lineSpacing: { section: 1.4, text: 1.8, bullet: 0.3 },
@@ -103,12 +98,13 @@ function marginsUniform(m: TemplateStyleSettings["pageMargins"]): boolean {
 }
 
 // Curated resume color schemes (primary accent + section rule color).
+// Display names are translated at render time via the id (builder.style.themes.<id>).
 const COLOR_THEMES = [
-  { label: "Corporate Blue", primary: "#0033A0", line: "#111111" },
-  { label: "Graphite", primary: "#111827", line: "#111827" },
-  { label: "Indigo", primary: "#4F46E5", line: "#312E81" },
-  { label: "Forest", primary: "#065F46", line: "#064E3B" },
-  { label: "Burgundy", primary: "#7F1D1D", line: "#7F1D1D" },
+  { id: "corporateBlue", primary: "#0033A0", line: "#111111" },
+  { id: "graphite", primary: "#111827", line: "#111827" },
+  { id: "indigo", primary: "#4F46E5", line: "#312E81" },
+  { id: "forest", primary: "#065F46", line: "#064E3B" },
+  { id: "burgundy", primary: "#7F1D1D", line: "#7F1D1D" },
 ];
 
 // Form-card ids that configure the document rather than hold resume content.
@@ -130,6 +126,7 @@ export default function ResumeBuilder({
   availableTemplates = VISIBLE_TEMPLATES,
 }: Props) {
   const router = useRouter();
+  const t = useTranslations("builder");
 
   const [versionName, setVersionName] = useState(initial?.versionName ?? "");
   const [targetRole, setTargetRole] = useState(initial?.targetRole ?? "");
@@ -434,7 +431,7 @@ export default function ResumeBuilder({
         method: "POST",
         body: form,
       });
-      if (!res.ok) throw new Error("Photo upload failed");
+      if (!res.ok) throw new Error(t("errors.photoUpload"));
       const result = await res.json();
       if (result.mode === "drive") {
         setData((d) => ({
@@ -450,7 +447,7 @@ export default function ResumeBuilder({
         }));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Photo upload failed");
+      setError(err instanceof Error ? err.message : t("errors.photoUpload"));
     } finally {
       setUploadingPhoto(false);
     }
@@ -706,7 +703,7 @@ export default function ResumeBuilder({
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(json?.error || "Import failed");
+        throw new Error(json?.error || t("errors.import"));
       }
       const imported = json.resumeData as ResumeData;
       // skillCategories is the single source for Technical Skills; drop any
@@ -719,16 +716,14 @@ export default function ResumeBuilder({
       if (!targetRole.trim() && imported.basics?.title) {
         setTargetRole(imported.basics.title);
       }
-      setImportNote(
-        "Imported. Review the sections below, then press “Create resume” to save."
-      );
+      setImportNote(t("import.imported"));
       // Land the user on Basics so they can review the extracted data.
       const idx = [...formCards]
         .sort((a, b) => a.order - b.order)
         .findIndex((c) => c.cardId === "basics");
       if (idx >= 0) goToCard(idx);
     } catch (e) {
-      setImportError(e instanceof Error ? e.message : "Import failed");
+      setImportError(e instanceof Error ? e.message : t("errors.import"));
     } finally {
       setImporting(false);
     }
@@ -755,12 +750,12 @@ export default function ResumeBuilder({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Save failed");
+      if (!res.ok) throw new Error(t("errors.save"));
       const saved = await res.json();
       router.push(`/resumes/${saved.id}`);
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Save failed");
+      setError(e instanceof Error ? e.message : t("errors.save"));
       setSaving(false);
     }
   }
@@ -832,14 +827,14 @@ export default function ResumeBuilder({
           onClick={() => setTemplateStyle(defaultTemplateStyle())}
           className="text-xs text-muted-foreground/70 hover:text-brand-600 dark:hover:text-brand-300"
         >
-          Reset to default
+          {t("actions.resetToDefault")}
         </button>
       ),
       body: (
         <>
           {/* Layout density presets — one tap sets size, margins, and spacing. */}
           <div>
-            <label className={labelClass}>Layout density</label>
+            <label className={labelClass}>{t("style.layoutDensity")}</label>
             <div className="grid grid-cols-3 gap-2">
               {LAYOUT_PRESETS.map((p) => {
                 const active = layoutPresetActive(p, templateStyle);
@@ -856,10 +851,10 @@ export default function ResumeBuilder({
                     }`}
                   >
                     <span className="block text-xs font-semibold text-foreground">
-                      {p.label}
+                      {t(`style.presets.${p.id}.label`)}
                     </span>
                     <span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">
-                      {p.desc}
+                      {t(`style.presets.${p.id}.desc`)}
                     </span>
                   </button>
                 );
@@ -870,7 +865,7 @@ export default function ResumeBuilder({
           {/* Typography */}
           <div className="mt-4 grid gap-x-4 gap-y-3 sm:grid-cols-2">
             <div>
-              <label className={labelClass}>Font</label>
+              <label className={labelClass}>{t("style.font")}</label>
               <select
                 className={inputClass}
                 value={templateStyle.fontFamily}
@@ -884,7 +879,7 @@ export default function ResumeBuilder({
               </select>
             </div>
             <SliderField
-              label="Body text size"
+              label={t("style.bodyTextSize")}
               value={templateStyle.fontSize}
               min={8}
               max={24}
@@ -893,7 +888,7 @@ export default function ResumeBuilder({
               onChange={(v) => patchStyle("fontSize", v)}
             />
             <SliderField
-              label="Name size"
+              label={t("style.nameSize")}
               value={templateStyle.fontScale.name}
               min={1}
               max={3}
@@ -902,7 +897,7 @@ export default function ResumeBuilder({
               onChange={(v) => patchScale("name", v)}
             />
             <SliderField
-              label="Heading size"
+              label={t("style.headingSize")}
               value={templateStyle.fontScale.heading}
               min={0.8}
               max={2}
@@ -914,23 +909,23 @@ export default function ResumeBuilder({
 
           {/* Colors: curated theme swatches up front, full pickers tucked away. */}
           <div className="mt-4">
-            <label className={labelClass}>Color theme</label>
+            <label className={labelClass}>{t("style.colorTheme")}</label>
             <div className="flex flex-wrap items-center gap-2">
-              {COLOR_THEMES.map((t) => {
+              {COLOR_THEMES.map((theme) => {
                 const active =
                   templateStyle.primaryColor.toLowerCase() ===
-                  t.primary.toLowerCase();
+                  theme.primary.toLowerCase();
                 return (
                   <button
-                    key={t.label}
+                    key={theme.id}
                     type="button"
-                    title={t.label}
+                    title={t(`style.themes.${theme.id}`)}
                     aria-pressed={active}
                     onClick={() =>
                       setTemplateStyle((s) => ({
                         ...s,
-                        primaryColor: t.primary,
-                        sectionLineColor: t.line,
+                        primaryColor: theme.primary,
+                        sectionLineColor: theme.line,
                       }))
                     }
                     className={`h-8 w-8 rounded-full border-2 transition ${
@@ -938,35 +933,35 @@ export default function ResumeBuilder({
                         ? "border-foreground ring-2 ring-ring/50"
                         : "border-transparent hover:scale-110"
                     }`}
-                    style={{ backgroundColor: t.primary }}
+                    style={{ backgroundColor: theme.primary }}
                   >
-                    <span className="sr-only">{t.label}</span>
+                    <span className="sr-only">{t(`style.themes.${theme.id}`)}</span>
                   </button>
                 );
               })}
             </div>
             <details className="mt-2">
               <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground">
-                Custom colors
+                {t("style.customColors")}
               </summary>
               <div className="mt-2 grid gap-3 sm:grid-cols-2">
                 <ColorField
-                  label="Primary color"
+                  label={t("style.primaryColor")}
                   value={templateStyle.primaryColor}
                   onChange={(v) => patchStyle("primaryColor", v)}
                 />
                 <ColorField
-                  label="Body text color"
+                  label={t("style.bodyTextColor")}
                   value={templateStyle.bodyColor}
                   onChange={(v) => patchStyle("bodyColor", v)}
                 />
                 <ColorField
-                  label="Muted text color"
+                  label={t("style.mutedTextColor")}
                   value={templateStyle.mutedColor}
                   onChange={(v) => patchStyle("mutedColor", v)}
                 />
                 <ColorField
-                  label="Section line color"
+                  label={t("style.sectionLineColor")}
                   value={templateStyle.sectionLineColor}
                   onChange={(v) => patchStyle("sectionLineColor", v)}
                 />
@@ -977,7 +972,7 @@ export default function ResumeBuilder({
           {/* Spacing */}
           <div className="mt-4 grid gap-x-4 gap-y-3 sm:grid-cols-2">
             <SliderField
-              label="Page margins"
+              label={t("style.pageMargins")}
               value={templateStyle.pageMargins.top}
               min={0}
               max={40}
@@ -985,12 +980,12 @@ export default function ResumeBuilder({
               display={
                 marginsUniform(templateStyle.pageMargins)
                   ? `${templateStyle.pageMargins.top}mm`
-                  : "custom"
+                  : t("style.customMargins")
               }
               onChange={setAllMargins}
             />
             <SliderField
-              label="Line height"
+              label={t("style.lineHeight")}
               value={templateStyle.lineSpacing.text}
               min={0.8}
               max={3}
@@ -999,7 +994,7 @@ export default function ResumeBuilder({
               onChange={(v) => patchSpacing("text", v)}
             />
             <SliderField
-              label="Section gap"
+              label={t("style.sectionGap")}
               value={templateStyle.lineSpacing.section}
               min={0}
               max={3}
@@ -1008,7 +1003,7 @@ export default function ResumeBuilder({
               onChange={(v) => patchSpacing("section", v)}
             />
             <SliderField
-              label="Bullet gap"
+              label={t("style.bulletGap")}
               value={templateStyle.lineSpacing.bullet}
               min={0}
               max={1.5}
@@ -1019,13 +1014,13 @@ export default function ResumeBuilder({
           </div>
           <details className="mt-2">
             <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground">
-              Per-side margins
+              {t("style.perSideMargins")}
             </summary>
             <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {(["top", "right", "bottom", "left"] as const).map((side) => (
                 <div key={side}>
-                  <span className="mb-1 block text-xs capitalize text-muted-foreground">
-                    {side}
+                  <span className="mb-1 block text-xs text-muted-foreground">
+                    {t(`style.sides.${side}`)}
                   </span>
                   <input
                     type="number"
@@ -1041,9 +1036,7 @@ export default function ResumeBuilder({
             </div>
           </details>
           <p className="mt-3 text-xs text-muted-foreground/70">
-            Applied live to the preview and saved with this version. Margins set
-            the printed A4 page margins. The ATS Corporate Style template uses
-            every setting; other templates use the font and primary color.
+            {t("style.hint")}
           </p>
         </>
       ),
@@ -1065,21 +1058,21 @@ export default function ResumeBuilder({
       body: (
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className={labelClass}>Version name</label>
+            <label className={labelClass}>{t("version.name")}</label>
             <input
               className={inputClass}
               value={versionName}
               onChange={(e) => setVersionName(e.target.value)}
-              placeholder="e.g. Backend Engineer v2"
+              placeholder={t("version.namePlaceholder")}
             />
           </div>
           <div>
-            <label className={labelClass}>Target role</label>
+            <label className={labelClass}>{t("version.targetRole")}</label>
             <input
               className={inputClass}
               value={targetRole}
               onChange={(e) => setTargetRole(e.target.value)}
-              placeholder="e.g. Senior Backend Engineer"
+              placeholder={t("version.targetRolePlaceholder")}
             />
           </div>
         </div>
@@ -1107,39 +1100,39 @@ export default function ResumeBuilder({
       body: (
         <>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Full name" value={data.basics.name} onChange={(v) => patchBasics("name", v)} />
-            <Field label="Headline / title" value={data.basics.title} onChange={(v) => patchBasics("title", v)} />
-            <Field label="Email" value={data.basics.email} onChange={(v) => patchBasics("email", v)} />
-            <Field label="Phone" value={data.basics.phone} onChange={(v) => patchBasics("phone", v)} />
-            <Field label="Location" value={data.basics.location} onChange={(v) => patchBasics("location", v)} />
-            <Field label="Website" value={data.basics.website} onChange={(v) => patchBasics("website", v)} />
+            <Field label={t("basics.fullName")} value={data.basics.name} onChange={(v) => patchBasics("name", v)} />
+            <Field label={t("basics.headline")} value={data.basics.title} onChange={(v) => patchBasics("title", v)} />
+            <Field label={t("basics.email")} value={data.basics.email} onChange={(v) => patchBasics("email", v)} />
+            <Field label={t("basics.phone")} value={data.basics.phone} onChange={(v) => patchBasics("phone", v)} />
+            <Field label={t("basics.location")} value={data.basics.location} onChange={(v) => patchBasics("location", v)} />
+            <Field label={t("basics.website")} value={data.basics.website} onChange={(v) => patchBasics("website", v)} />
           </div>
 
           {/* Profile photo */}
           <div className="mt-3">
-            <label className={labelClass}>Profile photo</label>
+            <label className={labelClass}>{t("basics.profilePhoto")}</label>
             <div className="flex items-center gap-3">
               {photoSrc ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={photoSrc}
-                  alt="Profile preview"
+                  alt={t("basics.photoAlt")}
                   className={`h-16 w-16 border border-border object-cover ${
                     photoShape === "circle" ? "rounded-full" : "rounded-md"
                   }`}
                 />
               ) : (
                 <div className="flex h-16 w-16 items-center justify-center rounded-md border border-dashed border-input text-[10px] text-muted-foreground/70">
-                  No photo
+                  {t("basics.noPhoto")}
                 </div>
               )}
               <div className="flex flex-col gap-1">
                 <label className="cursor-pointer rounded-md border border-input px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/50">
                   {uploadingPhoto
-                    ? "Uploading…"
+                    ? t("basics.uploading")
                     : photoSrc
-                      ? "Change photo"
-                      : "Upload photo"}
+                      ? t("basics.changePhoto")
+                      : t("basics.uploadPhoto")}
                   <input
                     type="file"
                     accept="image/*"
@@ -1154,7 +1147,7 @@ export default function ResumeBuilder({
                     onClick={removePhoto}
                     className="text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
                   >
-                    Remove photo
+                    {t("basics.removePhoto")}
                   </button>
                 )}
               </div>
@@ -1162,7 +1155,7 @@ export default function ResumeBuilder({
             {/* Shape choice (ATS Corporate Style template). Shown once a photo is present. */}
             {photoSrc && (
               <div className="mt-2 flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Shape:</span>
+                <span className="text-xs text-muted-foreground">{t("basics.shape")}</span>
                 <div className="inline-flex overflow-hidden rounded-md border border-input">
                   {(["square", "circle"] as const).map((shape) => (
                     <button
@@ -1171,22 +1164,20 @@ export default function ResumeBuilder({
                       onClick={() =>
                         setData((d) => ({ ...d, profilePhotoShape: shape }))
                       }
-                      className={`px-2.5 py-1 text-xs font-medium capitalize ${
+                      className={`px-2.5 py-1 text-xs font-medium ${
                         photoShape === shape
                           ? "bg-foreground text-background"
                           : "bg-card text-muted-foreground hover:bg-muted/50"
                       }`}
                     >
-                      {shape}
+                      {t(`basics.shapes.${shape}`)}
                     </button>
                   ))}
                 </div>
               </div>
             )}
             <p className="mt-1 text-xs text-muted-foreground/70">
-              Saved as an image in your Google Drive app data (only the file
-              reference is kept in the resume). Shown in the ATS Corporate Style
-              template header. In local dev mode it is embedded as Base64.
+              {t("basics.photoHint")}
             </p>
           </div>
         </>
@@ -1195,11 +1186,11 @@ export default function ResumeBuilder({
     summary: {
       body: (
         <div>
-          <label className={labelClass}>Professional summary</label>
+          <label className={labelClass}>{t("summary.label")}</label>
           <RichTextEditor
             value={data.basics.summary}
             onChange={(html) => patchBasics("summary", html)}
-            placeholder="2-3 sentences summarizing your experience and strengths."
+            placeholder={t("summary.placeholder")}
           />
           <ImproveButton
             sectionType="summary"
@@ -1249,7 +1240,7 @@ export default function ResumeBuilder({
               dataKey={itemKey}
               summary={
                 [exp.role, exp.company].filter(Boolean).join(" · ") ||
-                "New role"
+                t("experience.newRole")
               }
               detail={[exp.startDate, exp.endDate].filter(Boolean).join(" – ")}
               expanded={expanded}
@@ -1261,24 +1252,24 @@ export default function ResumeBuilder({
               }}
             >
               <div className="grid gap-2 sm:grid-cols-2">
-                <Field label="Role" value={exp.role} onChange={(v) => updateExperience(i, { role: v })} />
-                <Field label="Company" value={exp.company} onChange={(v) => updateExperience(i, { company: v })} />
-                <Field label="Location" value={exp.location} onChange={(v) => updateExperience(i, { location: v })} />
+                <Field label={t("experience.role")} value={exp.role} onChange={(v) => updateExperience(i, { role: v })} />
+                <Field label={t("experience.company")} value={exp.company} onChange={(v) => updateExperience(i, { company: v })} />
+                <Field label={t("experience.location")} value={exp.location} onChange={(v) => updateExperience(i, { location: v })} />
                 <div className="grid grid-cols-2 gap-2">
-                  <Field label="Start" value={exp.startDate} onChange={(v) => updateExperience(i, { startDate: v })} />
-                  <Field label="End" value={exp.endDate} onChange={(v) => updateExperience(i, { endDate: v })} />
+                  <Field label={t("common.start")} value={exp.startDate} onChange={(v) => updateExperience(i, { startDate: v })} />
+                  <Field label={t("common.end")} value={exp.endDate} onChange={(v) => updateExperience(i, { endDate: v })} />
                 </div>
               </div>
               <div className="mt-2">
-                <label className={labelClass}>Highlights (one bullet per line)</label>
+                <label className={labelClass}>{t("experience.highlights")}</label>
                 <RichTextEditor
                   value={linesToHtml(exp.highlights)}
                   onChange={(html) =>
                     updateExperience(i, { highlights: htmlToLines(html) })
                   }
                   showLists={false}
-                  hint="One bullet per line — Enter adds a bullet"
-                  placeholder="Key achievements, one per line"
+                  hint={t("experience.highlightsHint")}
+                  placeholder={t("experience.highlightsPlaceholder")}
                 />
                 <ImproveButton
                   sectionType="highlights"
@@ -1324,7 +1315,7 @@ export default function ResumeBuilder({
               summary={
                 [[ed.degree, ed.field].filter(Boolean).join(", "), ed.school]
                   .filter(Boolean)
-                  .join(" · ") || "New education"
+                  .join(" · ") || t("education.newEducation")
               }
               detail={[ed.startDate, ed.endDate].filter(Boolean).join(" – ")}
               expanded={expanded}
@@ -1336,12 +1327,12 @@ export default function ResumeBuilder({
               }}
             >
               <div className="grid gap-2 sm:grid-cols-2">
-                <Field label="School" value={ed.school} onChange={(v) => updateEducation(i, { school: v })} />
-                <Field label="Degree" value={ed.degree} onChange={(v) => updateEducation(i, { degree: v })} />
-                <Field label="Field" value={ed.field} onChange={(v) => updateEducation(i, { field: v })} />
+                <Field label={t("education.school")} value={ed.school} onChange={(v) => updateEducation(i, { school: v })} />
+                <Field label={t("education.degree")} value={ed.degree} onChange={(v) => updateEducation(i, { degree: v })} />
+                <Field label={t("education.field")} value={ed.field} onChange={(v) => updateEducation(i, { field: v })} />
                 <div className="grid grid-cols-2 gap-2">
-                  <Field label="Start" value={ed.startDate} onChange={(v) => updateEducation(i, { startDate: v })} />
-                  <Field label="End" value={ed.endDate} onChange={(v) => updateEducation(i, { endDate: v })} />
+                  <Field label={t("common.start")} value={ed.startDate} onChange={(v) => updateEducation(i, { startDate: v })} />
+                  <Field label={t("common.end")} value={ed.endDate} onChange={(v) => updateEducation(i, { endDate: v })} />
                 </div>
               </div>
             </ItemCard>
@@ -1372,7 +1363,7 @@ export default function ResumeBuilder({
             <ItemCard
               key={i}
               dataKey={itemKey}
-              summary={p.name || "New project"}
+              summary={p.name || t("projects.newProject")}
               expanded={expanded}
               onToggle={() => setActiveItem(expanded ? null : itemKey)}
               onActive={() => setActiveItem(itemKey)}
@@ -1382,10 +1373,10 @@ export default function ResumeBuilder({
               }}
             >
               <div className="grid gap-2">
-                <Field label="Name" value={p.name} onChange={(v) => updateProject(i, { name: v })} />
-                <Field label="Link" value={p.link} onChange={(v) => updateProject(i, { link: v })} />
+                <Field label={t("projects.name")} value={p.name} onChange={(v) => updateProject(i, { name: v })} />
+                <Field label={t("projects.link")} value={p.link} onChange={(v) => updateProject(i, { link: v })} />
                 <div>
-                  <label className={labelClass}>Description</label>
+                  <label className={labelClass}>{t("projects.description")}</label>
                   <textarea
                     className={inputClass}
                     rows={2}
@@ -1416,7 +1407,7 @@ export default function ResumeBuilder({
       count: data.certifications.length,
       body: (
         <div>
-          <label className={labelClass}>Certifications (one per line)</label>
+          <label className={labelClass}>{t("certifications.label")}</label>
           <textarea
             className={inputClass}
             rows={5}
@@ -1435,7 +1426,7 @@ export default function ResumeBuilder({
       count: (data.languages ?? []).length,
       body: (
         <div>
-          <label className={labelClass}>Languages (one per line)</label>
+          <label className={labelClass}>{t("languages.label")}</label>
           <textarea
             className={inputClass}
             rows={5}
@@ -1692,7 +1683,7 @@ export default function ResumeBuilder({
                     onClick={() => moveCard(card.cardId, -1)}
                     className="text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-30"
                   >
-                    ↑ Move up
+                    ↑ {t("actions.moveUp")}
                   </button>
                   <button
                     type="button"
@@ -1700,7 +1691,7 @@ export default function ResumeBuilder({
                     onClick={() => moveCard(card.cardId, 1)}
                     className="text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-30"
                   >
-                    ↓ Move down
+                    ↓ {t("actions.moveDown")}
                   </button>
                 </div>
               )}
@@ -1729,18 +1720,21 @@ export default function ResumeBuilder({
             <ScoreRing value={atsResult.overall} size={44} />
             <span className="min-w-0">
               <span className="block text-xs font-semibold text-foreground">
-                ATS Score
+                {t("ats.score")}
               </span>
               <span className="block truncate text-[11px] text-muted-foreground">
                 {atsResult.hasJobDescription
-                  ? `${atsResult.matchedCount}/${atsResult.keywords.length} keywords matched`
-                  : "Add a job description"}
+                  ? t("ats.keywordsMatched", {
+                      matched: atsResult.matchedCount,
+                      total: atsResult.keywords.length,
+                    })
+                  : t("ats.addJobDescription")}
               </span>
             </span>
           </button>
-          <nav aria-label="Resume sections" className="space-y-4">
-            {renderRailGroup("Setup", setupEntries, false)}
-            {renderRailGroup("Content", contentEntries, true)}
+          <nav aria-label={t("rail.sectionsNav")} className="space-y-4">
+            {renderRailGroup(t("rail.setup"), setupEntries, false)}
+            {renderRailGroup(t("rail.content"), contentEntries, true)}
           </nav>
           <div className="mt-4 space-y-2 border-t border-border pt-4">
             <button
@@ -1749,17 +1743,17 @@ export default function ResumeBuilder({
               className={`${buttonClass("primary")} w-full`}
             >
               {saving
-                ? "Saving…"
+                ? t("actions.saving")
                 : mode === "create"
-                  ? "Create resume"
-                  : "Save & view"}
+                  ? t("actions.createResume")
+                  : t("actions.saveAndView")}
             </button>
             <button
               type="button"
               onClick={() => router.back()}
               className={`${buttonClass("secondary")} w-full`}
             >
-              Cancel
+              {t("actions.cancel")}
             </button>
             {mode === "edit" && (
               <p className="text-center">
@@ -1780,12 +1774,10 @@ export default function ResumeBuilder({
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-foreground">
-                  Start from an existing resume
+                  {t("import.title")}
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Upload a PDF or Word (.docx) file and AI will sort it into the
-                  sections below. Nothing is saved until you press “Create
-                  resume”.
+                  {t("import.description")}
                 </p>
               </div>
               <label
@@ -1793,7 +1785,7 @@ export default function ResumeBuilder({
                   importing ? "pointer-events-none opacity-60" : ""
                 }`}
               >
-                {importing ? "Reading…" : "Import file"}
+                {importing ? t("import.reading") : t("import.button")}
                 <input
                   type="file"
                   accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -1810,7 +1802,7 @@ export default function ResumeBuilder({
             </div>
             {importing && (
               <p className="mt-2 text-xs text-muted-foreground">
-                Parsing and categorizing with AI — this can take a few seconds.
+                {t("import.parsing")}
               </p>
             )}
             {importError && (
@@ -1862,7 +1854,7 @@ export default function ResumeBuilder({
                       onClick={() => goToCard(Math.max(0, safeCurrent - 1))}
                       className={`${buttonClass("secondary")} disabled:opacity-40`}
                     >
-                      ← {prevCardMeta ? cardTitle(prevCardMeta) : "Back"}
+                      ← {prevCardMeta ? cardTitle(prevCardMeta) : t("actions.back")}
                     </button>
                     <button
                       type="button"
@@ -1870,7 +1862,9 @@ export default function ResumeBuilder({
                       onClick={() => goToCard(Math.min(orderedCards.length - 1, safeCurrent + 1))}
                       className={`${buttonClass("primary")} disabled:opacity-40`}
                     >
-                      {nextCardMeta ? `Next: ${cardTitle(nextCardMeta)}` : "Done"}{" "}
+                      {nextCardMeta
+                        ? t("actions.next", { title: cardTitle(nextCardMeta) })
+                        : t("actions.done")}{" "}
                       →
                     </button>
                   </div>
@@ -1887,14 +1881,18 @@ export default function ResumeBuilder({
         {/* Mobile save actions; on desktop these live in the rail. */}
         <div className="flex items-center gap-2 lg:hidden">
           <button onClick={save} disabled={saving} className={buttonClass("primary")}>
-            {saving ? "Saving…" : mode === "create" ? "Create resume" : "Save & view"}
+            {saving
+              ? t("actions.saving")
+              : mode === "create"
+                ? t("actions.createResume")
+                : t("actions.saveAndView")}
           </button>
           <button
             onClick={() => router.back()}
             className={buttonClass("secondary")}
             type="button"
           >
-            Cancel
+            {t("actions.cancel")}
           </button>
         </div>
       </div>
@@ -1908,10 +1906,10 @@ export default function ResumeBuilder({
           <div className="mb-2 flex items-center justify-between gap-2">
             <div className="min-w-0">
               <p className="text-sm font-semibold text-foreground/80">
-                Live preview
+                {t("preview.title")}
               </p>
               <p className="hidden text-xs text-muted-foreground/70 lg:block">
-                Click any part of the page to jump to its editor.
+                {t("preview.clickHint")}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -1922,18 +1920,18 @@ export default function ResumeBuilder({
                   goToCard(atsCardIndex);
                   setMobileView("edit");
                 }}
-                title="Open the ATS score panel"
+                title={t("ats.openPanel")}
                 className={`rounded-full border border-border bg-card px-2 py-0.5 text-[11px] font-bold tabular-nums shadow-sm ${scoreBandClass(
                   atsResult.overall
                 )}`}
               >
-                ATS {atsResult.overall}
+                {t("ats.chip", { score: atsResult.overall })}
               </button>
               {/* Mobile zoom controls (desktop shows the sheet full-size). */}
               <div className="flex items-center gap-1 lg:hidden">
                 <button
                   type="button"
-                  aria-label="Zoom out"
+                  aria-label={t("preview.zoomOut")}
                   onClick={() =>
                     setPreviewZoom((z) => Math.max(0.5, +(z - 0.25).toFixed(2)))
                   }
@@ -1944,14 +1942,14 @@ export default function ResumeBuilder({
                 <button
                   type="button"
                   onClick={() => setPreviewZoom(1)}
-                  title="Fit to width"
+                  title={t("preview.fitToWidth")}
                   className="min-w-[3rem] rounded-md border border-input px-1.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
                 >
-                  {previewZoom === 1 ? "Fit" : `${Math.round(previewZoom * 100)}%`}
+                  {previewZoom === 1 ? t("preview.fit") : `${Math.round(previewZoom * 100)}%`}
                 </button>
                 <button
                   type="button"
-                  aria-label="Zoom in"
+                  aria-label={t("preview.zoomIn")}
                   onClick={() =>
                     setPreviewZoom((z) => Math.min(3, +(z + 0.25).toFixed(2)))
                   }
@@ -1967,7 +1965,7 @@ export default function ResumeBuilder({
                   onChange={(e) => setAtsView(e.target.checked)}
                   className="h-3.5 w-3.5"
                 />
-                ATS-safe view
+                {t("ats.safeView")}
               </label>
             </div>
           </div>
@@ -2009,7 +2007,7 @@ export default function ResumeBuilder({
                   : "text-muted-foreground"
               }`}
             >
-              Edit
+              {t("mobile.edit")}
             </button>
             <button
               type="button"
@@ -2020,7 +2018,7 @@ export default function ResumeBuilder({
                   : "text-muted-foreground"
               }`}
             >
-              Preview
+              {t("mobile.preview")}
             </button>
           </div>
 
@@ -2028,7 +2026,7 @@ export default function ResumeBuilder({
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                aria-label="Previous section"
+                aria-label={t("mobile.prevSection")}
                 disabled={safeCurrent === 0}
                 onClick={() => goToCard(Math.max(0, safeCurrent - 1))}
                 className="grid h-9 w-9 place-items-center rounded-md border border-input text-foreground/80 disabled:opacity-40"
@@ -2040,7 +2038,7 @@ export default function ResumeBuilder({
               </span>
               <button
                 type="button"
-                aria-label="Next section"
+                aria-label={t("mobile.nextSection")}
                 disabled={safeCurrent >= orderedCards.length - 1}
                 onClick={() => goToCard(Math.min(orderedCards.length - 1, safeCurrent + 1))}
                 className="grid h-9 w-9 place-items-center rounded-md bg-brand-600 text-white disabled:opacity-40"
@@ -2050,7 +2048,7 @@ export default function ResumeBuilder({
             </div>
           ) : (
             <span className="truncate text-xs text-muted-foreground">
-              Tap a section to edit it
+              {t("mobile.tapToEdit")}
             </span>
           )}
 
@@ -2069,11 +2067,12 @@ function SaveStatusBadge({
 }: {
   status: "idle" | "saving" | "saved" | "error";
 }) {
+  const t = useTranslations("builder");
   if (status === "idle") return null;
   const map = {
-    saving: { text: "Saving…", cls: "text-muted-foreground/70" },
-    saved: { text: "Saved ✓", cls: "text-green-600 dark:text-green-400" },
-    error: { text: "Couldn’t save", cls: "text-red-600 dark:text-red-400" },
+    saving: { text: t("autosave.saving"), cls: "text-muted-foreground/70" },
+    saved: { text: t("autosave.saved"), cls: "text-green-600 dark:text-green-400" },
+    error: { text: t("autosave.error"), cls: "text-red-600 dark:text-red-400" },
   } as const;
   const { text, cls } = map[status];
   return <span className={`text-xs font-medium ${cls}`}>{text}</span>;
@@ -2098,6 +2097,7 @@ function SectionCard({
   footer?: React.ReactNode;
   children: React.ReactNode;
 }) {
+  const t = useTranslations("builder");
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm">
       <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
@@ -2105,7 +2105,7 @@ function SectionCard({
           {title}
           {hasCustomLabel && (
             <span className="ml-1 text-xs font-normal text-muted-foreground/70">
-              (renamed)
+              {t("sections.renamed")}
             </span>
           )}
           {typeof count === "number" && count > 0 && (
@@ -2159,6 +2159,7 @@ function AreasOfExpertiseEditor({
   onMove: (i: number, dir: -1 | 1) => void;
   onBulletStyleChange: (v: ResumeBulletStyle) => void;
 }) {
+  const t = useTranslations("builder");
   const [draft, setDraft] = useState("");
   function commitDraft() {
     onAdd(draft);
@@ -2167,7 +2168,7 @@ function AreasOfExpertiseEditor({
   return (
     <div>
       <div className="mb-3 max-w-xs">
-        <label className={labelClass}>Bullet style</label>
+        <label className={labelClass}>{t("areas.bulletStyle")}</label>
         <select
           className={inputClass}
           value={bulletStyle}
@@ -2188,24 +2189,24 @@ function AreasOfExpertiseEditor({
               className={inputClass}
               value={item}
               onChange={(e) => onUpdate(i, e.target.value)}
-              placeholder="e.g. Mainframe Modernization"
+              placeholder={t("areas.itemPlaceholder")}
             />
             <div className="flex shrink-0 items-center gap-1">
               <IconButton
-                label="Move up"
+                label={t("actions.moveUp")}
                 disabled={i === 0}
                 onClick={() => onMove(i, -1)}
               >
                 ↑
               </IconButton>
               <IconButton
-                label="Move down"
+                label={t("actions.moveDown")}
                 disabled={i === items.length - 1}
                 onClick={() => onMove(i, 1)}
               >
                 ↓
               </IconButton>
-              <IconButton label="Remove" danger onClick={() => onRemove(i)}>
+              <IconButton label={t("actions.remove")} danger onClick={() => onRemove(i)}>
                 ✕
               </IconButton>
             </div>
@@ -2225,19 +2226,18 @@ function AreasOfExpertiseEditor({
               commitDraft();
             }
           }}
-          placeholder="Add an area of expertise and press Enter"
+          placeholder={t("areas.addPlaceholder")}
         />
         <button
           type="button"
           onClick={commitDraft}
           className="shrink-0 rounded-md border border-input px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted/50"
         >
-          + Add
+          {t("actions.add")}
         </button>
       </div>
       <p className="mt-1 text-xs text-muted-foreground/70">
-        Rendered as a balanced two-column list on the ATS Corporate Style
-        template, using the selected bullet style.
+        {t("areas.hint")}
       </p>
     </div>
   );
@@ -2259,14 +2259,15 @@ function SkillCategoryEditor({
   onRemove: (i: number) => void;
   onMove: (i: number, dir: -1 | 1) => void;
 }) {
+  const t = useTranslations("builder");
   return (
     <div>
       {items.length > 0 && (
         <div className="mb-1 flex items-center gap-2">
           <span className="flex-1 text-xs font-medium text-muted-foreground sm:max-w-[40%]">
-            Category
+            {t("skills.category")}
           </span>
-          <span className="flex-1 text-xs font-medium text-muted-foreground">Value</span>
+          <span className="flex-1 text-xs font-medium text-muted-foreground">{t("skills.value")}</span>
           <span className="w-[104px] shrink-0" />
         </div>
       )}
@@ -2277,30 +2278,30 @@ function SkillCategoryEditor({
               className={`${inputClass} min-w-0 flex-1 sm:max-w-[40%]`}
               value={item.category}
               onChange={(e) => onUpdate(i, { category: e.target.value })}
-              placeholder="e.g. Mainframe"
+              placeholder={t("skills.categoryPlaceholder")}
             />
             <input
               className={`${inputClass} min-w-0 flex-1`}
               value={item.value}
               onChange={(e) => onUpdate(i, { value: e.target.value })}
-              placeholder="e.g. COBOL, PL/I, JCL"
+              placeholder={t("skills.valuePlaceholder")}
             />
             <div className="flex shrink-0 items-center gap-1">
               <IconButton
-                label="Move up"
+                label={t("actions.moveUp")}
                 disabled={i === 0}
                 onClick={() => onMove(i, -1)}
               >
                 ↑
               </IconButton>
               <IconButton
-                label="Move down"
+                label={t("actions.moveDown")}
                 disabled={i === items.length - 1}
                 onClick={() => onMove(i, 1)}
               >
                 ↓
               </IconButton>
-              <IconButton label="Remove" danger onClick={() => onRemove(i)}>
+              <IconButton label={t("actions.remove")} danger onClick={() => onRemove(i)}>
                 ✕
               </IconButton>
             </div>
@@ -2313,7 +2314,7 @@ function SkillCategoryEditor({
           onClick={onAdd}
           className="rounded-md border border-input px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted/50"
         >
-          Add item
+          {t("actions.addItem")}
         </button>
       </div>
     </div>
@@ -2344,6 +2345,7 @@ function SectionLayoutEditor({
   onRename: (sectionId: string, value: string) => void;
   onResetLabel: (sectionId: string) => void;
 }) {
+  const t = useTranslations("builder");
   const entryId = (e: DocSectionEntry) =>
     e.kind === "default" ? e.sectionId : e.id;
   // Which fixed section (by id) is currently being renamed, and the draft label.
@@ -2362,11 +2364,7 @@ function SectionLayoutEditor({
   return (
     <div>
       <p className="mb-3 text-xs text-muted-foreground/70">
-        Reorder, rename, and show/hide the sections of the resume document. This
-        order and these names apply to the live preview and to the PDF, DOCX, and
-        PPTX exports. Empty sections are hidden automatically. “Break after”
-        forces the next section onto a new A4 page (ATS Corporate Style template,
-        preview + PDF).
+        {t("sections.intro")}
       </p>
       <div className="space-y-2">
         {entries.map((e, i) => {
@@ -2391,12 +2389,12 @@ function SectionLayoutEditor({
                   {e.label}
                   {e.kind === "custom" && (
                     <span className="ml-1 text-xs font-normal text-muted-foreground/70">
-                      (custom)
+                      {t("sections.custom")}
                     </span>
                   )}
                   {hasCustomLabel && (
                     <span className="ml-1 text-xs font-normal text-muted-foreground/70">
-                      (renamed)
+                      {t("sections.renamed")}
                     </span>
                   )}
                 </span>
@@ -2408,7 +2406,7 @@ function SectionLayoutEditor({
                       onChange={() => onToggleVisible(e.kind, id)}
                       className="h-3.5 w-3.5"
                     />
-                    Show
+                    {t("sections.show")}
                   </label>
                   <label className="mr-1 flex items-center gap-1 text-xs text-muted-foreground">
                     <input
@@ -2417,11 +2415,11 @@ function SectionLayoutEditor({
                       onChange={() => onTogglePageBreak(e.kind, id)}
                       className="h-3.5 w-3.5"
                     />
-                    Break after
+                    {t("sections.breakAfter")}
                   </label>
                   {renamable && (
                     <IconButton
-                      label={`Rename “${e.label}” section`}
+                      label={t("sections.rename", { label: e.label })}
                       onClick={() =>
                         isEditing ? setEditingId(null) : startEdit(id, e.label)
                       }
@@ -2430,14 +2428,14 @@ function SectionLayoutEditor({
                     </IconButton>
                   )}
                   <IconButton
-                    label="Move section up"
+                    label={t("sections.moveUp")}
                     disabled={i === 0}
                     onClick={() => onMove(e.kind, id, -1)}
                   >
                     ↑
                   </IconButton>
                   <IconButton
-                    label="Move section down"
+                    label={t("sections.moveDown")}
                     disabled={i === entries.length - 1}
                     onClick={() => onMove(e.kind, id, 1)}
                   >
@@ -2462,8 +2460,10 @@ function SectionLayoutEditor({
                     }}
                     placeholder={
                       sec?.defaultTitle
-                        ? `Default: ${sec.defaultTitle}`
-                        : "Section name"
+                        ? t("sections.defaultPlaceholder", {
+                            title: sec.defaultTitle,
+                          })
+                        : t("sections.namePlaceholder")
                     }
                   />
                   <button
@@ -2471,7 +2471,7 @@ function SectionLayoutEditor({
                     onClick={() => commit(id)}
                     className="rounded-md border border-input px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted/50"
                   >
-                    Save
+                    {t("actions.save")}
                   </button>
                   {hasCustomLabel && (
                     <button
@@ -2482,7 +2482,7 @@ function SectionLayoutEditor({
                       }}
                       className="text-xs text-muted-foreground/70 hover:text-brand-600 dark:hover:text-brand-300"
                     >
-                      Reset to default
+                      {t("actions.resetToDefault")}
                     </button>
                   )}
                   <button
@@ -2490,7 +2490,7 @@ function SectionLayoutEditor({
                     onClick={() => setEditingId(null)}
                     className="text-xs text-muted-foreground/70 hover:text-foreground/80"
                   >
-                    Cancel
+                    {t("actions.cancel")}
                   </button>
                 </div>
               )}
@@ -2528,12 +2528,11 @@ function CustomSectionsEditor({
   onRemoveItem: (id: string, idx: number) => void;
   onMoveItem: (id: string, idx: number, dir: -1 | 1) => void;
 }) {
+  const t = useTranslations("builder");
   return (
     <div>
       <p className="mb-3 text-xs text-muted-foreground/70">
-        Add your own sections (Projects, Awards, Publications, …). Each one joins
-        the document order in the “Document Sections” card, so you can place it
-        anywhere and it flows into the live preview and every export.
+        {t("custom.intro")}
       </p>
       <div className="space-y-3">
         {sections.map((section) => (
@@ -2555,7 +2554,7 @@ function CustomSectionsEditor({
           onClick={onAdd}
           className="rounded-md border border-dashed border-input px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted/50"
         >
-          + Add Custom Section
+          {t("custom.addSection")}
         </button>
       </div>
     </div>
@@ -2585,6 +2584,7 @@ function CustomSectionCard({
   onRemoveItem: (id: string, idx: number) => void;
   onMoveItem: (id: string, idx: number, dir: -1 | 1) => void;
 }) {
+  const t = useTranslations("builder");
   const { id } = section;
   const isBulleted =
     section.layoutType === "bullets" ||
@@ -2609,7 +2609,7 @@ function CustomSectionCard({
             {customSectionLabel(section)}
             {!section.visible && (
               <span className="ml-1 text-xs font-normal text-muted-foreground/70">
-                (hidden)
+                {t("custom.hidden")}
               </span>
             )}
           </span>
@@ -2622,14 +2622,14 @@ function CustomSectionCard({
               onChange={() => onUpdate(id, { visible: !section.visible })}
               className="h-3.5 w-3.5"
             />
-            Show in Resume
+            {t("custom.showInResume")}
           </label>
           <button
             type="button"
             onClick={() => onDelete(id)}
             className="rounded-md border border-input px-2 py-1 text-xs font-medium text-muted-foreground hover:border-red-200 dark:hover:border-red-900 hover:text-red-600 dark:hover:text-red-400"
           >
-            Delete Section
+            {t("custom.deleteSection")}
           </button>
         </div>
       </div>
@@ -2638,16 +2638,16 @@ function CustomSectionCard({
         <div className="space-y-3 border-t border-border px-3 py-3">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className={labelClass}>Section Title</label>
+              <label className={labelClass}>{t("custom.sectionTitle")}</label>
               <input
                 className={inputClass}
                 value={section.title}
                 onChange={(e) => onUpdate(id, { title: e.target.value })}
-                placeholder="e.g. Projects"
+                placeholder={t("custom.sectionTitlePlaceholder")}
               />
             </div>
             <div>
-              <label className={labelClass}>Layout Type</label>
+              <label className={labelClass}>{t("custom.layoutType")}</label>
               <select
                 className={inputClass}
                 value={section.layoutType}
@@ -2668,7 +2668,7 @@ function CustomSectionCard({
 
           {isBulleted && (
             <div className="max-w-xs">
-              <label className={labelClass}>Bullet Style</label>
+              <label className={labelClass}>{t("custom.bulletStyle")}</label>
               <select
                 className={inputClass}
                 value={section.bulletStyle}
@@ -2689,13 +2689,13 @@ function CustomSectionCard({
 
           {section.layoutType === "freeText" ? (
             <div>
-              <label className={labelClass}>Content</label>
+              <label className={labelClass}>{t("custom.content")}</label>
               <textarea
                 className={inputClass}
                 rows={4}
                 value={section.freeText}
                 onChange={(e) => onUpdate(id, { freeText: e.target.value })}
-                placeholder="Paragraph-style content for this section."
+                placeholder={t("custom.freeTextPlaceholder")}
               />
             </div>
           ) : section.layoutType === "categoryValue" ? (
@@ -2740,6 +2740,7 @@ function BulletItemsEditor({
   onRemoveItem: (id: string, idx: number) => void;
   onMoveItem: (id: string, idx: number, dir: -1 | 1) => void;
 }) {
+  const t = useTranslations("builder");
   const [draft, setDraft] = useState("");
   function commit() {
     const text = draft.trim();
@@ -2750,7 +2751,7 @@ function BulletItemsEditor({
   const items = section.items ?? [];
   return (
     <div>
-      {items.length > 0 && <label className={labelClass}>Items</label>}
+      {items.length > 0 && <label className={labelClass}>{t("custom.items")}</label>}
       <div className="space-y-2">
         {items.map((item, i) => (
           <div key={i} className="flex items-center gap-2">
@@ -2763,25 +2764,25 @@ function BulletItemsEditor({
               onChange={(e) =>
                 onUpdateItem(section.id, i, { value: e.target.value })
               }
-              placeholder="Bullet text"
+              placeholder={t("custom.bulletPlaceholder")}
             />
             <div className="flex shrink-0 items-center gap-1">
               <IconButton
-                label="Move up"
+                label={t("actions.moveUp")}
                 disabled={i === 0}
                 onClick={() => onMoveItem(section.id, i, -1)}
               >
                 ↑
               </IconButton>
               <IconButton
-                label="Move down"
+                label={t("actions.moveDown")}
                 disabled={i === items.length - 1}
                 onClick={() => onMoveItem(section.id, i, 1)}
               >
                 ↓
               </IconButton>
               <IconButton
-                label="Remove"
+                label={t("actions.remove")}
                 danger
                 onClick={() => onRemoveItem(section.id, i)}
               >
@@ -2802,14 +2803,14 @@ function BulletItemsEditor({
               commit();
             }
           }}
-          placeholder="Add an item and press Enter"
+          placeholder={t("custom.addItemPlaceholder")}
         />
         <button
           type="button"
           onClick={commit}
           className="shrink-0 rounded-md border border-input px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted/50"
         >
-          Add item
+          {t("actions.addItem")}
         </button>
       </div>
     </div>
@@ -2835,10 +2836,11 @@ function CategoryValueEditor({
   onRemoveItem: (id: string, idx: number) => void;
   onMoveItem: (id: string, idx: number, dir: -1 | 1) => void;
 }) {
+  const t = useTranslations("builder");
   const items = section.items ?? [];
   return (
     <div>
-      {items.length > 0 && <label className={labelClass}>Items</label>}
+      {items.length > 0 && <label className={labelClass}>{t("custom.items")}</label>}
       <div className="space-y-2">
         {items.map((item, i) => (
           <div key={i} className="flex items-center gap-2">
@@ -2851,7 +2853,7 @@ function CategoryValueEditor({
               onChange={(e) =>
                 onUpdateItem(section.id, i, { category: e.target.value })
               }
-              placeholder="Category (e.g. Database)"
+              placeholder={t("custom.categoryPlaceholder")}
             />
             <input
               className={`${inputClass} min-w-0 flex-1`}
@@ -2859,25 +2861,25 @@ function CategoryValueEditor({
               onChange={(e) =>
                 onUpdateItem(section.id, i, { value: e.target.value })
               }
-              placeholder="Value (e.g. DB2, Oracle)"
+              placeholder={t("custom.valuePlaceholder")}
             />
             <div className="flex shrink-0 items-center gap-1">
               <IconButton
-                label="Move up"
+                label={t("actions.moveUp")}
                 disabled={i === 0}
                 onClick={() => onMoveItem(section.id, i, -1)}
               >
                 ↑
               </IconButton>
               <IconButton
-                label="Move down"
+                label={t("actions.moveDown")}
                 disabled={i === items.length - 1}
                 onClick={() => onMoveItem(section.id, i, 1)}
               >
                 ↓
               </IconButton>
               <IconButton
-                label="Remove"
+                label={t("actions.remove")}
                 danger
                 onClick={() => onRemoveItem(section.id, i)}
               >
@@ -2893,7 +2895,7 @@ function CategoryValueEditor({
           onClick={() => onAddItem(section.id, { category: "", value: "" })}
           className="rounded-md border border-input px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted/50"
         >
-          Add item
+          {t("actions.addItem")}
         </button>
       </div>
     </div>
@@ -2930,13 +2932,14 @@ function IconButton({
 }
 
 function AddButton({ onClick }: { onClick: () => void }) {
+  const t = useTranslations("builder");
   return (
     <button
       type="button"
       onClick={onClick}
       className="rounded-md border border-input px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/50"
     >
-      + Add
+      {t("actions.add")}
     </button>
   );
 }
@@ -3062,6 +3065,7 @@ function ItemCard({
   expanded: boolean;
   onToggle: () => void;
 }) {
+  const t = useTranslations("builder");
   return (
     <div
       className="rounded-lg border border-border bg-muted/50"
@@ -3097,7 +3101,7 @@ function ItemCard({
           onClick={onRemove}
           className="shrink-0 text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
         >
-          Remove
+          {t("actions.remove")}
         </button>
       </div>
       {expanded && <div className="border-t border-border p-3">{children}</div>}

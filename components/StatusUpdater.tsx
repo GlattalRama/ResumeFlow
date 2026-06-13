@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import type { ApplicationStatus } from "@/lib/types";
 import { APPLICATION_STATUSES } from "@/lib/constants";
 import { buttonClass } from "./ui";
@@ -13,6 +14,8 @@ export default function StatusUpdater({
   applicationId: string;
   current: ApplicationStatus;
 }) {
+  const t = useTranslations("application");
+  const tStatus = useTranslations("status");
   const router = useRouter();
   const [status, setStatus] = useState<ApplicationStatus>(current);
   const [comment, setComment] = useState("");
@@ -37,7 +40,7 @@ export default function StatusUpdater({
   return (
     <div className="flex flex-wrap items-end gap-2">
       <div>
-        <label className="block text-xs font-medium text-muted-foreground">Status</label>
+        <label className="block text-xs font-medium text-muted-foreground">{t("statusUpdater.status")}</label>
         <select
           className="mt-1 rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
           value={status}
@@ -45,14 +48,14 @@ export default function StatusUpdater({
         >
           {APPLICATION_STATUSES.map((s) => (
             <option key={s} value={s}>
-              {s}
+              {tStatus(s)}
             </option>
           ))}
         </select>
       </div>
       <input
         className="min-w-[12rem] flex-1 rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
-        placeholder="Optional comment for history"
+        placeholder={t("statusUpdater.commentPlaceholder")}
         value={comment}
         onChange={(e) => setComment(e.target.value)}
       />
@@ -61,7 +64,7 @@ export default function StatusUpdater({
         disabled={!changed || busy}
         className={buttonClass("primary")}
       >
-        {busy ? "Updating…" : "Update status"}
+        {busy ? t("statusUpdater.updating") : t("statusUpdater.update")}
       </button>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 // Per-section "Improve with AI" control. Streams a suggestion from
 // /api/ai/improve and shows it as a preview the user can Accept or Discard —
@@ -17,6 +18,7 @@ export default function ImproveButton({
   // Called with the accepted suggestion.
   onAccept: (value: string) => void;
 }) {
+  const t = useTranslations("ai");
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +30,7 @@ export default function ImproveButton({
     setSuggestion("");
 
     if (!text.trim()) {
-      setError("Add some text first, then improve it with AI.");
+      setError(t("improve.addTextFirst"));
       return;
     }
 
@@ -43,7 +45,7 @@ export default function ImproveButton({
       if (!res.ok || !res.body) {
         const msg = await res.text();
         if (res.status === 400 && /key/i.test(msg)) setNeedsKey(true);
-        setError(msg || "AI request failed.");
+        setError(msg || t("improve.requestFailed"));
         return;
       }
 
@@ -58,7 +60,7 @@ export default function ImproveButton({
         setSuggestion(acc);
       }
     } catch {
-      setError("Network error contacting the AI service.");
+      setError(t("improve.network"));
     } finally {
       setLoading(false);
     }
@@ -74,7 +76,7 @@ export default function ImproveButton({
           className="inline-flex items-center gap-1.5 rounded-md border border-brand-200 dark:border-brand-500/40 bg-brand-50 dark:bg-brand-500/15 px-2.5 py-1 text-xs font-medium text-brand-700 dark:text-brand-300 transition hover:bg-brand-100 dark:hover:bg-brand-500/20 disabled:opacity-60"
         >
           <span aria-hidden>✦</span>
-          {loading ? "Thinking…" : "Improve with AI"}
+          {loading ? t("improve.thinking") : t("improve.button")}
         </button>
       )}
 
@@ -83,7 +85,7 @@ export default function ImproveButton({
           {error}{" "}
           {needsKey && (
             <Link href="/settings" className="font-medium underline">
-              Open Settings
+              {t("improve.openSettings")}
             </Link>
           )}
         </p>
@@ -92,7 +94,8 @@ export default function ImproveButton({
       {suggestion && (
         <div className="mt-2 rounded-md border border-brand-200 dark:border-brand-500/40 bg-brand-50/60 dark:bg-brand-500/10 p-3">
           <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-brand-700 dark:text-brand-300">
-            AI suggestion{loading ? " (writing…)" : ""}
+            {t("improve.suggestion")}
+            {loading ? ` ${t("improve.writing")}` : ""}
           </p>
           <p className="whitespace-pre-wrap text-sm text-foreground">
             {suggestion}
@@ -107,14 +110,14 @@ export default function ImproveButton({
               }}
               className="rounded-md bg-brand-600 px-3 py-1 text-xs font-medium text-white hover:bg-brand-700 disabled:opacity-60"
             >
-              Accept
+              {t("improve.accept")}
             </button>
             <button
               type="button"
               onClick={() => setSuggestion("")}
               className="rounded-md border border-input bg-card px-3 py-1 text-xs font-medium text-foreground/80 hover:bg-muted/50"
             >
-              Discard
+              {t("improve.discard")}
             </button>
             <button
               type="button"
@@ -122,7 +125,7 @@ export default function ImproveButton({
               onClick={run}
               className="rounded-md border border-input bg-card px-3 py-1 text-xs font-medium text-foreground/80 hover:bg-muted/50 disabled:opacity-60"
             >
-              Regenerate
+              {t("improve.regenerate")}
             </button>
           </div>
         </div>

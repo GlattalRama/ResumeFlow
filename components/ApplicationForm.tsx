@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import type { Application, ApplicationStatus } from "@/lib/types";
 import { APPLICATION_STATUSES } from "@/lib/constants";
 import { buttonClass } from "./ui";
@@ -26,6 +27,8 @@ export default function ApplicationForm({
   initial,
   resumeOptions,
 }: Props) {
+  const t = useTranslations("application");
+  const tStatus = useTranslations("status");
   const router = useRouter();
   const [form, setForm] = useState({
     company: initial?.company ?? "",
@@ -60,12 +63,12 @@ export default function ApplicationForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error("Save failed");
+      if (!res.ok) throw new Error(t("form.saveFailed"));
       const saved = await res.json();
       router.push(`/applications/${saved.id}`);
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Save failed");
+      setError(e instanceof Error ? e.message : t("form.saveFailed"));
       setSaving(false);
     }
   }
@@ -75,23 +78,23 @@ export default function ApplicationForm({
       <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className={labelClass}>Company *</label>
+            <label className={labelClass}>{t("form.company")}</label>
             <input className={inputClass} value={form.company} onChange={(e) => set("company", e.target.value)} />
           </div>
           <div>
-            <label className={labelClass}>Job title *</label>
+            <label className={labelClass}>{t("form.jobTitle")}</label>
             <input className={inputClass} value={form.jobTitle} onChange={(e) => set("jobTitle", e.target.value)} />
           </div>
           <div>
-            <label className={labelClass}>Job ID</label>
+            <label className={labelClass}>{t("form.jobId")}</label>
             <input className={inputClass} value={form.jobId} onChange={(e) => set("jobId", e.target.value)} />
           </div>
           <div>
-            <label className={labelClass}>Job link</label>
+            <label className={labelClass}>{t("form.jobLink")}</label>
             <input className={inputClass} value={form.jobLink} onChange={(e) => set("jobLink", e.target.value)} />
           </div>
           <div>
-            <label className={labelClass}>Status</label>
+            <label className={labelClass}>{t("form.status")}</label>
             <select
               className={inputClass}
               value={form.status}
@@ -99,19 +102,19 @@ export default function ApplicationForm({
             >
               {APPLICATION_STATUSES.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {tStatus(s)}
                 </option>
               ))}
             </select>
           </div>
           <div>
-            <label className={labelClass}>Resume version used</label>
+            <label className={labelClass}>{t("form.resumeVersionUsed")}</label>
             <select
               className={inputClass}
               value={form.resumeVersionUsed}
               onChange={(e) => set("resumeVersionUsed", e.target.value)}
             >
-              <option value="">— none —</option>
+              <option value="">{t("form.noneOption")}</option>
               {resumeOptions.map((r) => (
                 <option key={r.id} value={r.id}>
                   {r.label}
@@ -120,20 +123,20 @@ export default function ApplicationForm({
             </select>
           </div>
           <div>
-            <label className={labelClass}>Applied date</label>
+            <label className={labelClass}>{t("form.appliedDate")}</label>
             <input type="date" className={inputClass} value={form.appliedDate} onChange={(e) => set("appliedDate", e.target.value)} />
           </div>
           <div>
-            <label className={labelClass}>Next action date</label>
+            <label className={labelClass}>{t("form.nextActionDate")}</label>
             <input type="date" className={inputClass} value={form.nextActionDate} onChange={(e) => set("nextActionDate", e.target.value)} />
           </div>
         </div>
         <div className="mt-3">
-          <label className={labelClass}>Next action</label>
-          <input className={inputClass} value={form.nextAction} onChange={(e) => set("nextAction", e.target.value)} placeholder="e.g. Follow up with recruiter" />
+          <label className={labelClass}>{t("form.nextAction")}</label>
+          <input className={inputClass} value={form.nextAction} onChange={(e) => set("nextAction", e.target.value)} placeholder={t("form.nextActionPlaceholder")} />
         </div>
         <div className="mt-3">
-          <label className={labelClass}>Job description</label>
+          <label className={labelClass}>{t("form.jobDescription")}</label>
           <textarea
             className={inputClass}
             rows={6}
@@ -147,10 +150,14 @@ export default function ApplicationForm({
 
       <div className="flex gap-2">
         <button onClick={save} disabled={saving} className={buttonClass("primary")}>
-          {saving ? "Saving…" : mode === "create" ? "Add application" : "Save changes"}
+          {saving
+            ? t("form.saving")
+            : mode === "create"
+              ? t("form.addApplication")
+              : t("form.saveChanges")}
         </button>
         <button onClick={() => router.back()} className={buttonClass("secondary")} type="button">
-          Cancel
+          {t("form.cancel")}
         </button>
       </div>
     </div>

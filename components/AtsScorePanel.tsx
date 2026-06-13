@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { AtsScoreResult } from "@/lib/atsScore";
 
 // Color band for a 0–100 score: red < 50 ≤ amber < 75 ≤ green.
@@ -17,6 +18,7 @@ export function ScoreRing({
   value: number;
   size?: number;
 }) {
+  const t = useTranslations("resumeDetail.ats");
   const stroke = Math.max(3, Math.round(size / 12));
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
@@ -27,7 +29,7 @@ export function ScoreRing({
       viewBox={`0 0 ${size} ${size}`}
       className={`shrink-0 ${scoreBandClass(value)}`}
       role="img"
-      aria-label={`ATS score ${value} of 100`}
+      aria-label={t("scoreAria", { value })}
     >
       <circle
         cx={size / 2}
@@ -79,6 +81,7 @@ export default function AtsScorePanel({
   jobDescription: string;
   onJobDescriptionChange: (value: string) => void;
 }) {
+  const t = useTranslations("resumeDetail.ats");
   return (
     <div className="space-y-5">
       {/* Overall + subscores */}
@@ -87,19 +90,20 @@ export default function AtsScorePanel({
         <div className="min-w-0 space-y-1">
           <p className="text-sm font-semibold text-foreground">
             {result.overall >= 75
-              ? "Strong — ready for ATS portals"
+              ? t("verdictStrong")
               : result.overall >= 50
-                ? "Getting there — work through the fixes below"
-                : "Needs work — start with the failed checks"}
+                ? t("verdictMedium")
+                : t("verdictWeak")}
           </p>
           <p className="text-xs text-muted-foreground">
-            Resume health{" "}
+            {t("resumeHealth")}{" "}
             <span className={`font-semibold ${scoreBandClass(result.healthScore)}`}>
               {result.healthScore}
             </span>
             {result.keywordScore != null && (
               <>
-                {" · "}Job match{" "}
+                {" · "}
+                {t("jobMatch")}{" "}
                 <span
                   className={`font-semibold ${scoreBandClass(result.keywordScore)}`}
                 >
@@ -107,9 +111,7 @@ export default function AtsScorePanel({
                 </span>
               </>
             )}
-            {result.keywordScore == null && (
-              <> · paste a job description to add keyword match</>
-            )}
+            {result.keywordScore == null && <> · {t("pasteJdHint")}</>}
           </p>
         </div>
       </div>
@@ -117,14 +119,14 @@ export default function AtsScorePanel({
       {/* Job description input */}
       <div>
         <label className="mb-1 block text-xs font-medium text-muted-foreground">
-          Job description
+          {t("jdLabel")}
         </label>
         <textarea
           className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           rows={5}
           value={jobDescription}
           onChange={(e) => onJobDescriptionChange(e.target.value)}
-          placeholder="Paste the job description here — keywords are extracted locally and matched against your resume as you type."
+          placeholder={t("jdPlaceholder")}
         />
       </div>
 
@@ -132,7 +134,10 @@ export default function AtsScorePanel({
       {result.hasJobDescription && result.keywords.length > 0 && (
         <div>
           <p className="mb-1.5 text-xs font-medium text-muted-foreground">
-            Keywords: {result.matchedCount} of {result.keywords.length} covered
+            {t("keywordsCovered", {
+              matched: result.matchedCount,
+              total: result.keywords.length,
+            })}
           </p>
           <div className="flex flex-wrap gap-1.5">
             {result.keywords.map(({ keyword, matched }) => (
@@ -143,7 +148,7 @@ export default function AtsScorePanel({
                     ? "border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-950/40 dark:text-green-300"
                     : "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
                 }`}
-                title={matched ? "Found in your resume" : "Not found in your resume"}
+                title={matched ? t("keywordFound") : t("keywordMissing")}
               >
                 {matched ? "✓ " : ""}
                 {keyword}
@@ -152,8 +157,7 @@ export default function AtsScorePanel({
           </div>
           {result.matchedCount < result.keywords.length && (
             <p className="mt-1.5 text-xs text-muted-foreground/70">
-              Weave missing keywords into your summary, skills, or bullets —
-              but only where they're true.
+              {t("missingKeywordsHint")}
             </p>
           )}
         </div>
@@ -162,7 +166,7 @@ export default function AtsScorePanel({
       {/* Health checks */}
       <div>
         <p className="mb-1.5 text-xs font-medium text-muted-foreground">
-          Resume health checks
+          {t("healthChecksHeading")}
         </p>
         <ul className="space-y-1.5">
           {result.checks.map((check) => {
@@ -210,11 +214,7 @@ export default function AtsScorePanel({
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground/70">
-        Scores are heuristic guidance computed locally — nothing is sent to a
-        server. Different ATS vendors parse differently; the ATS-safe export is
-        the safest format for portals.
-      </p>
+      <p className="text-xs text-muted-foreground/70">{t("disclaimer")}</p>
     </div>
   );
 }

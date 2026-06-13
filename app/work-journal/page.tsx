@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { readAll } from "@/lib/store";
 import { resolveBaseResumeId } from "@/lib/baseResume";
 import WorkJournal from "@/components/WorkJournal";
@@ -5,6 +6,7 @@ import WorkJournal from "@/components/WorkJournal";
 export const dynamic = "force-dynamic";
 
 export default async function WorkJournalPage() {
+  const t = await getTranslations("workJournal");
   const [notes, resumes, baseResumeId] = await Promise.all([
     readAll("workJournal"),
     readAll("resumes"),
@@ -18,7 +20,7 @@ export default async function WorkJournalPage() {
     name: r.versionName,
     isBase: r.id === baseResumeId,
     experience: r.resumeData.experience.map(
-      (e) => `${e.role || "Untitled role"} — ${e.company || "Unknown company"}`
+      (e) => `${e.role || t("untitledRole")} — ${e.company || t("unknownCompany")}`
     ),
   }));
 

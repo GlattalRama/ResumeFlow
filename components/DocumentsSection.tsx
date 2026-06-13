@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import type { DocumentMeta } from "@/lib/types";
 
+// Document type VALUES are data; only their display labels are localized.
 const DOC_TYPES = ["Resume", "Cover Letter", "Portfolio", "Other"];
 
 export default function DocumentsSection({
@@ -15,6 +17,7 @@ export default function DocumentsSection({
   documents: DocumentMeta[];
   resumeOptions: { id: string; label: string }[];
 }) {
+  const t = useTranslations("application");
   const router = useRouter();
   const [name, setName] = useState("");
   const [type, setType] = useState("Resume");
@@ -53,15 +56,19 @@ export default function DocumentsSection({
     return resumeOptions.find((r) => r.id === id)?.label;
   }
 
+  function docTypeLabel(docType: string) {
+    return DOC_TYPES.includes(docType) ? t(`docType.${docType}`) : docType;
+  }
+
   return (
     <div>
       <p className="mb-2 text-xs text-muted-foreground/70">
-        Stores document metadata only (no files are uploaded).
+        {t("docs.metaOnly")}
       </p>
       <div className="flex flex-wrap gap-2">
         <input
           className="min-w-[10rem] flex-1 rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm"
-          placeholder="Document name"
+          placeholder={t("docs.namePlaceholder")}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
@@ -70,9 +77,9 @@ export default function DocumentsSection({
           value={type}
           onChange={(e) => setType(e.target.value)}
         >
-          {DOC_TYPES.map((t) => (
-            <option key={t} value={t}>
-              {t}
+          {DOC_TYPES.map((docType) => (
+            <option key={docType} value={docType}>
+              {docTypeLabel(docType)}
             </option>
           ))}
         </select>
@@ -81,7 +88,7 @@ export default function DocumentsSection({
           value={resumeVersionId}
           onChange={(e) => setResumeVersionId(e.target.value)}
         >
-          <option value="">— resume version —</option>
+          <option value="">{t("docs.resumeVersionOption")}</option>
           {resumeOptions.map((r) => (
             <option key={r.id} value={r.id}>
               {r.label}
@@ -90,7 +97,7 @@ export default function DocumentsSection({
         </select>
         <input
           className="min-w-[10rem] flex-1 rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm"
-          placeholder="Link (optional)"
+          placeholder={t("docs.linkPlaceholder")}
           value={link}
           onChange={(e) => setLink(e.target.value)}
         />
@@ -99,13 +106,13 @@ export default function DocumentsSection({
           disabled={busy}
           className="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
         >
-          Add
+          {t("docs.add")}
         </button>
       </div>
 
       <ul className="mt-4 space-y-2">
         {documents.length === 0 && (
-          <li className="text-sm text-muted-foreground/70">No documents linked yet.</li>
+          <li className="text-sm text-muted-foreground/70">{t("docs.empty")}</li>
         )}
         {documents.map((d) => (
           <li
@@ -114,7 +121,7 @@ export default function DocumentsSection({
           >
             <div>
               <span className="mr-2 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
-                {d.type}
+                {docTypeLabel(d.type)}
               </span>
               <span className="text-sm text-foreground">{d.name}</span>
               {d.resumeVersionId && resumeLabel(d.resumeVersionId) && (
@@ -129,7 +136,7 @@ export default function DocumentsSection({
                   rel="noreferrer"
                   className="ml-2 text-xs text-brand-600 dark:text-brand-300 hover:underline"
                 >
-                  open
+                  {t("docs.open")}
                 </a>
               )}
             </div>
@@ -137,7 +144,7 @@ export default function DocumentsSection({
               onClick={() => remove(d.id)}
               className="text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
             >
-              Delete
+              {t("docs.delete")}
             </button>
           </li>
         ))}

@@ -153,5 +153,691 @@
     "scopeNote": "Nous demandons uniquement l'accès au dossier de données applicatives de Resumeflow-ATS dans votre Google Drive.",
     "privacy": "Politique de confidentialité",
     "terms": "Conditions d'utilisation"
+  },
+  "ai": {
+    "tailor": {
+      "openButton": "Adapter le CV à cette offre",
+      "title": "Adapter le CV à cette offre",
+      "subtitle": "L'IA reformule et réorganise votre contenu existant — elle n'invente jamais de faits. Examinez chaque modification ; votre CV source n'est pas modifié.",
+      "close": "Fermer",
+      "noResumesBanner": "Vous n'avez pas encore de CV. L'adaptation reformule un CV existant pour cette offre : créez-en d'abord un, puis revenez ici pour l'adapter.",
+      "cancel": "Annuler",
+      "createResume": "Créer un CV",
+      "sourceLabel": "CV source",
+      "choosePlaceholder": "Choisissez un CV…",
+      "defaultOption": "{label} — par défaut",
+      "sourceHint": "Votre CV de base est utilisé par défaut. Votre propre clé API (Paramètres) est recommandée pour des adaptations fréquentes.",
+      "generate": "Générer",
+      "generating": "Adaptation en cours…",
+      "changesTab": "Modifications ({count})",
+      "sideBySide": "Côte à côte",
+      "noChanges": "L'adaptation n'a produit aucune modification — votre CV correspond déjà bien à cette description de poste.",
+      "proposedChanges": "{count, plural, one {# modification proposée} other {# modifications proposées}} — examinez-les une par une. Refuser conserve votre formulation d'origine.",
+      "heldBack": "Retenues par la vérification des faits :",
+      "discard": "Abandonner",
+      "regenerate": "Régénérer",
+      "nothingToSave": "Toutes les modifications ont été refusées — il n'y a rien à enregistrer.",
+      "saving": "Enregistrement…",
+      "saveAsNewVersion": "Enregistrer comme nouvelle version",
+      "saveWithCount": "Enregistrer comme nouvelle version ({accepted} sur {total})",
+      "accept": "Accepter",
+      "keepOriginal": "Conserver l'original",
+      "dropped": "Écartés car moins pertinents :",
+      "atsScore": "Score ATS",
+      "keywords": "Mots-clés",
+      "original": "Original",
+      "tailoredOutlined": "Adapté — modifications acceptées encadrées",
+      "errors": {
+        "failed": "L'adaptation a échoué. Veuillez réessayer.",
+        "sourceLoad": "Impossible de charger le CV source. Veuillez réessayer.",
+        "network": "Erreur réseau. Veuillez réessayer.",
+        "save": "Impossible d'enregistrer le CV adapté.",
+        "networkSave": "Erreur réseau lors de l'enregistrement. Veuillez réessayer."
+      }
+    },
+    "changeType": {
+      "rephrased": "Reformulé",
+      "reordered": "Réorganisé",
+      "emphasized": "Mis en valeur",
+      "unchanged": "Inchangé",
+      "rejected": "Refusé"
+    },
+    "coverLetter": {
+      "intro": "Rédige une lettre à partir de votre CV et de la description de ce poste — en utilisant uniquement des faits issus de votre CV. Vous la modifiez avant de l'envoyer ; rien n'est enregistré tant que vous n'appuyez pas sur Enregistrer.",
+      "sourceAria": "CV source",
+      "toneAria": "Ton",
+      "choosePlaceholder": "Choisissez un CV…",
+      "defaultOption": "{label} — par défaut",
+      "generate": "Générer la lettre de motivation",
+      "regenerate": "Régénérer",
+      "writing": "Rédaction…",
+      "letterAria": "Texte de la lettre de motivation",
+      "wordCount": "{count, plural, one {# mot} other {# mots}}",
+      "generatedMeta": "générée le {date} ({tone})",
+      "unsavedEdits": "modifications non enregistrées",
+      "copy": "Copier",
+      "copied": "Copié ✓",
+      "download": "Télécharger en .docx",
+      "save": "Enregistrer",
+      "saved": "Enregistré ✓",
+      "saving": "Enregistrement…",
+      "fileName": "Lettre de motivation - {company}.docx",
+      "fileNameFallback": "candidature",
+      "unverifiedWarning": "Vérifiez ces chiffres — ils n'ont été trouvés ni dans votre CV ni dans la description du poste :",
+      "tone": {
+        "professional": "Professionnel",
+        "warm": "Chaleureux",
+        "direct": "Direct"
+      },
+      "errors": {
+        "generation": "La génération a échoué. Veuillez réessayer.",
+        "network": "Erreur réseau. Veuillez réessayer.",
+        "save": "Impossible d'enregistrer la lettre de motivation.",
+        "networkSave": "Erreur réseau lors de l'enregistrement.",
+        "clipboard": "Impossible d'accéder au presse-papiers — sélectionnez et copiez manuellement."
+      }
+    },
+    "actions": {
+      "intro": "Généré à partir de votre CV et de cette offre — à relire avant utilisation.",
+      "working": "En cours…",
+      "done": "Terminé.",
+      "labels": {
+        "generate-qna": "Générer des questions-réponses d'entretien",
+        "interview-briefing": "Générer un briefing d'entretien",
+        "cover-letter": "Générer une lettre de motivation",
+        "follow-up": "Générer un message de relance"
+      },
+      "errors": {
+        "generic": "Une erreur est survenue. Veuillez réessayer.",
+        "network": "Erreur réseau. Veuillez réessayer."
+      }
+    },
+    "improve": {
+      "button": "Améliorer avec l'IA",
+      "thinking": "Réflexion…",
+      "addTextFirst": "Ajoutez d'abord du texte, puis améliorez-le avec l'IA.",
+      "requestFailed": "La requête IA a échoué.",
+      "network": "Erreur réseau lors de la connexion au service d'IA.",
+      "openSettings": "Ouvrir les paramètres",
+      "suggestion": "Suggestion de l'IA",
+      "writing": "(rédaction…)",
+      "accept": "Accepter",
+      "discard": "Abandonner",
+      "regenerate": "Régénérer"
+    },
+    "error": {
+      "title": "Une erreur est survenue",
+      "description": "Votre session a peut-être expiré. Déconnectez-vous puis reconnectez-vous pour rétablir l'accès à votre Google Drive, ou réessayez de charger la page.",
+      "reauth": "Se déconnecter et se reconnecter",
+      "signingIn": "Connexion…",
+      "tryAgain": "Réessayer",
+      "reference": "Référence de l'erreur : {digest}"
+    }
+  },
+  "application": {
+    "form": {
+      "company": "Entreprise *",
+      "jobTitle": "Intitulé du poste *",
+      "jobId": "ID de l'offre",
+      "jobLink": "Lien de l'offre",
+      "status": "Statut",
+      "resumeVersionUsed": "Version du CV utilisée",
+      "noneOption": "— aucune —",
+      "appliedDate": "Date de candidature",
+      "nextActionDate": "Date de la prochaine action",
+      "nextAction": "Prochaine action",
+      "nextActionPlaceholder": "p. ex. Relancer le recruteur",
+      "jobDescription": "Description du poste",
+      "saving": "Enregistrement…",
+      "addApplication": "Ajouter une candidature",
+      "saveChanges": "Enregistrer les modifications",
+      "cancel": "Annuler",
+      "saveFailed": "Échec de l'enregistrement"
+    },
+    "statusUpdater": {
+      "status": "Statut",
+      "commentPlaceholder": "Commentaire facultatif pour l'historique",
+      "updating": "Mise à jour…",
+      "update": "Mettre à jour le statut"
+    },
+    "notes": {
+      "placeholder": "Ajouter une note…",
+      "add": "Ajouter",
+      "empty": "Aucune note pour le moment.",
+      "delete": "Supprimer"
+    },
+    "noteType": {
+      "general": "Général",
+      "recruiter": "Recruteur",
+      "interview": "Entretien",
+      "todo": "À faire"
+    },
+    "docs": {
+      "metaOnly": "Seules les métadonnées des documents sont enregistrées (aucun fichier n'est téléversé).",
+      "namePlaceholder": "Nom du document",
+      "resumeVersionOption": "— version du CV —",
+      "linkPlaceholder": "Lien (facultatif)",
+      "add": "Ajouter",
+      "empty": "Aucun document lié pour le moment.",
+      "open": "ouvrir",
+      "delete": "Supprimer"
+    },
+    "docType": {
+      "Resume": "CV",
+      "Cover Letter": "Lettre de motivation",
+      "Portfolio": "Portfolio",
+      "Other": "Autre"
+    },
+    "actions": {
+      "confirmDelete": "Supprimer cette candidature ? Cette action est irréversible.",
+      "edit": "Modifier",
+      "delete": "Supprimer"
+    },
+    "detail": {
+      "allApplications": "Toutes les candidatures",
+      "untitledRole": "Poste sans titre",
+      "unknownCompany": "Entreprise inconnue",
+      "jobId": "ID de l'offre {id}",
+      "overview": "Aperçu",
+      "appliedDate": "Date de candidature",
+      "nextAction": "Prochaine action",
+      "resumeVersion": "Version du CV",
+      "jobLink": "Lien de l'offre",
+      "jobDescription": "Description du poste",
+      "status": "Statut",
+      "statusHistory": "Historique des statuts",
+      "noHistory": "Aucun historique pour le moment.",
+      "aiAssistant": "Assistant IA",
+      "tailoredResume": "CV personnalisé",
+      "coverLetter": "Lettre de motivation",
+      "interviewCoach": "Coach d'entretien",
+      "interviewCoachHint": "Préparez des questions et des réponses pour cette candidature — sur la base de votre CV, de votre journal de travail et de cette description de poste.",
+      "prepareInterview": "Préparer l'entretien",
+      "notes": "Notes",
+      "documents": "Documents"
+    },
+    "new": {
+      "title": "Nouvelle candidature",
+      "subtitle": "Enregistrez un poste auquel vous candidatez et associez une version de votre CV."
+    },
+    "edit": {
+      "title": "Modifier la candidature"
+    }
+  },
+  "builder": {
+    "page": {
+      "newTitle": "Nouveau CV",
+      "newSubtitle": "Renseignez vos informations et choisissez un modèle. L’aperçu se met à jour en direct.",
+      "editTitle": "Modifier le CV"
+    },
+    "actions": {
+      "add": "+ Ajouter",
+      "addItem": "Ajouter un élément",
+      "remove": "Supprimer",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "saving": "Enregistrement…",
+      "createResume": "Créer le CV",
+      "saveAndView": "Enregistrer et afficher",
+      "moveUp": "Monter",
+      "moveDown": "Descendre",
+      "back": "Retour",
+      "next": "Suivant : {title}",
+      "done": "Terminé",
+      "resetToDefault": "Réinitialiser"
+    },
+    "autosave": {
+      "saving": "Enregistrement…",
+      "saved": "Enregistré ✓",
+      "error": "Échec de l’enregistrement"
+    },
+    "errors": {
+      "photoUpload": "Échec de l’envoi de la photo",
+      "import": "Échec de l’import",
+      "save": "Échec de l’enregistrement"
+    },
+    "import": {
+      "title": "Partir d’un CV existant",
+      "description": "Téléversez un fichier PDF ou Word (.docx) et l’IA le répartira dans les sections ci-dessous. Rien n’est enregistré tant que vous n’appuyez pas sur « Créer le CV ».",
+      "button": "Importer un fichier",
+      "reading": "Lecture…",
+      "parsing": "Analyse et classement par l’IA — cela peut prendre quelques secondes.",
+      "imported": "Importé. Vérifiez les sections ci-dessous, puis appuyez sur « Créer le CV » pour enregistrer."
+    },
+    "rail": {
+      "setup": "Configuration",
+      "content": "Contenu",
+      "sectionsNav": "Sections du CV"
+    },
+    "ats": {
+      "score": "Score ATS",
+      "chip": "ATS {score}",
+      "keywordsMatched": "{matched}/{total} mots-clés trouvés",
+      "addJobDescription": "Ajoutez une offre d’emploi",
+      "openPanel": "Ouvrir le panneau du score ATS",
+      "safeView": "Vue compatible ATS"
+    },
+    "preview": {
+      "title": "Aperçu en direct",
+      "clickHint": "Cliquez sur une partie de la page pour accéder à son éditeur.",
+      "zoomIn": "Zoom avant",
+      "zoomOut": "Zoom arrière",
+      "fit": "Ajuster",
+      "fitToWidth": "Ajuster à la largeur"
+    },
+    "mobile": {
+      "edit": "Modifier",
+      "preview": "Aperçu",
+      "prevSection": "Section précédente",
+      "nextSection": "Section suivante",
+      "tapToEdit": "Touchez une section pour la modifier"
+    },
+    "style": {
+      "layoutDensity": "Densité de mise en page",
+      "presets": {
+        "compact": {
+          "label": "Compact",
+          "desc": "Le plus de contenu par page"
+        },
+        "balanced": {
+          "label": "Équilibré",
+          "desc": "Le rendu par défaut"
+        },
+        "spacious": {
+          "label": "Aéré",
+          "desc": "Espacé et facile à parcourir"
+        }
+      },
+      "font": "Police",
+      "bodyTextSize": "Taille du texte",
+      "nameSize": "Taille du nom",
+      "headingSize": "Taille des titres",
+      "colorTheme": "Thème de couleurs",
+      "themes": {
+        "corporateBlue": "Bleu corporate",
+        "graphite": "Graphite",
+        "indigo": "Indigo",
+        "forest": "Vert forêt",
+        "burgundy": "Bordeaux"
+      },
+      "customColors": "Couleurs personnalisées",
+      "primaryColor": "Couleur principale",
+      "bodyTextColor": "Couleur du texte",
+      "mutedTextColor": "Couleur du texte secondaire",
+      "sectionLineColor": "Couleur des lignes de section",
+      "pageMargins": "Marges de page",
+      "customMargins": "personnalisé",
+      "lineHeight": "Interligne",
+      "sectionGap": "Espacement des sections",
+      "bulletGap": "Espacement des puces",
+      "perSideMargins": "Marges par côté",
+      "sides": {
+        "top": "Haut",
+        "right": "Droite",
+        "bottom": "Bas",
+        "left": "Gauche"
+      },
+      "hint": "Appliqué en direct à l’aperçu et enregistré avec cette version. Les marges définissent les marges de la page A4 imprimée. Le modèle « ATS Corporate Style » utilise tous les réglages ; les autres modèles utilisent la police et la couleur principale."
+    },
+    "version": {
+      "name": "Nom de la version",
+      "namePlaceholder": "p. ex. Ingénieur backend v2",
+      "targetRole": "Poste visé",
+      "targetRolePlaceholder": "p. ex. Ingénieur backend senior"
+    },
+    "basics": {
+      "fullName": "Nom complet",
+      "headline": "Accroche / titre",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "location": "Localisation",
+      "website": "Site web",
+      "profilePhoto": "Photo de profil",
+      "photoAlt": "Aperçu du profil",
+      "noPhoto": "Pas de photo",
+      "uploading": "Envoi…",
+      "changePhoto": "Changer la photo",
+      "uploadPhoto": "Téléverser une photo",
+      "removePhoto": "Supprimer la photo",
+      "shape": "Forme :",
+      "shapes": {
+        "square": "Carrée",
+        "circle": "Ronde"
+      },
+      "photoHint": "Enregistrée comme image dans les données d’application de votre Google Drive (seule la référence du fichier est conservée dans le CV). Affichée dans l’en-tête du modèle « ATS Corporate Style ». En mode développement local, elle est intégrée en Base64."
+    },
+    "summary": {
+      "label": "Résumé professionnel",
+      "placeholder": "2-3 phrases résumant votre expérience et vos points forts."
+    },
+    "common": {
+      "start": "Début",
+      "end": "Fin"
+    },
+    "experience": {
+      "newRole": "Nouveau poste",
+      "role": "Poste",
+      "company": "Entreprise",
+      "location": "Lieu",
+      "highlights": "Réalisations (une puce par ligne)",
+      "highlightsHint": "Une puce par ligne — Entrée ajoute une puce",
+      "highlightsPlaceholder": "Réalisations clés, une par ligne"
+    },
+    "education": {
+      "newEducation": "Nouvelle formation",
+      "school": "Établissement",
+      "degree": "Diplôme",
+      "field": "Domaine"
+    },
+    "projects": {
+      "newProject": "Nouveau projet",
+      "name": "Nom",
+      "link": "Lien",
+      "description": "Description"
+    },
+    "skills": {
+      "category": "Catégorie",
+      "value": "Valeur",
+      "categoryPlaceholder": "p. ex. Mainframe",
+      "valuePlaceholder": "p. ex. COBOL, PL/I, JCL"
+    },
+    "certifications": {
+      "label": "Certifications (une par ligne)"
+    },
+    "languages": {
+      "label": "Langues (une par ligne)"
+    },
+    "areas": {
+      "bulletStyle": "Style de puce",
+      "itemPlaceholder": "p. ex. Modernisation mainframe",
+      "addPlaceholder": "Ajoutez un domaine d’expertise et appuyez sur Entrée",
+      "hint": "Affiché en liste équilibrée sur deux colonnes dans le modèle « ATS Corporate Style », avec le style de puce choisi."
+    },
+    "sections": {
+      "intro": "Réorganisez, renommez et affichez ou masquez les sections du CV. Cet ordre et ces noms s’appliquent à l’aperçu en direct et aux exports PDF, DOCX et PPTX. Les sections vides sont masquées automatiquement. « Saut après » force la section suivante à commencer sur une nouvelle page A4 (modèle « ATS Corporate Style », aperçu + PDF).",
+      "custom": "(personnalisée)",
+      "renamed": "(renommée)",
+      "show": "Afficher",
+      "breakAfter": "Saut après",
+      "rename": "Renommer la section « {label} »",
+      "moveUp": "Monter la section",
+      "moveDown": "Descendre la section",
+      "defaultPlaceholder": "Par défaut : {title}",
+      "namePlaceholder": "Nom de la section"
+    },
+    "custom": {
+      "intro": "Ajoutez vos propres sections (projets, distinctions, publications, …). Chacune rejoint l’ordre du document dans la carte « Sections du document » : vous pouvez la placer où vous voulez et elle apparaît dans l’aperçu en direct et dans chaque export.",
+      "addSection": "+ Ajouter une section personnalisée",
+      "hidden": "(masquée)",
+      "showInResume": "Afficher dans le CV",
+      "deleteSection": "Supprimer la section",
+      "sectionTitle": "Titre de la section",
+      "sectionTitlePlaceholder": "p. ex. Projets",
+      "layoutType": "Type de mise en page",
+      "bulletStyle": "Style de puce",
+      "content": "Contenu",
+      "freeTextPlaceholder": "Contenu en paragraphe pour cette section.",
+      "items": "Éléments",
+      "bulletPlaceholder": "Texte de la puce",
+      "addItemPlaceholder": "Ajoutez un élément et appuyez sur Entrée",
+      "categoryPlaceholder": "Catégorie (p. ex. Base de données)",
+      "valuePlaceholder": "Valeur (p. ex. DB2, Oracle)"
+    }
+  },
+  "interviewCoach": {
+    "title": "Coach d'entretien",
+    "subtitle": "Préparez des questions et des réponses fondées sur votre journal de travail, votre CV et le poste que vous visez.",
+    "preparingFor": "Préparation pour",
+    "allQuestions": "Toutes les questions",
+    "generalPractice": "Entraînement général (sans candidature)",
+    "untitledRole": "Poste sans titre",
+    "unknownCompany": "Entreprise inconnue",
+    "noJobDescription": "Cette candidature n'a pas de description de poste.",
+    "generateQuestions": "✦ Générer des questions à partir de la description de poste",
+    "generating": "Génération…",
+    "manualPlaceholder": "Saisissez une question, p. ex. « Parlez-moi de vous »",
+    "addQuestion": "+ Ajouter une question",
+    "adding": "Ajout…",
+    "bannerAdded": "{count, plural, one {# nouvelle question ajoutée} other {# nouvelles questions ajoutées}}.",
+    "bannerAddedSkipped": "{count, plural, one {# nouvelle question ajoutée} other {# nouvelles questions ajoutées}} ({skipped, plural, one {# existait déjà} other {# existaient déjà}}).",
+    "confirmDelete": "Supprimer cette question et sa réponse ?",
+    "confirmRegenerate": "Remplacer la réponse enregistrée par une nouvelle réponse générée ? Votre réponse actuelle sera écrasée (l'historique des révisions est conservé).",
+    "context": {
+      "company": "Entreprise :",
+      "jobTitle": "Intitulé du poste :",
+      "jobId": "Référence du poste :",
+      "status": "Statut :",
+      "resume": "CV :",
+      "notes": "Notes :",
+      "jd": "Description de poste :",
+      "noneLinked": "aucun lié",
+      "notesUsed": "{count, plural, one {# utilisée comme preuve} other {# utilisées comme preuves}}"
+    },
+    "errors": {
+      "addQuestion": "Impossible d'ajouter la question",
+      "save": "Échec de l'enregistrement",
+      "questionGeneration": "Échec de la génération des questions",
+      "answerGeneration": "Échec de la génération de la réponse",
+      "revision": "Échec de la révision",
+      "generic": "Une erreur s'est produite"
+    },
+    "empty": {
+      "title": "Pas encore de questions",
+      "hintApplication": "Générez des questions à partir de la description de poste, ou saisissez-en une ci-dessus.",
+      "hintGeneral": "Saisissez une question ci-dessus, ou choisissez une candidature pour générer des questions à partir de la description de poste."
+    },
+    "category": {
+      "General": "Général",
+      "Resume Based": "Basées sur le CV",
+      "Job Description Based": "Basées sur la description de poste",
+      "Technical": "Techniques",
+      "Behavioral": "Comportementales",
+      "HR": "RH",
+      "Gap / Risk": "Lacunes / Risques",
+      "Salary / Notice Period": "Salaire / Préavis"
+    },
+    "statusChip": {
+      "draft": "Brouillon",
+      "aiGenerated": "Brouillon IA",
+      "userEdited": "Modifiée",
+      "final": "Finale"
+    },
+    "revise": {
+      "improve": "Améliorer",
+      "shorter": "Plus court",
+      "detailed": "Plus détaillé",
+      "star": "Format STAR",
+      "confident": "Plus assuré",
+      "professional": "Plus professionnel",
+      "resumeTone": "Aligner sur le CV"
+    },
+    "entry": {
+      "collapse": "Réduire",
+      "open": "Ouvrir",
+      "answer": "Répondre",
+      "formatParagraph": "Paragraphe",
+      "formatStar": "STAR",
+      "formatBullets": "Liste à puces",
+      "toneNeutral": "Ton neutre",
+      "toneConfident": "Ton assuré",
+      "toneProfessional": "Ton professionnel",
+      "evidence": "Preuves :",
+      "workJournal": "Journal de travail",
+      "baseResume": "CV de base",
+      "answerPlaceholder": "Rédigez votre réponse ici — ou générez-en une avec l'IA.",
+      "saveAnswer": "Enregistrer la réponse",
+      "saving": "Enregistrement…",
+      "generateAnswer": "✦ Générer une réponse",
+      "cancel": "Annuler",
+      "edit": "Modifier",
+      "copy": "Copier",
+      "copied": "Copié ✓",
+      "markFinal": "Marquer comme finale ✓",
+      "unmarkFinal": "Retirer le marquage final",
+      "regenerate": "Régénérer…",
+      "regenerating": "Régénération…",
+      "working": "En cours…",
+      "revisedAnswer": "Réponse révisée",
+      "acceptRevision": "Accepter la révision",
+      "reject": "Rejeter",
+      "evidenceUsed": "Preuves utilisées",
+      "missingEvidence": "Preuves manquantes",
+      "revisionHistory": "Historique des révisions ({count})",
+      "deleteQuestion": "Supprimer la question"
+    }
+  },
+  "resumeDetail": {
+    "resumeDetail": {
+      "allResumes": "Tous les CV",
+      "baseResume": "CV de base",
+      "templateLabel": "Modèle :",
+      "downloadPdf": "Télécharger le PDF",
+      "downloadDocx": "Télécharger le DOCX",
+      "downloadPptx": "Télécharger le PPTX",
+      "preparing": "Préparation…",
+      "edit": "Modifier",
+      "duplicate": "Dupliquer",
+      "setAsBase": "Définir comme CV de base",
+      "setAsBaseShort": "Définir comme base",
+      "settingBase": "Définition…",
+      "delete": "Supprimer",
+      "deleteNeedsBaseAlert": "Sélectionnez d'abord un CV de base. Vous devez désigner un CV de base avant de pouvoir supprimer une version de CV.",
+      "deleteBaseAlert": "Le CV de base ne peut pas être supprimé. Désignez d'abord une autre version comme CV de base.",
+      "deleteConfirm": "Supprimer cette version du CV ? Cette action est irréversible.",
+      "deleteNeedsBaseTitle": "Sélectionnez d'abord un CV de base avant de supprimer une version.",
+      "deleteBaseTitle": "Le CV de base ne peut pas être supprimé.",
+      "docxExportFailed": "Échec de l'export DOCX.",
+      "pptxExportFailed": "Échec de l'export PPTX.",
+      "atsSafeMode": "Mode compatible ATS",
+      "atsSafeHint": "(une seule colonne, sans photo — s'applique à l'aperçu, au PDF et au DOCX)",
+      "history": {
+        "title": "Historique des versions",
+        "empty": "Aucun instantané pour le moment. Ils sont capturés automatiquement pendant vos modifications — au plus un toutes les 10 minutes — et avant chaque restauration.",
+        "beforeRestore": "avant restauration",
+        "identicalToCurrent": "Identique à la version actuelle",
+        "differsIn": "Diffère dans : {groups}",
+        "compare": "Comparer",
+        "hideCompare": "Masquer la comparaison",
+        "restore": "Restaurer",
+        "restoring": "Restauration…",
+        "restoreThisSnapshot": "Restaurer cet instantané",
+        "restoreConfirm": "Restaurer le CV à son état du {when} ? Votre état actuel est d'abord sauvegardé en instantané, vous pourrez donc annuler depuis l'historique.",
+        "restoreFailed": "Échec de la restauration.",
+        "restoreNetworkError": "Erreur réseau pendant la restauration.",
+        "comparingFrom": "Comparaison de l'instantané du {when} avec l'état actuel",
+        "labelSnapshot": "Instantané — {date}",
+        "labelCurrent": "Actuel — différences encadrées",
+        "groups": {
+          "basicsSummary": "Informations & résumé",
+          "areasOfExpertise": "Domaines d'expertise",
+          "experience": "Expérience",
+          "education": "Formation",
+          "projects": "Projets",
+          "skills": "Compétences",
+          "certifications": "Certifications",
+          "languages": "Langues",
+          "customSections": "Sections personnalisées",
+          "templateStyle": "Modèle & style",
+          "nameTargetRole": "Nom / poste visé"
+        }
+      },
+      "ats": {
+        "scoreAria": "Score ATS {value} sur 100",
+        "verdictStrong": "Solide — prêt pour les portails ATS",
+        "verdictMedium": "En bonne voie — traitez les corrections ci-dessous",
+        "verdictWeak": "À retravailler — commencez par les contrôles en échec",
+        "resumeHealth": "Santé du CV",
+        "jobMatch": "Correspondance avec l'offre",
+        "pasteJdHint": "collez une description de poste pour ajouter la correspondance des mots-clés",
+        "jdLabel": "Description du poste",
+        "jdPlaceholder": "Collez ici la description du poste — les mots-clés sont extraits localement et comparés à votre CV au fil de la saisie.",
+        "keywordsCovered": "Mots-clés : {matched} sur {total} couverts",
+        "keywordFound": "Présent dans votre CV",
+        "keywordMissing": "Absent de votre CV",
+        "missingKeywordsHint": "Intégrez les mots-clés manquants dans votre résumé, vos compétences ou vos puces — mais uniquement là où ils sont véridiques.",
+        "healthChecksHeading": "Contrôles de santé du CV",
+        "disclaimer": "Les scores sont des indications heuristiques calculées localement — rien n'est envoyé à un serveur. Chaque ATS analyse différemment ; l'export compatible ATS est le format le plus sûr pour les portails."
+      }
+    }
+  },
+  "workJournal": {
+    "title": "Journal de travail",
+    "subtitle": "Notez vos projets, réussites et histoires STAR pendant qu'ils sont frais — puis transformez-les en points pour votre CV.",
+    "newEntry": "+ Nouvelle entrée",
+    "searchPlaceholder": "Rechercher des entrées…",
+    "resumeReadyCheck": "✓ Prêt pour le CV",
+    "editEntry": "Modifier l'entrée",
+    "newEntryHeading": "Nouvelle entrée",
+    "emptyTitle": "Aucune entrée pour le moment",
+    "noMatchTitle": "Aucune entrée correspondante",
+    "emptyHint": "Notez ce sur quoi vous avez travaillé — le projet, le problème, l'impact — avant d'oublier les détails.",
+    "noMatchHint": "Essayez une autre recherche ou effacez les filtres.",
+    "saveFailed": "Échec de l'enregistrement",
+    "confirmDelete": "Supprimer cette entrée du journal ? Cette action est irréversible.",
+    "errorNoTitle": "Donnez un titre à l'entrée.",
+    "labelTitle": "Titre *",
+    "phTitle": "p. ex. Migration des traitements batch vers le planificateur cloud",
+    "labelRole": "Votre rôle",
+    "phRole": "p. ex. Développeur mainframe senior",
+    "labelCompany": "Entreprise",
+    "labelClient": "Client",
+    "labelProject": "Projet",
+    "labelPeriod": "Période",
+    "phPeriod": "p. ex. janv. 2026 – mars 2026",
+    "labelWhatIDid": "Ce que j'ai fait",
+    "phWhatIDid": "Le travail lui-même — soyez précis.",
+    "labelProblemSolved": "Problème résolu",
+    "phProblemSolved": "Qu'est-ce qui était cassé, lent, risqué ou manquant ?",
+    "labelImpactResult": "Impact / résultat",
+    "phImpactResult": "Qu'est-ce qui a changé grâce à votre travail ?",
+    "labelTools": "Outils et technologies",
+    "phTools": "p. ex. COBOL, JCL, DB2, AWS",
+    "labelMetrics": "Indicateurs",
+    "phMetrics": "p. ex. 40 % plus rapide, 200 k$ économisés, 0 défaut",
+    "labelTags": "Tags (séparés par des virgules)",
+    "phTags": "p. ex. migration, leadership",
+    "resumeReady": "Prêt pour le CV",
+    "saving": "Enregistrement…",
+    "saveEntry": "Enregistrer l'entrée",
+    "cancel": "Annuler",
+    "aiRequestFailed": "Échec de la requête IA",
+    "titleMarkedReady": "Marqué comme prêt pour le CV",
+    "titleMarkReady": "Marquer comme prêt pour le CV",
+    "markReady": "Marquer comme prêt",
+    "collapse": "Replier",
+    "open": "Ouvrir",
+    "labelStarStory": "Histoire STAR",
+    "resumeBullets": "Points pour le CV",
+    "generating": "Génération…",
+    "generateBullets": "✦ Générer des points pour le CV",
+    "improving": "Amélioration…",
+    "improveWording": "✦ Améliorer la formulation",
+    "writing": "Rédaction…",
+    "generateStar": "✦ Générer une histoire STAR",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "suggestedBullets": "Points suggérés pour le CV",
+    "improvedWording": "Formulation améliorée",
+    "starSituation": "Situation :",
+    "starTask": "Tâche :",
+    "starAction": "Action :",
+    "starResult": "Résultat :",
+    "saveBulletsToNote": "Enregistrer les points dans l'entrée",
+    "accept": "Accepter",
+    "dismiss": "Ignorer",
+    "updatedOn": "Mis à jour le {date}",
+    "bulletAddedTo": "point ajouté à {name}",
+    "fallbackResume": "un CV",
+    "couldNotAddBullet": "Impossible d'ajouter le point",
+    "addedTo": "Ajouté à {name}.",
+    "resumeFallback": "CV",
+    "copy": "Copier",
+    "addToResume": "Ajouter au CV…",
+    "baseResumeSuffix": "(CV de base)",
+    "noExperienceEntries": "Ce CV ne contient aucune expérience.",
+    "adding": "Ajout…",
+    "addBullet": "Ajouter le point",
+    "untitledRole": "Rôle sans titre",
+    "unknownCompany": "Entreprise inconnue"
   }
 }

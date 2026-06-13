@@ -153,5 +153,691 @@
     "scopeNote": "Solo solicitamos acceso a la carpeta de datos de la app Resumeflow-ATS en tu Google Drive.",
     "privacy": "Política de privacidad",
     "terms": "Términos del servicio"
+  },
+  "ai": {
+    "tailor": {
+      "openButton": "Adaptar el currículum a esta oferta",
+      "title": "Adaptar el currículum a esta oferta",
+      "subtitle": "La IA reformula y reordena tu contenido existente — nunca inventa datos. Revisa cada cambio; tu currículum de origen no se modifica.",
+      "close": "Cerrar",
+      "noResumesBanner": "Todavía no tienes ningún currículum. La adaptación reformula un currículum existente para esta oferta: crea uno primero y luego vuelve aquí para adaptarlo.",
+      "cancel": "Cancelar",
+      "createResume": "Crear currículum",
+      "sourceLabel": "Currículum de origen",
+      "choosePlaceholder": "Elige un currículum…",
+      "defaultOption": "{label} — predeterminado",
+      "sourceHint": "De forma predeterminada se usa tu currículum base. Para adaptaciones frecuentes se recomienda tu propia clave de API (Ajustes).",
+      "generate": "Generar",
+      "generating": "Adaptando…",
+      "changesTab": "Cambios ({count})",
+      "sideBySide": "Lado a lado",
+      "noChanges": "La adaptación no produjo cambios — tu currículum ya encaja bien con esta descripción del puesto.",
+      "proposedChanges": "{count, plural, one {# cambio propuesto} other {# cambios propuestos}} — revísalos uno a uno. Al rechazar se conserva tu redacción original.",
+      "heldBack": "Retenidos por la verificación de datos:",
+      "discard": "Descartar",
+      "regenerate": "Regenerar",
+      "nothingToSave": "Todos los cambios están rechazados — no hay nada que guardar.",
+      "saving": "Guardando…",
+      "saveAsNewVersion": "Guardar como nueva versión",
+      "saveWithCount": "Guardar como nueva versión ({accepted} de {total})",
+      "accept": "Aceptar",
+      "keepOriginal": "Mantener original",
+      "dropped": "Descartados por ser menos relevantes:",
+      "atsScore": "Puntuación ATS",
+      "keywords": "Palabras clave",
+      "original": "Original",
+      "tailoredOutlined": "Adaptado — cambios aceptados resaltados",
+      "errors": {
+        "failed": "La adaptación falló. Inténtalo de nuevo.",
+        "sourceLoad": "No se pudo cargar el currículum de origen. Inténtalo de nuevo.",
+        "network": "Error de red. Inténtalo de nuevo.",
+        "save": "No se pudo guardar el currículum adaptado.",
+        "networkSave": "Error de red al guardar. Inténtalo de nuevo."
+      }
+    },
+    "changeType": {
+      "rephrased": "Reformulado",
+      "reordered": "Reordenado",
+      "emphasized": "Destacado",
+      "unchanged": "Sin cambios",
+      "rejected": "Rechazado"
+    },
+    "coverLetter": {
+      "intro": "Redacta una carta a partir de tu currículum y la descripción de esta oferta — usando solo datos de tu currículum. La editas antes de enviarla; no se guarda nada hasta que pulsas Guardar.",
+      "sourceAria": "Currículum de origen",
+      "toneAria": "Tono",
+      "choosePlaceholder": "Elige un currículum…",
+      "defaultOption": "{label} — predeterminado",
+      "generate": "Generar carta de presentación",
+      "regenerate": "Regenerar",
+      "writing": "Redactando…",
+      "letterAria": "Texto de la carta de presentación",
+      "wordCount": "{count, plural, one {# palabra} other {# palabras}}",
+      "generatedMeta": "generada el {date} ({tone})",
+      "unsavedEdits": "cambios sin guardar",
+      "copy": "Copiar",
+      "copied": "Copiado ✓",
+      "download": "Descargar .docx",
+      "save": "Guardar",
+      "saved": "Guardado ✓",
+      "saving": "Guardando…",
+      "fileName": "Carta de presentación - {company}.docx",
+      "fileNameFallback": "candidatura",
+      "unverifiedWarning": "Comprueba estas cifras — no se encontraron ni en tu currículum ni en la descripción del puesto:",
+      "tone": {
+        "professional": "Profesional",
+        "warm": "Cercano",
+        "direct": "Directo"
+      },
+      "errors": {
+        "generation": "La generación falló. Inténtalo de nuevo.",
+        "network": "Error de red. Inténtalo de nuevo.",
+        "save": "No se pudo guardar la carta de presentación.",
+        "networkSave": "Error de red al guardar.",
+        "clipboard": "No se pudo acceder al portapapeles — selecciona y copia manualmente."
+      }
+    },
+    "actions": {
+      "intro": "Generado a partir de tu currículum y esta oferta — revísalo antes de usarlo.",
+      "working": "Trabajando…",
+      "done": "Listo.",
+      "labels": {
+        "generate-qna": "Generar preguntas y respuestas de entrevista",
+        "interview-briefing": "Generar briefing de entrevista",
+        "cover-letter": "Generar carta de presentación",
+        "follow-up": "Generar mensaje de seguimiento"
+      },
+      "errors": {
+        "generic": "Algo salió mal. Inténtalo de nuevo.",
+        "network": "Error de red. Inténtalo de nuevo."
+      }
+    },
+    "improve": {
+      "button": "Mejorar con IA",
+      "thinking": "Pensando…",
+      "addTextFirst": "Añade primero algo de texto y luego mejóralo con IA.",
+      "requestFailed": "La solicitud a la IA falló.",
+      "network": "Error de red al contactar con el servicio de IA.",
+      "openSettings": "Abrir Ajustes",
+      "suggestion": "Sugerencia de la IA",
+      "writing": "(redactando…)",
+      "accept": "Aceptar",
+      "discard": "Descartar",
+      "regenerate": "Regenerar"
+    },
+    "error": {
+      "title": "Algo salió mal",
+      "description": "Es posible que tu sesión haya caducado. Cierra sesión y vuelve a iniciarla para reconectar con tu Google Drive, o reintenta cargar la página.",
+      "reauth": "Cerrar sesión y volver a entrar",
+      "signingIn": "Iniciando sesión…",
+      "tryAgain": "Reintentar",
+      "reference": "Referencia del error: {digest}"
+    }
+  },
+  "application": {
+    "form": {
+      "company": "Empresa *",
+      "jobTitle": "Puesto *",
+      "jobId": "ID de la oferta",
+      "jobLink": "Enlace de la oferta",
+      "status": "Estado",
+      "resumeVersionUsed": "Versión del currículum utilizada",
+      "noneOption": "— ninguna —",
+      "appliedDate": "Fecha de solicitud",
+      "nextActionDate": "Fecha de la próxima acción",
+      "nextAction": "Próxima acción",
+      "nextActionPlaceholder": "p. ej. Hacer seguimiento con el reclutador",
+      "jobDescription": "Descripción del puesto",
+      "saving": "Guardando…",
+      "addApplication": "Añadir solicitud",
+      "saveChanges": "Guardar cambios",
+      "cancel": "Cancelar",
+      "saveFailed": "Error al guardar"
+    },
+    "statusUpdater": {
+      "status": "Estado",
+      "commentPlaceholder": "Comentario opcional para el historial",
+      "updating": "Actualizando…",
+      "update": "Actualizar estado"
+    },
+    "notes": {
+      "placeholder": "Añadir una nota…",
+      "add": "Añadir",
+      "empty": "Aún no hay notas.",
+      "delete": "Eliminar"
+    },
+    "noteType": {
+      "general": "General",
+      "recruiter": "Reclutador",
+      "interview": "Entrevista",
+      "todo": "Pendiente"
+    },
+    "docs": {
+      "metaOnly": "Solo se guardan los metadatos de los documentos (no se suben archivos).",
+      "namePlaceholder": "Nombre del documento",
+      "resumeVersionOption": "— versión del currículum —",
+      "linkPlaceholder": "Enlace (opcional)",
+      "add": "Añadir",
+      "empty": "Aún no hay documentos vinculados.",
+      "open": "abrir",
+      "delete": "Eliminar"
+    },
+    "docType": {
+      "Resume": "Currículum",
+      "Cover Letter": "Carta de presentación",
+      "Portfolio": "Portafolio",
+      "Other": "Otro"
+    },
+    "actions": {
+      "confirmDelete": "¿Eliminar esta solicitud? Esta acción no se puede deshacer.",
+      "edit": "Editar",
+      "delete": "Eliminar"
+    },
+    "detail": {
+      "allApplications": "Todas las solicitudes",
+      "untitledRole": "Puesto sin título",
+      "unknownCompany": "Empresa desconocida",
+      "jobId": "ID de la oferta {id}",
+      "overview": "Información general",
+      "appliedDate": "Fecha de solicitud",
+      "nextAction": "Próxima acción",
+      "resumeVersion": "Versión del currículum",
+      "jobLink": "Enlace de la oferta",
+      "jobDescription": "Descripción del puesto",
+      "status": "Estado",
+      "statusHistory": "Historial de estados",
+      "noHistory": "Aún no hay historial.",
+      "aiAssistant": "Asistente de IA",
+      "tailoredResume": "Currículum adaptado",
+      "coverLetter": "Carta de presentación",
+      "interviewCoach": "Coach de entrevistas",
+      "interviewCoachHint": "Prepara preguntas y respuestas para esta solicitud, basadas en tu currículum, tu diario laboral y esta descripción del puesto.",
+      "prepareInterview": "Preparar entrevista",
+      "notes": "Notas",
+      "documents": "Documentos"
+    },
+    "new": {
+      "title": "Nueva solicitud",
+      "subtitle": "Registra un empleo al que te postulas y vincula una versión de tu currículum."
+    },
+    "edit": {
+      "title": "Editar solicitud"
+    }
+  },
+  "builder": {
+    "page": {
+      "newTitle": "Nuevo currículum",
+      "newSubtitle": "Completa tus datos y elige una plantilla. La vista previa se actualiza en vivo.",
+      "editTitle": "Editar currículum"
+    },
+    "actions": {
+      "add": "+ Añadir",
+      "addItem": "Añadir elemento",
+      "remove": "Quitar",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "saving": "Guardando…",
+      "createResume": "Crear currículum",
+      "saveAndView": "Guardar y ver",
+      "moveUp": "Subir",
+      "moveDown": "Bajar",
+      "back": "Atrás",
+      "next": "Siguiente: {title}",
+      "done": "Listo",
+      "resetToDefault": "Restablecer valores"
+    },
+    "autosave": {
+      "saving": "Guardando…",
+      "saved": "Guardado ✓",
+      "error": "No se pudo guardar"
+    },
+    "errors": {
+      "photoUpload": "Error al subir la foto",
+      "import": "Error al importar",
+      "save": "Error al guardar"
+    },
+    "import": {
+      "title": "Empieza desde un currículum existente",
+      "description": "Sube un archivo PDF o Word (.docx) y la IA lo organizará en las secciones de abajo. No se guarda nada hasta que pulses “Crear currículum”.",
+      "button": "Importar archivo",
+      "reading": "Leyendo…",
+      "parsing": "Analizando y clasificando con IA — puede tardar unos segundos.",
+      "imported": "Importado. Revisa las secciones de abajo y pulsa “Crear currículum” para guardar."
+    },
+    "rail": {
+      "setup": "Configuración",
+      "content": "Contenido",
+      "sectionsNav": "Secciones del currículum"
+    },
+    "ats": {
+      "score": "Puntuación ATS",
+      "chip": "ATS {score}",
+      "keywordsMatched": "{matched}/{total} palabras clave encontradas",
+      "addJobDescription": "Añade una oferta de trabajo",
+      "openPanel": "Abrir el panel de puntuación ATS",
+      "safeView": "Vista compatible con ATS"
+    },
+    "preview": {
+      "title": "Vista previa en vivo",
+      "clickHint": "Haz clic en cualquier parte de la página para ir a su editor.",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "fit": "Ajustar",
+      "fitToWidth": "Ajustar al ancho"
+    },
+    "mobile": {
+      "edit": "Editar",
+      "preview": "Vista previa",
+      "prevSection": "Sección anterior",
+      "nextSection": "Sección siguiente",
+      "tapToEdit": "Toca una sección para editarla"
+    },
+    "style": {
+      "layoutDensity": "Densidad del diseño",
+      "presets": {
+        "compact": {
+          "label": "Compacto",
+          "desc": "Lo máximo por página"
+        },
+        "balanced": {
+          "label": "Equilibrado",
+          "desc": "El aspecto predeterminado"
+        },
+        "spacious": {
+          "label": "Amplio",
+          "desc": "Espacioso y fácil de leer"
+        }
+      },
+      "font": "Fuente",
+      "bodyTextSize": "Tamaño del texto",
+      "nameSize": "Tamaño del nombre",
+      "headingSize": "Tamaño de los títulos",
+      "colorTheme": "Tema de color",
+      "themes": {
+        "corporateBlue": "Azul corporativo",
+        "graphite": "Grafito",
+        "indigo": "Índigo",
+        "forest": "Verde bosque",
+        "burgundy": "Burdeos"
+      },
+      "customColors": "Colores personalizados",
+      "primaryColor": "Color principal",
+      "bodyTextColor": "Color del texto",
+      "mutedTextColor": "Color del texto secundario",
+      "sectionLineColor": "Color de las líneas de sección",
+      "pageMargins": "Márgenes de página",
+      "customMargins": "personalizado",
+      "lineHeight": "Interlineado",
+      "sectionGap": "Espacio entre secciones",
+      "bulletGap": "Espacio entre viñetas",
+      "perSideMargins": "Márgenes por lado",
+      "sides": {
+        "top": "Arriba",
+        "right": "Derecha",
+        "bottom": "Abajo",
+        "left": "Izquierda"
+      },
+      "hint": "Se aplica en vivo a la vista previa y se guarda con esta versión. Los márgenes definen los márgenes de la página A4 impresa. La plantilla “ATS Corporate Style” usa todos los ajustes; las demás plantillas usan la fuente y el color principal."
+    },
+    "version": {
+      "name": "Nombre de la versión",
+      "namePlaceholder": "p. ej. Backend Engineer v2",
+      "targetRole": "Puesto objetivo",
+      "targetRolePlaceholder": "p. ej. Senior Backend Engineer"
+    },
+    "basics": {
+      "fullName": "Nombre completo",
+      "headline": "Titular / título",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "location": "Ubicación",
+      "website": "Sitio web",
+      "profilePhoto": "Foto de perfil",
+      "photoAlt": "Vista previa del perfil",
+      "noPhoto": "Sin foto",
+      "uploading": "Subiendo…",
+      "changePhoto": "Cambiar foto",
+      "uploadPhoto": "Subir foto",
+      "removePhoto": "Quitar foto",
+      "shape": "Forma:",
+      "shapes": {
+        "square": "Cuadrada",
+        "circle": "Redonda"
+      },
+      "photoHint": "Se guarda como imagen en los datos de aplicación de tu Google Drive (en el currículum solo se conserva la referencia al archivo). Se muestra en la cabecera de la plantilla “ATS Corporate Style”. En modo de desarrollo local se incrusta como Base64."
+    },
+    "summary": {
+      "label": "Resumen profesional",
+      "placeholder": "2-3 frases que resuman tu experiencia y tus puntos fuertes."
+    },
+    "common": {
+      "start": "Inicio",
+      "end": "Fin"
+    },
+    "experience": {
+      "newRole": "Nuevo puesto",
+      "role": "Puesto",
+      "company": "Empresa",
+      "location": "Ubicación",
+      "highlights": "Logros (una viñeta por línea)",
+      "highlightsHint": "Una viñeta por línea — Intro añade una viñeta",
+      "highlightsPlaceholder": "Logros clave, uno por línea"
+    },
+    "education": {
+      "newEducation": "Nueva formación",
+      "school": "Centro de estudios",
+      "degree": "Título",
+      "field": "Especialidad"
+    },
+    "projects": {
+      "newProject": "Nuevo proyecto",
+      "name": "Nombre",
+      "link": "Enlace",
+      "description": "Descripción"
+    },
+    "skills": {
+      "category": "Categoría",
+      "value": "Valor",
+      "categoryPlaceholder": "p. ej. Mainframe",
+      "valuePlaceholder": "p. ej. COBOL, PL/I, JCL"
+    },
+    "certifications": {
+      "label": "Certificaciones (una por línea)"
+    },
+    "languages": {
+      "label": "Idiomas (uno por línea)"
+    },
+    "areas": {
+      "bulletStyle": "Estilo de viñeta",
+      "itemPlaceholder": "p. ej. Modernización de mainframe",
+      "addPlaceholder": "Añade un área de especialización y pulsa Intro",
+      "hint": "Se muestra como una lista equilibrada a dos columnas en la plantilla “ATS Corporate Style”, con el estilo de viñeta seleccionado."
+    },
+    "sections": {
+      "intro": "Reordena, renombra y muestra u oculta las secciones del currículum. Este orden y estos nombres se aplican a la vista previa en vivo y a las exportaciones PDF, DOCX y PPTX. Las secciones vacías se ocultan automáticamente. “Salto después” fuerza a que la siguiente sección empiece en una nueva página A4 (plantilla “ATS Corporate Style”, vista previa + PDF).",
+      "custom": "(personalizada)",
+      "renamed": "(renombrada)",
+      "show": "Mostrar",
+      "breakAfter": "Salto después",
+      "rename": "Renombrar la sección “{label}”",
+      "moveUp": "Subir la sección",
+      "moveDown": "Bajar la sección",
+      "defaultPlaceholder": "Predeterminado: {title}",
+      "namePlaceholder": "Nombre de la sección"
+    },
+    "custom": {
+      "intro": "Añade tus propias secciones (proyectos, premios, publicaciones, …). Cada una se incorpora al orden del documento en la tarjeta “Secciones del documento”: puedes colocarla donde quieras y aparece en la vista previa en vivo y en cada exportación.",
+      "addSection": "+ Añadir sección personalizada",
+      "hidden": "(oculta)",
+      "showInResume": "Mostrar en el currículum",
+      "deleteSection": "Eliminar sección",
+      "sectionTitle": "Título de la sección",
+      "sectionTitlePlaceholder": "p. ej. Proyectos",
+      "layoutType": "Tipo de diseño",
+      "bulletStyle": "Estilo de viñeta",
+      "content": "Contenido",
+      "freeTextPlaceholder": "Contenido en formato párrafo para esta sección.",
+      "items": "Elementos",
+      "bulletPlaceholder": "Texto de la viñeta",
+      "addItemPlaceholder": "Añade un elemento y pulsa Intro",
+      "categoryPlaceholder": "Categoría (p. ej. Base de datos)",
+      "valuePlaceholder": "Valor (p. ej. DB2, Oracle)"
+    }
+  },
+  "interviewCoach": {
+    "title": "Coach de entrevistas",
+    "subtitle": "Prepara preguntas y respuestas basadas en tu diario de trabajo, tu currículum y el puesto al que aspiras.",
+    "preparingFor": "Preparándote para",
+    "allQuestions": "Todas las preguntas",
+    "generalPractice": "Práctica general (sin candidatura)",
+    "untitledRole": "Puesto sin título",
+    "unknownCompany": "Empresa desconocida",
+    "noJobDescription": "Esta candidatura no tiene descripción del puesto.",
+    "generateQuestions": "✦ Generar preguntas a partir de la descripción del puesto",
+    "generating": "Generando…",
+    "manualPlaceholder": "Escribe una pregunta, p. ej. «Háblame de ti»",
+    "addQuestion": "+ Añadir pregunta",
+    "adding": "Añadiendo…",
+    "bannerAdded": "{count, plural, one {# nueva pregunta añadida} other {# nuevas preguntas añadidas}}.",
+    "bannerAddedSkipped": "{count, plural, one {# nueva pregunta añadida} other {# nuevas preguntas añadidas}} ({skipped, plural, one {# ya existía} other {# ya existían}}).",
+    "confirmDelete": "¿Eliminar esta pregunta y su respuesta?",
+    "confirmRegenerate": "¿Reemplazar la respuesta guardada por una recién generada? Tu respuesta actual se sobrescribirá (el historial de revisiones se conserva).",
+    "context": {
+      "company": "Empresa:",
+      "jobTitle": "Puesto:",
+      "jobId": "ID del puesto:",
+      "status": "Estado:",
+      "resume": "Currículum:",
+      "notes": "Notas:",
+      "jd": "Descripción del puesto:",
+      "noneLinked": "ninguno vinculado",
+      "notesUsed": "{count, plural, one {# usada como evidencia} other {# usadas como evidencia}}"
+    },
+    "errors": {
+      "addQuestion": "No se pudo añadir la pregunta",
+      "save": "Error al guardar",
+      "questionGeneration": "Error al generar las preguntas",
+      "answerGeneration": "Error al generar la respuesta",
+      "revision": "Error en la revisión",
+      "generic": "Algo salió mal"
+    },
+    "empty": {
+      "title": "Aún no hay preguntas",
+      "hintApplication": "Genera preguntas a partir de la descripción del puesto o escribe una arriba.",
+      "hintGeneral": "Escribe una pregunta arriba o elige una candidatura para generar preguntas basadas en la descripción del puesto."
+    },
+    "category": {
+      "General": "General",
+      "Resume Based": "Basadas en el currículum",
+      "Job Description Based": "Basadas en la descripción del puesto",
+      "Technical": "Técnicas",
+      "Behavioral": "Conductuales",
+      "HR": "RR. HH.",
+      "Gap / Risk": "Lagunas / Riesgos",
+      "Salary / Notice Period": "Salario / Preaviso"
+    },
+    "statusChip": {
+      "draft": "Borrador",
+      "aiGenerated": "Borrador de IA",
+      "userEdited": "Editada",
+      "final": "Definitiva"
+    },
+    "revise": {
+      "improve": "Mejorar",
+      "shorter": "Más corta",
+      "detailed": "Más detallada",
+      "star": "Formato STAR",
+      "confident": "Más segura",
+      "professional": "Más profesional",
+      "resumeTone": "Alinear con el currículum"
+    },
+    "entry": {
+      "collapse": "Contraer",
+      "open": "Abrir",
+      "answer": "Responder",
+      "formatParagraph": "Párrafo",
+      "formatStar": "STAR",
+      "formatBullets": "Viñetas",
+      "toneNeutral": "Tono neutro",
+      "toneConfident": "Tono seguro",
+      "toneProfessional": "Tono profesional",
+      "evidence": "Evidencia:",
+      "workJournal": "Diario de trabajo",
+      "baseResume": "Currículum base",
+      "answerPlaceholder": "Escribe aquí tu respuesta — o genera una con IA.",
+      "saveAnswer": "Guardar respuesta",
+      "saving": "Guardando…",
+      "generateAnswer": "✦ Generar respuesta",
+      "cancel": "Cancelar",
+      "edit": "Editar",
+      "copy": "Copiar",
+      "copied": "Copiado ✓",
+      "markFinal": "Marcar como definitiva ✓",
+      "unmarkFinal": "Quitar marca de definitiva",
+      "regenerate": "Regenerar…",
+      "regenerating": "Regenerando…",
+      "working": "Procesando…",
+      "revisedAnswer": "Respuesta revisada",
+      "acceptRevision": "Aceptar revisión",
+      "reject": "Rechazar",
+      "evidenceUsed": "Evidencia utilizada",
+      "missingEvidence": "Evidencia faltante",
+      "revisionHistory": "Historial de revisiones ({count})",
+      "deleteQuestion": "Eliminar pregunta"
+    }
+  },
+  "resumeDetail": {
+    "resumeDetail": {
+      "allResumes": "Todos los currículums",
+      "baseResume": "Currículum base",
+      "templateLabel": "Plantilla:",
+      "downloadPdf": "Descargar PDF",
+      "downloadDocx": "Descargar DOCX",
+      "downloadPptx": "Descargar PPTX",
+      "preparing": "Preparando…",
+      "edit": "Editar",
+      "duplicate": "Duplicar",
+      "setAsBase": "Definir como currículum base",
+      "setAsBaseShort": "Definir como base",
+      "settingBase": "Definiendo…",
+      "delete": "Eliminar",
+      "deleteNeedsBaseAlert": "Selecciona primero un currículum base. Debes designar un currículum base antes de poder eliminar cualquier versión.",
+      "deleteBaseAlert": "El currículum base no se puede eliminar. Designa primero otra versión como currículum base.",
+      "deleteConfirm": "¿Eliminar esta versión del currículum? Esta acción no se puede deshacer.",
+      "deleteNeedsBaseTitle": "Selecciona primero un currículum base antes de eliminar una versión.",
+      "deleteBaseTitle": "El currículum base no se puede eliminar.",
+      "docxExportFailed": "Error al exportar DOCX.",
+      "pptxExportFailed": "Error al exportar PPTX.",
+      "atsSafeMode": "Modo compatible con ATS",
+      "atsSafeHint": "(una sola columna, sin foto — afecta a la vista previa, el PDF y el DOCX)",
+      "history": {
+        "title": "Historial de versiones",
+        "empty": "Aún no hay instantáneas. Se capturan automáticamente mientras editas — como máximo una cada 10 minutos — y antes de cada restauración.",
+        "beforeRestore": "antes de restaurar",
+        "identicalToCurrent": "Idéntico a la versión actual",
+        "differsIn": "Difiere en: {groups}",
+        "compare": "Comparar",
+        "hideCompare": "Ocultar comparación",
+        "restore": "Restaurar",
+        "restoring": "Restaurando…",
+        "restoreThisSnapshot": "Restaurar esta instantánea",
+        "restoreConfirm": "¿Restaurar el currículum a su estado del {when}? Tu estado actual se guarda primero como instantánea, así que podrás deshacerlo desde el historial.",
+        "restoreFailed": "La restauración falló.",
+        "restoreNetworkError": "Error de red durante la restauración.",
+        "comparingFrom": "Comparando la instantánea del {when} con el estado actual",
+        "labelSnapshot": "Instantánea — {date}",
+        "labelCurrent": "Actual — diferencias resaltadas",
+        "groups": {
+          "basicsSummary": "Datos básicos y resumen",
+          "areasOfExpertise": "Áreas de especialización",
+          "experience": "Experiencia",
+          "education": "Educación",
+          "projects": "Proyectos",
+          "skills": "Habilidades",
+          "certifications": "Certificaciones",
+          "languages": "Idiomas",
+          "customSections": "Secciones personalizadas",
+          "templateStyle": "Plantilla y estilo",
+          "nameTargetRole": "Nombre / puesto objetivo"
+        }
+      },
+      "ats": {
+        "scoreAria": "Puntuación ATS {value} de 100",
+        "verdictStrong": "Sólido — listo para portales ATS",
+        "verdictMedium": "Por buen camino — trabaja en las correcciones de abajo",
+        "verdictWeak": "Necesita trabajo — empieza por las comprobaciones fallidas",
+        "resumeHealth": "Salud del currículum",
+        "jobMatch": "Coincidencia con la oferta",
+        "pasteJdHint": "pega una descripción del puesto para añadir la coincidencia de palabras clave",
+        "jdLabel": "Descripción del puesto",
+        "jdPlaceholder": "Pega aquí la descripción del puesto — las palabras clave se extraen localmente y se comparan con tu currículum mientras escribes.",
+        "keywordsCovered": "Palabras clave: {matched} de {total} cubiertas",
+        "keywordFound": "Presente en tu currículum",
+        "keywordMissing": "Ausente en tu currículum",
+        "missingKeywordsHint": "Incorpora las palabras clave que faltan en tu resumen, habilidades o viñetas — pero solo donde sean ciertas.",
+        "healthChecksHeading": "Comprobaciones de salud del currículum",
+        "disclaimer": "Las puntuaciones son orientaciones heurísticas calculadas localmente — no se envía nada a ningún servidor. Cada ATS analiza de forma distinta; la exportación compatible con ATS es el formato más seguro para los portales."
+      }
+    }
+  },
+  "workJournal": {
+    "title": "Diario de trabajo",
+    "subtitle": "Anota proyectos, logros e historias STAR mientras están frescos — y conviértelos después en viñetas para tu currículum.",
+    "newEntry": "+ Nueva entrada",
+    "searchPlaceholder": "Buscar entradas…",
+    "resumeReadyCheck": "✓ Listo para el currículum",
+    "editEntry": "Editar entrada",
+    "newEntryHeading": "Nueva entrada",
+    "emptyTitle": "Aún no hay entradas en el diario",
+    "noMatchTitle": "Ninguna entrada coincide",
+    "emptyHint": "Apunta en qué trabajaste — el proyecto, el problema, el impacto — antes de que olvides los detalles.",
+    "noMatchHint": "Prueba otra búsqueda o borra los filtros.",
+    "saveFailed": "Error al guardar",
+    "confirmDelete": "¿Eliminar esta entrada del diario? Esta acción no se puede deshacer.",
+    "errorNoTitle": "Ponle un título a la entrada.",
+    "labelTitle": "Título *",
+    "phTitle": "p. ej. Migré los trabajos batch al planificador en la nube",
+    "labelRole": "Tu rol",
+    "phRole": "p. ej. Desarrollador mainframe sénior",
+    "labelCompany": "Empresa",
+    "labelClient": "Cliente",
+    "labelProject": "Proyecto",
+    "labelPeriod": "Período",
+    "phPeriod": "p. ej. ene 2026 – mar 2026",
+    "labelWhatIDid": "Qué hice",
+    "phWhatIDid": "El trabajo en sí — sé específico.",
+    "labelProblemSolved": "Problema resuelto",
+    "phProblemSolved": "¿Qué estaba roto, lento, en riesgo o faltaba?",
+    "labelImpactResult": "Impacto / resultado",
+    "phImpactResult": "¿Qué cambió gracias a tu trabajo?",
+    "labelTools": "Herramientas y tecnologías",
+    "phTools": "p. ej. COBOL, JCL, DB2, AWS",
+    "labelMetrics": "Métricas",
+    "phMetrics": "p. ej. 40 % más rápido, 200.000 $ ahorrados, 0 defectos",
+    "labelTags": "Etiquetas (separadas por comas)",
+    "phTags": "p. ej. migración, liderazgo",
+    "resumeReady": "Listo para el currículum",
+    "saving": "Guardando…",
+    "saveEntry": "Guardar entrada",
+    "cancel": "Cancelar",
+    "aiRequestFailed": "Error en la solicitud de IA",
+    "titleMarkedReady": "Marcado como listo para el currículum",
+    "titleMarkReady": "Marcar como listo para el currículum",
+    "markReady": "Marcar como listo",
+    "collapse": "Contraer",
+    "open": "Abrir",
+    "labelStarStory": "Historia STAR",
+    "resumeBullets": "Viñetas para el currículum",
+    "generating": "Generando…",
+    "generateBullets": "✦ Generar viñetas para el currículum",
+    "improving": "Mejorando…",
+    "improveWording": "✦ Mejorar la redacción",
+    "writing": "Redactando…",
+    "generateStar": "✦ Generar historia STAR",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "suggestedBullets": "Viñetas sugeridas para el currículum",
+    "improvedWording": "Redacción mejorada",
+    "starSituation": "Situación:",
+    "starTask": "Tarea:",
+    "starAction": "Acción:",
+    "starResult": "Resultado:",
+    "saveBulletsToNote": "Guardar viñetas en la entrada",
+    "accept": "Aceptar",
+    "dismiss": "Descartar",
+    "updatedOn": "Actualizado el {date}",
+    "bulletAddedTo": "viñeta añadida a {name}",
+    "fallbackResume": "un currículum",
+    "couldNotAddBullet": "No se pudo añadir la viñeta",
+    "addedTo": "Añadido a {name}.",
+    "resumeFallback": "currículum",
+    "copy": "Copiar",
+    "addToResume": "Añadir al currículum…",
+    "baseResumeSuffix": "(Currículum base)",
+    "noExperienceEntries": "Este currículum no tiene experiencias.",
+    "adding": "Añadiendo…",
+    "addBullet": "Añadir viñeta",
+    "untitledRole": "Rol sin título",
+    "unknownCompany": "Empresa desconocida"
   }
 }

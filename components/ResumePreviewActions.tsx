@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type {
   ResumeData,
   ResumeSectionState,
@@ -33,6 +34,7 @@ export default function ResumePreviewActions({
   // once a base exists (and the base itself can't be deleted).
   baseSet?: boolean;
 }) {
+  const t = useTranslations("resumeDetail");
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [exporting, setExporting] = useState<"docx" | "pptx" | null>(null);
@@ -79,18 +81,14 @@ export default function ResumePreviewActions({
     //  - this version IS the base → it can't be deleted (pick a different base).
     // These mirror the server-side guard in /api/resumes/[id] DELETE.
     if (!baseSet) {
-      alert(
-        "Select a Base Resume first. You must designate a Base Resume before you can delete any resume version."
-      );
+      alert(t("deleteNeedsBaseAlert"));
       return;
     }
     if (isBase) {
-      alert(
-        "The Base Resume can't be deleted. Designate a different version as the Base Resume first."
-      );
+      alert(t("deleteBaseAlert"));
       return;
     }
-    if (!confirm("Delete this resume version? This cannot be undone.")) {
+    if (!confirm(t("deleteConfirm"))) {
       return;
     }
     setBusy(true);
@@ -110,7 +108,7 @@ export default function ResumePreviewActions({
       reportExport("docx");
     } catch (e) {
       console.error(e);
-      alert("DOCX export failed.");
+      alert(t("docxExportFailed"));
     } finally {
       setExporting(null);
     }
@@ -123,7 +121,7 @@ export default function ResumePreviewActions({
       reportExport("pptx");
     } catch (e) {
       console.error(e);
-      alert("PPTX export failed.");
+      alert(t("pptxExportFailed"));
     } finally {
       setExporting(null);
     }
@@ -139,7 +137,7 @@ export default function ResumePreviewActions({
         className={buttonClass("primary")}
         type="button"
       >
-        Download PDF
+        {t("downloadPdf")}
       </button>
       <button
         onClick={downloadDocx}
@@ -147,7 +145,7 @@ export default function ResumePreviewActions({
         className={buttonClass("secondary")}
         type="button"
       >
-        {exporting === "docx" ? "Preparing…" : "Download DOCX"}
+        {exporting === "docx" ? t("preparing") : t("downloadDocx")}
       </button>
       <button
         onClick={downloadPptx}
@@ -155,10 +153,10 @@ export default function ResumePreviewActions({
         className={buttonClass("secondary")}
         type="button"
       >
-        {exporting === "pptx" ? "Preparing…" : "Download PPTX"}
+        {exporting === "pptx" ? t("preparing") : t("downloadPptx")}
       </button>
       <Link href={`/resumes/${id}/edit`} className={buttonClass("secondary")}>
-        Edit
+        {t("edit")}
       </Link>
       <button
         onClick={duplicate}
@@ -166,11 +164,11 @@ export default function ResumePreviewActions({
         className={buttonClass("secondary")}
         type="button"
       >
-        Duplicate
+        {t("duplicate")}
       </button>
       {isBase ? (
         <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 dark:bg-emerald-950/40 px-3 py-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-900">
-          ★ Base Resume
+          ★ {t("baseResume")}
         </span>
       ) : (
         <button
@@ -179,7 +177,7 @@ export default function ResumePreviewActions({
           className={buttonClass("secondary")}
           type="button"
         >
-          Set as Base Resume
+          {t("setAsBase")}
         </button>
       )}
       <button
@@ -190,14 +188,14 @@ export default function ResumePreviewActions({
         }`}
         title={
           !baseSet
-            ? "Select a Base Resume first before deleting any version."
+            ? t("deleteNeedsBaseTitle")
             : isBase
-            ? "The Base Resume can't be deleted."
+            ? t("deleteBaseTitle")
             : undefined
         }
         type="button"
       >
-        Delete
+        {t("delete")}
       </button>
     </div>
   );

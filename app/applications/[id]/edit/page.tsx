@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { getItem, readAll } from "@/lib/store";
 import { PageHeader } from "@/components/ui";
 import ApplicationForm from "@/components/ApplicationForm";
@@ -11,6 +12,7 @@ export default async function EditApplicationPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const t = await getTranslations("application");
   const app = await getItem("applications", id);
   if (!app) notFound();
 
@@ -23,7 +25,7 @@ export default async function EditApplicationPage({
   return (
     <div>
       <PageHeader
-        title="Edit application"
+        title={t("edit.title")}
         subtitle={`${app.jobTitle} · ${app.company}`}
       />
       <ApplicationForm mode="edit" initial={app} resumeOptions={resumeOptions} />

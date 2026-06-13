@@ -153,5 +153,691 @@
     "scopeNote": "Wir fordern nur Zugriff auf den eigenen App-Datenordner von Resumeflow-ATS in deinem Google Drive an.",
     "privacy": "Datenschutzerklärung",
     "terms": "Nutzungsbedingungen"
+  },
+  "ai": {
+    "tailor": {
+      "openButton": "Lebenslauf für diesen Job anpassen",
+      "title": "Lebenslauf für diesen Job anpassen",
+      "subtitle": "Die KI formuliert deine vorhandenen Inhalte um und ordnet sie neu — sie erfindet niemals Fakten. Prüfe jede Änderung; dein Quell-Lebenslauf wird nicht verändert.",
+      "close": "Schließen",
+      "noResumesBanner": "Du hast noch keine Lebensläufe. Beim Anpassen wird ein vorhandener Lebenslauf für diesen Job umformuliert — erstelle also zuerst einen und komm dann hierher zurück, um ihn anzupassen.",
+      "cancel": "Abbrechen",
+      "createResume": "Lebenslauf erstellen",
+      "sourceLabel": "Quell-Lebenslauf",
+      "choosePlaceholder": "Lebenslauf auswählen…",
+      "defaultOption": "{label} — Standard",
+      "sourceHint": "Standardmäßig wird dein Basis-Lebenslauf verwendet. Für häufiges Anpassen empfiehlt sich dein eigener API-Schlüssel (Einstellungen).",
+      "generate": "Generieren",
+      "generating": "Wird angepasst…",
+      "changesTab": "Änderungen ({count})",
+      "sideBySide": "Nebeneinander",
+      "noChanges": "Die Anpassung hat keine Änderungen ergeben — dein Lebenslauf passt bereits gut zu dieser Stellenbeschreibung.",
+      "proposedChanges": "{count, plural, one {# vorgeschlagene Änderung} other {# vorgeschlagene Änderungen}} — prüfe jede einzelne. Beim Ablehnen bleibt deine ursprüngliche Formulierung erhalten.",
+      "heldBack": "Durch Faktenprüfung zurückgehalten:",
+      "discard": "Verwerfen",
+      "regenerate": "Neu generieren",
+      "nothingToSave": "Alle Änderungen wurden abgelehnt — es gibt nichts zu speichern.",
+      "saving": "Wird gespeichert…",
+      "saveAsNewVersion": "Als neue Version speichern",
+      "saveWithCount": "Als neue Version speichern ({accepted} von {total})",
+      "accept": "Übernehmen",
+      "keepOriginal": "Original behalten",
+      "dropped": "Als weniger relevant entfernt:",
+      "atsScore": "ATS-Score",
+      "keywords": "Schlüsselwörter",
+      "original": "Original",
+      "tailoredOutlined": "Angepasst — übernommene Änderungen umrandet",
+      "errors": {
+        "failed": "Die Anpassung ist fehlgeschlagen. Bitte versuche es erneut.",
+        "sourceLoad": "Der Quell-Lebenslauf konnte nicht geladen werden. Bitte versuche es erneut.",
+        "network": "Netzwerkfehler. Bitte versuche es erneut.",
+        "save": "Der angepasste Lebenslauf konnte nicht gespeichert werden.",
+        "networkSave": "Netzwerkfehler beim Speichern. Bitte versuche es erneut."
+      }
+    },
+    "changeType": {
+      "rephrased": "Umformuliert",
+      "reordered": "Neu angeordnet",
+      "emphasized": "Hervorgehoben",
+      "unchanged": "Unverändert",
+      "rejected": "Abgelehnt"
+    },
+    "coverLetter": {
+      "intro": "Entwirft ein Anschreiben aus deinem Lebenslauf und der Beschreibung dieses Jobs — ausschließlich mit Fakten aus deinem Lebenslauf. Du bearbeitest es vor dem Versenden; nichts wird gespeichert, bis du auf Speichern klickst.",
+      "sourceAria": "Quell-Lebenslauf",
+      "toneAria": "Tonfall",
+      "choosePlaceholder": "Lebenslauf auswählen…",
+      "defaultOption": "{label} — Standard",
+      "generate": "Anschreiben generieren",
+      "regenerate": "Neu generieren",
+      "writing": "Wird geschrieben…",
+      "letterAria": "Text des Anschreibens",
+      "wordCount": "{count, plural, one {# Wort} other {# Wörter}}",
+      "generatedMeta": "generiert am {date} ({tone})",
+      "unsavedEdits": "ungespeicherte Änderungen",
+      "copy": "Kopieren",
+      "copied": "Kopiert ✓",
+      "download": ".docx herunterladen",
+      "save": "Speichern",
+      "saved": "Gespeichert ✓",
+      "saving": "Wird gespeichert…",
+      "fileName": "Anschreiben - {company}.docx",
+      "fileNameFallback": "Bewerbung",
+      "unverifiedWarning": "Überprüfe diese Zahlen — sie wurden weder in deinem Lebenslauf noch in der Stellenbeschreibung gefunden:",
+      "tone": {
+        "professional": "Professionell",
+        "warm": "Herzlich",
+        "direct": "Direkt"
+      },
+      "errors": {
+        "generation": "Die Generierung ist fehlgeschlagen. Bitte versuche es erneut.",
+        "network": "Netzwerkfehler. Bitte versuche es erneut.",
+        "save": "Das Anschreiben konnte nicht gespeichert werden.",
+        "networkSave": "Netzwerkfehler beim Speichern.",
+        "clipboard": "Zugriff auf die Zwischenablage nicht möglich — bitte manuell markieren und kopieren."
+      }
+    },
+    "actions": {
+      "intro": "Aus deinem Lebenslauf und diesem Job generiert — vor der Verwendung prüfen.",
+      "working": "In Arbeit…",
+      "done": "Fertig.",
+      "labels": {
+        "generate-qna": "Interview-Fragen & Antworten generieren",
+        "interview-briefing": "Interview-Briefing generieren",
+        "cover-letter": "Anschreiben generieren",
+        "follow-up": "Follow-up-Nachricht generieren"
+      },
+      "errors": {
+        "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+        "network": "Netzwerkfehler. Bitte versuche es erneut."
+      }
+    },
+    "improve": {
+      "button": "Mit KI verbessern",
+      "thinking": "Denkt nach…",
+      "addTextFirst": "Füge zuerst etwas Text hinzu und verbessere ihn dann mit KI.",
+      "requestFailed": "KI-Anfrage fehlgeschlagen.",
+      "network": "Netzwerkfehler bei der Verbindung zum KI-Dienst.",
+      "openSettings": "Einstellungen öffnen",
+      "suggestion": "KI-Vorschlag",
+      "writing": "(schreibt…)",
+      "accept": "Übernehmen",
+      "discard": "Verwerfen",
+      "regenerate": "Neu generieren"
+    },
+    "error": {
+      "title": "Etwas ist schiefgelaufen",
+      "description": "Deine Sitzung ist möglicherweise abgelaufen. Melde dich ab und wieder an, um die Verbindung zu deinem Google Drive wiederherzustellen, oder lade die Seite erneut.",
+      "reauth": "Abmelden & erneut anmelden",
+      "signingIn": "Anmeldung läuft…",
+      "tryAgain": "Erneut versuchen",
+      "reference": "Fehlerreferenz: {digest}"
+    }
+  },
+  "application": {
+    "form": {
+      "company": "Unternehmen *",
+      "jobTitle": "Stellenbezeichnung *",
+      "jobId": "Stellen-ID",
+      "jobLink": "Stellenlink",
+      "status": "Status",
+      "resumeVersionUsed": "Verwendete Lebenslauf-Version",
+      "noneOption": "— keine —",
+      "appliedDate": "Bewerbungsdatum",
+      "nextActionDate": "Datum der nächsten Aktion",
+      "nextAction": "Nächste Aktion",
+      "nextActionPlaceholder": "z. B. Beim Recruiter nachfassen",
+      "jobDescription": "Stellenbeschreibung",
+      "saving": "Wird gespeichert…",
+      "addApplication": "Bewerbung hinzufügen",
+      "saveChanges": "Änderungen speichern",
+      "cancel": "Abbrechen",
+      "saveFailed": "Speichern fehlgeschlagen"
+    },
+    "statusUpdater": {
+      "status": "Status",
+      "commentPlaceholder": "Optionaler Kommentar für den Verlauf",
+      "updating": "Wird aktualisiert…",
+      "update": "Status aktualisieren"
+    },
+    "notes": {
+      "placeholder": "Notiz hinzufügen…",
+      "add": "Hinzufügen",
+      "empty": "Noch keine Notizen.",
+      "delete": "Löschen"
+    },
+    "noteType": {
+      "general": "Allgemein",
+      "recruiter": "Recruiter",
+      "interview": "Vorstellungsgespräch",
+      "todo": "To-do"
+    },
+    "docs": {
+      "metaOnly": "Speichert nur Dokument-Metadaten (es werden keine Dateien hochgeladen).",
+      "namePlaceholder": "Dokumentname",
+      "resumeVersionOption": "— Lebenslauf-Version —",
+      "linkPlaceholder": "Link (optional)",
+      "add": "Hinzufügen",
+      "empty": "Noch keine Dokumente verknüpft.",
+      "open": "öffnen",
+      "delete": "Löschen"
+    },
+    "docType": {
+      "Resume": "Lebenslauf",
+      "Cover Letter": "Anschreiben",
+      "Portfolio": "Portfolio",
+      "Other": "Sonstiges"
+    },
+    "actions": {
+      "confirmDelete": "Diese Bewerbung löschen? Das kann nicht rückgängig gemacht werden.",
+      "edit": "Bearbeiten",
+      "delete": "Löschen"
+    },
+    "detail": {
+      "allApplications": "Alle Bewerbungen",
+      "untitledRole": "Unbenannte Stelle",
+      "unknownCompany": "Unbekanntes Unternehmen",
+      "jobId": "Stellen-ID {id}",
+      "overview": "Überblick",
+      "appliedDate": "Bewerbungsdatum",
+      "nextAction": "Nächste Aktion",
+      "resumeVersion": "Lebenslauf-Version",
+      "jobLink": "Stellenlink",
+      "jobDescription": "Stellenbeschreibung",
+      "status": "Status",
+      "statusHistory": "Statusverlauf",
+      "noHistory": "Noch kein Verlauf.",
+      "aiAssistant": "KI-Assistent",
+      "tailoredResume": "Angepasster Lebenslauf",
+      "coverLetter": "Anschreiben",
+      "interviewCoach": "Interview-Coach",
+      "interviewCoachHint": "Bereite Fragen und Antworten für diese Bewerbung vor – basierend auf deinem Lebenslauf, deinem Arbeitsjournal und dieser Stellenbeschreibung.",
+      "prepareInterview": "Interview vorbereiten",
+      "notes": "Notizen",
+      "documents": "Dokumente"
+    },
+    "new": {
+      "title": "Neue Bewerbung",
+      "subtitle": "Erfasse eine Stelle, auf die du dich bewirbst, und verknüpfe eine Lebenslauf-Version."
+    },
+    "edit": {
+      "title": "Bewerbung bearbeiten"
+    }
+  },
+  "builder": {
+    "page": {
+      "newTitle": "Neuer Lebenslauf",
+      "newSubtitle": "Füll deine Angaben aus und wähl eine Vorlage. Die Vorschau aktualisiert sich live.",
+      "editTitle": "Lebenslauf bearbeiten"
+    },
+    "actions": {
+      "add": "+ Hinzufügen",
+      "addItem": "Eintrag hinzufügen",
+      "remove": "Entfernen",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "saving": "Wird gespeichert…",
+      "createResume": "Lebenslauf erstellen",
+      "saveAndView": "Speichern & ansehen",
+      "moveUp": "Nach oben",
+      "moveDown": "Nach unten",
+      "back": "Zurück",
+      "next": "Weiter: {title}",
+      "done": "Fertig",
+      "resetToDefault": "Auf Standard zurücksetzen"
+    },
+    "autosave": {
+      "saving": "Wird gespeichert…",
+      "saved": "Gespeichert ✓",
+      "error": "Speichern fehlgeschlagen"
+    },
+    "errors": {
+      "photoUpload": "Foto-Upload fehlgeschlagen",
+      "import": "Import fehlgeschlagen",
+      "save": "Speichern fehlgeschlagen"
+    },
+    "import": {
+      "title": "Mit einem vorhandenen Lebenslauf starten",
+      "description": "Lade eine PDF- oder Word-Datei (.docx) hoch und die KI ordnet sie in die Abschnitte unten ein. Nichts wird gespeichert, bis du „Lebenslauf erstellen“ drückst.",
+      "button": "Datei importieren",
+      "reading": "Wird gelesen…",
+      "parsing": "Analyse und Zuordnung mit KI — das kann ein paar Sekunden dauern.",
+      "imported": "Importiert. Sieh dir die Abschnitte unten an und drücke dann „Lebenslauf erstellen“ zum Speichern."
+    },
+    "rail": {
+      "setup": "Einrichtung",
+      "content": "Inhalt",
+      "sectionsNav": "Lebenslauf-Abschnitte"
+    },
+    "ats": {
+      "score": "ATS-Score",
+      "chip": "ATS {score}",
+      "keywordsMatched": "{matched}/{total} Schlüsselwörter gefunden",
+      "addJobDescription": "Stellenbeschreibung hinzufügen",
+      "openPanel": "ATS-Score-Panel öffnen",
+      "safeView": "ATS-sichere Ansicht"
+    },
+    "preview": {
+      "title": "Live-Vorschau",
+      "clickHint": "Klick auf einen Bereich der Seite, um zu seinem Editor zu springen.",
+      "zoomIn": "Vergrößern",
+      "zoomOut": "Verkleinern",
+      "fit": "Einpassen",
+      "fitToWidth": "An Breite anpassen"
+    },
+    "mobile": {
+      "edit": "Bearbeiten",
+      "preview": "Vorschau",
+      "prevSection": "Vorheriger Abschnitt",
+      "nextSection": "Nächster Abschnitt",
+      "tapToEdit": "Tippe auf einen Abschnitt, um ihn zu bearbeiten"
+    },
+    "style": {
+      "layoutDensity": "Layoutdichte",
+      "presets": {
+        "compact": {
+          "label": "Kompakt",
+          "desc": "Bringt am meisten auf eine Seite"
+        },
+        "balanced": {
+          "label": "Ausgewogen",
+          "desc": "Der Standard-Look"
+        },
+        "spacious": {
+          "label": "Großzügig",
+          "desc": "Luftig und leicht zu überfliegen"
+        }
+      },
+      "font": "Schriftart",
+      "bodyTextSize": "Textgröße",
+      "nameSize": "Namensgröße",
+      "headingSize": "Überschriftengröße",
+      "colorTheme": "Farbschema",
+      "themes": {
+        "corporateBlue": "Business-Blau",
+        "graphite": "Graphit",
+        "indigo": "Indigo",
+        "forest": "Tannengrün",
+        "burgundy": "Burgunderrot"
+      },
+      "customColors": "Eigene Farben",
+      "primaryColor": "Primärfarbe",
+      "bodyTextColor": "Textfarbe",
+      "mutedTextColor": "Sekundäre Textfarbe",
+      "sectionLineColor": "Linienfarbe der Abschnitte",
+      "pageMargins": "Seitenränder",
+      "customMargins": "individuell",
+      "lineHeight": "Zeilenhöhe",
+      "sectionGap": "Abschnittsabstand",
+      "bulletGap": "Aufzählungsabstand",
+      "perSideMargins": "Ränder pro Seite",
+      "sides": {
+        "top": "Oben",
+        "right": "Rechts",
+        "bottom": "Unten",
+        "left": "Links"
+      },
+      "hint": "Wird live auf die Vorschau angewendet und mit dieser Version gespeichert. Die Ränder gelten für die gedruckte A4-Seite. Die Vorlage „ATS Corporate Style“ nutzt alle Einstellungen; andere Vorlagen nutzen Schriftart und Primärfarbe."
+    },
+    "version": {
+      "name": "Versionsname",
+      "namePlaceholder": "z. B. Backend Engineer v2",
+      "targetRole": "Zielposition",
+      "targetRolePlaceholder": "z. B. Senior Backend Engineer"
+    },
+    "basics": {
+      "fullName": "Vollständiger Name",
+      "headline": "Überschrift / Titel",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "location": "Ort",
+      "website": "Website",
+      "profilePhoto": "Profilfoto",
+      "photoAlt": "Profilvorschau",
+      "noPhoto": "Kein Foto",
+      "uploading": "Wird hochgeladen…",
+      "changePhoto": "Foto ändern",
+      "uploadPhoto": "Foto hochladen",
+      "removePhoto": "Foto entfernen",
+      "shape": "Form:",
+      "shapes": {
+        "square": "Quadratisch",
+        "circle": "Rund"
+      },
+      "photoHint": "Wird als Bild in deinen Google-Drive-App-Daten gespeichert (im Lebenslauf bleibt nur die Dateireferenz). Erscheint im Kopfbereich der Vorlage „ATS Corporate Style“. Im lokalen Dev-Modus wird es als Base64 eingebettet."
+    },
+    "summary": {
+      "label": "Berufliches Profil",
+      "placeholder": "2-3 Sätze, die deine Erfahrung und Stärken zusammenfassen."
+    },
+    "common": {
+      "start": "Beginn",
+      "end": "Ende"
+    },
+    "experience": {
+      "newRole": "Neue Position",
+      "role": "Position",
+      "company": "Unternehmen",
+      "location": "Ort",
+      "highlights": "Erfolge (ein Punkt pro Zeile)",
+      "highlightsHint": "Ein Punkt pro Zeile — Enter fügt einen neuen hinzu",
+      "highlightsPlaceholder": "Wichtigste Erfolge, einer pro Zeile"
+    },
+    "education": {
+      "newEducation": "Neue Ausbildung",
+      "school": "Schule/Hochschule",
+      "degree": "Abschluss",
+      "field": "Fachrichtung"
+    },
+    "projects": {
+      "newProject": "Neues Projekt",
+      "name": "Name",
+      "link": "Link",
+      "description": "Beschreibung"
+    },
+    "skills": {
+      "category": "Kategorie",
+      "value": "Wert",
+      "categoryPlaceholder": "z. B. Mainframe",
+      "valuePlaceholder": "z. B. COBOL, PL/I, JCL"
+    },
+    "certifications": {
+      "label": "Zertifizierungen (eine pro Zeile)"
+    },
+    "languages": {
+      "label": "Sprachen (eine pro Zeile)"
+    },
+    "areas": {
+      "bulletStyle": "Aufzählungszeichen",
+      "itemPlaceholder": "z. B. Mainframe-Modernisierung",
+      "addPlaceholder": "Fachgebiet eingeben und Enter drücken",
+      "hint": "Wird in der Vorlage „ATS Corporate Style“ als ausgewogene zweispaltige Liste mit dem gewählten Aufzählungszeichen dargestellt."
+    },
+    "sections": {
+      "intro": "Abschnitte des Lebenslaufs neu anordnen, umbenennen und ein-/ausblenden. Reihenfolge und Namen gelten für die Live-Vorschau und für die PDF-, DOCX- und PPTX-Exporte. Leere Abschnitte werden automatisch ausgeblendet. „Umbruch danach“ erzwingt, dass der nächste Abschnitt auf einer neuen A4-Seite beginnt (Vorlage „ATS Corporate Style“, Vorschau + PDF).",
+      "custom": "(benutzerdefiniert)",
+      "renamed": "(umbenannt)",
+      "show": "Anzeigen",
+      "breakAfter": "Umbruch danach",
+      "rename": "Abschnitt „{label}“ umbenennen",
+      "moveUp": "Abschnitt nach oben",
+      "moveDown": "Abschnitt nach unten",
+      "defaultPlaceholder": "Standard: {title}",
+      "namePlaceholder": "Abschnittsname"
+    },
+    "custom": {
+      "intro": "Füge eigene Abschnitte hinzu (Projekte, Auszeichnungen, Publikationen, …). Jeder reiht sich in die Dokumentreihenfolge in der Karte „Dokumentabschnitte“ ein, du kannst ihn also überall platzieren, und er fließt in die Live-Vorschau und jeden Export ein.",
+      "addSection": "+ Eigenen Abschnitt hinzufügen",
+      "hidden": "(ausgeblendet)",
+      "showInResume": "Im Lebenslauf anzeigen",
+      "deleteSection": "Abschnitt löschen",
+      "sectionTitle": "Abschnittstitel",
+      "sectionTitlePlaceholder": "z. B. Projekte",
+      "layoutType": "Layouttyp",
+      "bulletStyle": "Aufzählungszeichen",
+      "content": "Inhalt",
+      "freeTextPlaceholder": "Fließtext für diesen Abschnitt.",
+      "items": "Einträge",
+      "bulletPlaceholder": "Aufzählungstext",
+      "addItemPlaceholder": "Eintrag eingeben und Enter drücken",
+      "categoryPlaceholder": "Kategorie (z. B. Datenbank)",
+      "valuePlaceholder": "Wert (z. B. DB2, Oracle)"
+    }
+  },
+  "interviewCoach": {
+    "title": "Interview-Coach",
+    "subtitle": "Bereite Fragen und Antworten vor, gestützt auf dein Arbeitsjournal, deinen Lebenslauf und die Stelle, die du anstrebst.",
+    "preparingFor": "Vorbereitung auf",
+    "allQuestions": "Alle Fragen",
+    "generalPractice": "Allgemeine Übung (ohne Bewerbung)",
+    "untitledRole": "Unbenannte Stelle",
+    "unknownCompany": "Unbekanntes Unternehmen",
+    "noJobDescription": "Diese Bewerbung hat keine Stellenbeschreibung.",
+    "generateQuestions": "✦ Fragen aus der Stellenbeschreibung generieren",
+    "generating": "Wird generiert…",
+    "manualPlaceholder": "Gib eine Frage ein, z. B. „Erzähl mir etwas über dich“",
+    "addQuestion": "+ Frage hinzufügen",
+    "adding": "Wird hinzugefügt…",
+    "bannerAdded": "{count, plural, one {# neue Frage hinzugefügt} other {# neue Fragen hinzugefügt}}.",
+    "bannerAddedSkipped": "{count, plural, one {# neue Frage hinzugefügt} other {# neue Fragen hinzugefügt}} ({skipped} bereits vorhanden).",
+    "confirmDelete": "Diese Frage und ihre Antwort löschen?",
+    "confirmRegenerate": "Die gespeicherte Antwort durch eine neu generierte ersetzen? Deine aktuelle Antwort wird überschrieben (der Überarbeitungsverlauf bleibt erhalten).",
+    "context": {
+      "company": "Unternehmen:",
+      "jobTitle": "Stellenbezeichnung:",
+      "jobId": "Stellen-ID:",
+      "status": "Status:",
+      "resume": "Lebenslauf:",
+      "notes": "Notizen:",
+      "jd": "Stellenbeschreibung:",
+      "noneLinked": "keiner verknüpft",
+      "notesUsed": "{count} als Nachweis verwendet"
+    },
+    "errors": {
+      "addQuestion": "Frage konnte nicht hinzugefügt werden",
+      "save": "Speichern fehlgeschlagen",
+      "questionGeneration": "Fragengenerierung fehlgeschlagen",
+      "answerGeneration": "Antwortgenerierung fehlgeschlagen",
+      "revision": "Überarbeitung fehlgeschlagen",
+      "generic": "Etwas ist schiefgelaufen"
+    },
+    "empty": {
+      "title": "Noch keine Fragen",
+      "hintApplication": "Generiere Fragen aus der Stellenbeschreibung oder gib oben eine ein.",
+      "hintGeneral": "Gib oben eine Frage ein oder wähle eine Bewerbung, um Fragen aus der Stellenbeschreibung zu generieren."
+    },
+    "category": {
+      "General": "Allgemein",
+      "Resume Based": "Zum Lebenslauf",
+      "Job Description Based": "Zur Stellenbeschreibung",
+      "Technical": "Fachlich",
+      "Behavioral": "Verhaltensbezogen",
+      "HR": "HR",
+      "Gap / Risk": "Lücken / Risiken",
+      "Salary / Notice Period": "Gehalt / Kündigungsfrist"
+    },
+    "statusChip": {
+      "draft": "Entwurf",
+      "aiGenerated": "KI-Entwurf",
+      "userEdited": "Bearbeitet",
+      "final": "Final"
+    },
+    "revise": {
+      "improve": "Verbessern",
+      "shorter": "Kürzer",
+      "detailed": "Ausführlicher",
+      "star": "STAR-Format",
+      "confident": "Selbstbewusster",
+      "professional": "Professioneller",
+      "resumeTone": "An Lebenslauf angleichen"
+    },
+    "entry": {
+      "collapse": "Einklappen",
+      "open": "Öffnen",
+      "answer": "Beantworten",
+      "formatParagraph": "Fließtext",
+      "formatStar": "STAR",
+      "formatBullets": "Stichpunkte",
+      "toneNeutral": "Neutraler Ton",
+      "toneConfident": "Selbstbewusster Ton",
+      "toneProfessional": "Professioneller Ton",
+      "evidence": "Nachweise:",
+      "workJournal": "Arbeitsjournal",
+      "baseResume": "Basis-Lebenslauf",
+      "answerPlaceholder": "Schreibe deine Antwort hier — oder lass sie von der KI generieren.",
+      "saveAnswer": "Antwort speichern",
+      "saving": "Wird gespeichert…",
+      "generateAnswer": "✦ Antwort generieren",
+      "cancel": "Abbrechen",
+      "edit": "Bearbeiten",
+      "copy": "Kopieren",
+      "copied": "Kopiert ✓",
+      "markFinal": "Als final markieren ✓",
+      "unmarkFinal": "Final-Markierung entfernen",
+      "regenerate": "Neu generieren…",
+      "regenerating": "Wird neu generiert…",
+      "working": "In Arbeit…",
+      "revisedAnswer": "Überarbeitete Antwort",
+      "acceptRevision": "Überarbeitung übernehmen",
+      "reject": "Verwerfen",
+      "evidenceUsed": "Verwendete Nachweise",
+      "missingEvidence": "Fehlende Nachweise",
+      "revisionHistory": "Überarbeitungsverlauf ({count})",
+      "deleteQuestion": "Frage löschen"
+    }
+  },
+  "resumeDetail": {
+    "resumeDetail": {
+      "allResumes": "Alle Lebensläufe",
+      "baseResume": "Basis-Lebenslauf",
+      "templateLabel": "Vorlage:",
+      "downloadPdf": "PDF herunterladen",
+      "downloadDocx": "DOCX herunterladen",
+      "downloadPptx": "PPTX herunterladen",
+      "preparing": "Wird vorbereitet…",
+      "edit": "Bearbeiten",
+      "duplicate": "Duplizieren",
+      "setAsBase": "Als Basis-Lebenslauf festlegen",
+      "setAsBaseShort": "Als Basis festlegen",
+      "settingBase": "Wird festgelegt…",
+      "delete": "Löschen",
+      "deleteNeedsBaseAlert": "Wähle zuerst einen Basis-Lebenslauf. Du musst einen Basis-Lebenslauf festlegen, bevor du eine Lebenslauf-Version löschen kannst.",
+      "deleteBaseAlert": "Der Basis-Lebenslauf kann nicht gelöscht werden. Lege zuerst eine andere Version als Basis-Lebenslauf fest.",
+      "deleteConfirm": "Diese Lebenslauf-Version löschen? Das kann nicht rückgängig gemacht werden.",
+      "deleteNeedsBaseTitle": "Wähle zuerst einen Basis-Lebenslauf, bevor du eine Version löschst.",
+      "deleteBaseTitle": "Der Basis-Lebenslauf kann nicht gelöscht werden.",
+      "docxExportFailed": "DOCX-Export fehlgeschlagen.",
+      "pptxExportFailed": "PPTX-Export fehlgeschlagen.",
+      "atsSafeMode": "ATS-sicherer Modus",
+      "atsSafeHint": "(einspaltig, ohne Foto — gilt für Vorschau, PDF & DOCX)",
+      "history": {
+        "title": "Versionsverlauf",
+        "empty": "Noch keine Snapshots. Sie werden beim Bearbeiten automatisch erstellt — höchstens einer alle 10 Minuten — sowie vor jeder Wiederherstellung.",
+        "beforeRestore": "vor Wiederherstellung",
+        "identicalToCurrent": "Identisch mit aktueller Version",
+        "differsIn": "Unterschiede in: {groups}",
+        "compare": "Vergleichen",
+        "hideCompare": "Vergleich ausblenden",
+        "restore": "Wiederherstellen",
+        "restoring": "Wird wiederhergestellt…",
+        "restoreThisSnapshot": "Diesen Snapshot wiederherstellen",
+        "restoreConfirm": "Lebenslauf auf den Stand vom {when} zurücksetzen? Dein aktueller Stand wird vorher als Snapshot gesichert, du kannst es also über den Verlauf rückgängig machen.",
+        "restoreFailed": "Wiederherstellung fehlgeschlagen.",
+        "restoreNetworkError": "Netzwerkfehler bei der Wiederherstellung.",
+        "comparingFrom": "Vergleich des Snapshots vom {when} mit dem aktuellen Stand",
+        "labelSnapshot": "Snapshot — {date}",
+        "labelCurrent": "Aktuell — Unterschiede markiert",
+        "groups": {
+          "basicsSummary": "Basisdaten & Zusammenfassung",
+          "areasOfExpertise": "Kompetenzbereiche",
+          "experience": "Berufserfahrung",
+          "education": "Ausbildung",
+          "projects": "Projekte",
+          "skills": "Kenntnisse",
+          "certifications": "Zertifizierungen",
+          "languages": "Sprachen",
+          "customSections": "Eigene Abschnitte",
+          "templateStyle": "Vorlage & Stil",
+          "nameTargetRole": "Name / Zielposition"
+        }
+      },
+      "ats": {
+        "scoreAria": "ATS-Score {value} von 100",
+        "verdictStrong": "Stark — bereit für ATS-Portale",
+        "verdictMedium": "Auf gutem Weg — arbeite die Hinweise unten ab",
+        "verdictWeak": "Braucht Arbeit — beginne mit den fehlgeschlagenen Prüfungen",
+        "resumeHealth": "Lebenslauf-Qualität",
+        "jobMatch": "Job-Übereinstimmung",
+        "pasteJdHint": "füge eine Stellenbeschreibung ein, um den Keyword-Abgleich zu aktivieren",
+        "jdLabel": "Stellenbeschreibung",
+        "jdPlaceholder": "Füge hier die Stellenbeschreibung ein — Keywords werden lokal extrahiert und beim Tippen mit deinem Lebenslauf abgeglichen.",
+        "keywordsCovered": "Keywords: {matched} von {total} abgedeckt",
+        "keywordFound": "In deinem Lebenslauf gefunden",
+        "keywordMissing": "Nicht in deinem Lebenslauf gefunden",
+        "missingKeywordsHint": "Baue fehlende Keywords in deine Zusammenfassung, Kenntnisse oder Stichpunkte ein — aber nur dort, wo sie stimmen.",
+        "healthChecksHeading": "Qualitätsprüfungen des Lebenslaufs",
+        "disclaimer": "Die Scores sind heuristische Richtwerte und werden lokal berechnet — nichts wird an einen Server gesendet. Verschiedene ATS-Anbieter parsen unterschiedlich; der ATS-sichere Export ist das sicherste Format für Portale."
+      }
+    }
+  },
+  "workJournal": {
+    "title": "Arbeitsjournal",
+    "subtitle": "Halte Projekte, Erfolge und STAR-Geschichten fest, solange sie frisch sind — und mach daraus später Stichpunkte für deinen Lebenslauf.",
+    "newEntry": "+ Neuer Eintrag",
+    "searchPlaceholder": "Einträge durchsuchen…",
+    "resumeReadyCheck": "✓ Bereit für den Lebenslauf",
+    "editEntry": "Eintrag bearbeiten",
+    "newEntryHeading": "Neuer Eintrag",
+    "emptyTitle": "Noch keine Journaleinträge",
+    "noMatchTitle": "Keine passenden Einträge",
+    "emptyHint": "Schreib auf, woran du gearbeitet hast — das Projekt, das Problem, die Wirkung — bevor du die Details vergisst.",
+    "noMatchHint": "Versuche eine andere Suche oder setze die Filter zurück.",
+    "saveFailed": "Speichern fehlgeschlagen",
+    "confirmDelete": "Diesen Journaleintrag löschen? Das kann nicht rückgängig gemacht werden.",
+    "errorNoTitle": "Gib dem Eintrag einen Titel.",
+    "labelTitle": "Titel *",
+    "phTitle": "z. B. Batch-Jobs in den Cloud-Scheduler migriert",
+    "labelRole": "Deine Rolle",
+    "phRole": "z. B. Senior Mainframe Developer",
+    "labelCompany": "Unternehmen",
+    "labelClient": "Kunde",
+    "labelProject": "Projekt",
+    "labelPeriod": "Zeitraum",
+    "phPeriod": "z. B. Jan. 2026 – März 2026",
+    "labelWhatIDid": "Was ich gemacht habe",
+    "phWhatIDid": "Die Arbeit selbst — sei konkret.",
+    "labelProblemSolved": "Gelöstes Problem",
+    "phProblemSolved": "Was war kaputt, langsam, riskant oder hat gefehlt?",
+    "labelImpactResult": "Wirkung / Ergebnis",
+    "phImpactResult": "Was hat sich durch deine Arbeit verändert?",
+    "labelTools": "Tools & Technologien",
+    "phTools": "z. B. COBOL, JCL, DB2, AWS",
+    "labelMetrics": "Kennzahlen",
+    "phMetrics": "z. B. 40 % schneller, 200.000 $ gespart, 0 Fehler",
+    "labelTags": "Tags (durch Komma getrennt)",
+    "phTags": "z. B. Migration, Führung",
+    "resumeReady": "Bereit für den Lebenslauf",
+    "saving": "Wird gespeichert…",
+    "saveEntry": "Eintrag speichern",
+    "cancel": "Abbrechen",
+    "aiRequestFailed": "KI-Anfrage fehlgeschlagen",
+    "titleMarkedReady": "Als bereit für den Lebenslauf markiert",
+    "titleMarkReady": "Als bereit für den Lebenslauf markieren",
+    "markReady": "Als bereit markieren",
+    "collapse": "Einklappen",
+    "open": "Öffnen",
+    "labelStarStory": "STAR-Geschichte",
+    "resumeBullets": "Lebenslauf-Stichpunkte",
+    "generating": "Wird generiert…",
+    "generateBullets": "✦ Lebenslauf-Stichpunkte generieren",
+    "improving": "Wird verbessert…",
+    "improveWording": "✦ Formulierung verbessern",
+    "writing": "Wird geschrieben…",
+    "generateStar": "✦ STAR-Geschichte generieren",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "suggestedBullets": "Vorgeschlagene Lebenslauf-Stichpunkte",
+    "improvedWording": "Verbesserte Formulierung",
+    "starSituation": "Situation:",
+    "starTask": "Aufgabe:",
+    "starAction": "Aktion:",
+    "starResult": "Ergebnis:",
+    "saveBulletsToNote": "Stichpunkte im Eintrag speichern",
+    "accept": "Übernehmen",
+    "dismiss": "Verwerfen",
+    "updatedOn": "Aktualisiert am {date}",
+    "bulletAddedTo": "Stichpunkt zu {name} hinzugefügt",
+    "fallbackResume": "einem Lebenslauf",
+    "couldNotAddBullet": "Stichpunkt konnte nicht hinzugefügt werden",
+    "addedTo": "Zu {name} hinzugefügt.",
+    "resumeFallback": "Lebenslauf",
+    "copy": "Kopieren",
+    "addToResume": "Zum Lebenslauf hinzufügen…",
+    "baseResumeSuffix": "(Basis-Lebenslauf)",
+    "noExperienceEntries": "Dieser Lebenslauf enthält keine Berufserfahrung.",
+    "adding": "Wird hinzugefügt…",
+    "addBullet": "Stichpunkt hinzufügen",
+    "untitledRole": "Unbenannte Rolle",
+    "unknownCompany": "Unbekanntes Unternehmen"
   }
 }

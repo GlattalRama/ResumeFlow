@@ -2,15 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import type { Note, NoteType } from "@/lib/types";
 import { NOTE_TYPES } from "@/lib/constants";
-
-const TYPE_LABEL: Record<NoteType, string> = {
-  general: "General",
-  recruiter: "Recruiter",
-  interview: "Interview",
-  todo: "To-do",
-};
 
 export default function NotesSection({
   applicationId,
@@ -19,6 +13,8 @@ export default function NotesSection({
   applicationId: string;
   notes: Note[];
 }) {
+  const t = useTranslations("application");
+  const locale = useLocale();
   const router = useRouter();
   const [type, setType] = useState<NoteType>("general");
   const [text, setText] = useState("");
@@ -57,15 +53,15 @@ export default function NotesSection({
           value={type}
           onChange={(e) => setType(e.target.value as NoteType)}
         >
-          {NOTE_TYPES.map((t) => (
-            <option key={t} value={t}>
-              {TYPE_LABEL[t]}
+          {NOTE_TYPES.map((noteType) => (
+            <option key={noteType} value={noteType}>
+              {t(`noteType.${noteType}`)}
             </option>
           ))}
         </select>
         <input
           className="min-w-[12rem] flex-1 rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
-          placeholder="Add a note…"
+          placeholder={t("notes.placeholder")}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && add()}
@@ -75,13 +71,13 @@ export default function NotesSection({
           disabled={busy}
           className="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
         >
-          Add
+          {t("notes.add")}
         </button>
       </div>
 
       <ul className="mt-4 space-y-2">
         {sorted.length === 0 && (
-          <li className="text-sm text-muted-foreground/70">No notes yet.</li>
+          <li className="text-sm text-muted-foreground/70">{t("notes.empty")}</li>
         )}
         {sorted.map((n) => (
           <li
@@ -90,18 +86,18 @@ export default function NotesSection({
           >
             <div>
               <span className="mr-2 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                {TYPE_LABEL[n.type]}
+                {t(`noteType.${n.type}`)}
               </span>
               <span className="text-sm text-foreground">{n.text}</span>
               <p className="mt-1 text-[11px] text-muted-foreground/70">
-                {new Date(n.createdAt).toLocaleString()}
+                {new Date(n.createdAt).toLocaleString(locale)}
               </p>
             </div>
             <button
               onClick={() => remove(n.id)}
               className="text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
             >
-              Delete
+              {t("notes.delete")}
             </button>
           </li>
         ))}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type {
   ResumeData,
   ResumeSectionState,
@@ -32,6 +33,7 @@ export default function ResumePreviewPane({
   isBase?: boolean;
   baseSet?: boolean;
 }) {
+  const t = useTranslations("resumeDetail");
   const [atsSafe, setAtsSafe] = useState(false);
   const margins = resolveTemplateStyle(templateStyle).pageMargins;
 
@@ -45,9 +47,9 @@ export default function ResumePreviewPane({
             onChange={(e) => setAtsSafe(e.target.checked)}
             className="h-4 w-4"
           />
-          ATS-safe mode
+          {t("atsSafeMode")}
           <span className="font-normal text-muted-foreground/70">
-            (single column, no photo — affects preview, PDF &amp; DOCX)
+            {t("atsSafeHint")}
           </span>
         </label>
         <ResumePreviewActions

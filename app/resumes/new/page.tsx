@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui";
 import ResumeBuilder from "@/components/ResumeBuilder";
 import { resolveVisibleTemplates } from "@/lib/constants";
@@ -9,11 +10,12 @@ export default async function NewResumePage() {
   const availableTemplates = resolveVisibleTemplates(
     await loadTemplateVisibility()
   );
+  const t = await getTranslations("builder");
   return (
     <div>
       <PageHeader
-        title="New resume"
-        subtitle="Fill in your details and pick a template. The preview updates live."
+        title={t("page.newTitle")}
+        subtitle={t("page.newSubtitle")}
       />
       <ResumeBuilder mode="create" availableTemplates={availableTemplates} />
     </div>

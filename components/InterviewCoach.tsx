@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { INTERVIEW_QUESTION_CATEGORIES } from "@/lib/constants";
 import type {
   InterviewAnswerFormat,
@@ -30,33 +31,28 @@ export interface CoachResumeOption {
 const inputClass =
   "rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500";
 
-const STATUS_CHIP: Record<InterviewCoachEntry["status"], [string, string]> = {
-  draft: ["Draft", "bg-muted text-muted-foreground"],
-  aiGenerated: [
-    "AI draft",
-    "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300",
-  ],
-  userEdited: [
-    "Edited",
+// Display classes per entry status; the visible label comes from the
+// "interviewCoach.statusChip" message namespace.
+const STATUS_CHIP_CLASS: Record<InterviewCoachEntry["status"], string> = {
+  draft: "bg-muted text-muted-foreground",
+  aiGenerated: "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300",
+  userEdited:
     "bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300",
-  ],
-  final: [
-    "Final",
+  final:
     "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300",
-  ],
 };
 
-// User-facing labels for the AI revision actions (ids match REVISION_ACTIONS
-// in lib/aiInterviewCoach).
-const REVISE_BUTTONS: { action: string; label: string }[] = [
-  { action: "improve", label: "Improve" },
-  { action: "shorter", label: "Shorter" },
-  { action: "detailed", label: "More detailed" },
-  { action: "star", label: "STAR format" },
-  { action: "confident", label: "More confident" },
-  { action: "professional", label: "More professional" },
-  { action: "resumeTone", label: "Align with resume" },
-];
+// AI revision action ids (match REVISION_ACTIONS in lib/aiInterviewCoach).
+// User-facing labels come from the "interviewCoach.revise" message namespace.
+const REVISE_ACTIONS = [
+  "improve",
+  "shorter",
+  "detailed",
+  "star",
+  "confident",
+  "professional",
+  "resumeTone",
+] as const;
 
 type Scope = "all" | "general" | string;
 
@@ -73,6 +69,8 @@ export default function InterviewCoach({
   baseResumeId: string;
   initialApplicationId: string;
 }) {
+  const t = useTranslations("interviewCoach");
+  const tStatus = useTranslations("status");
   const [entries, setEntries] = useState(initialEntries);
   const [scope, setScope] = useState<Scope>(initialApplicationId || "all");
   const [manualQ, setManualQ] = useState("");
@@ -115,13 +113,13 @@ export default function InterviewCoach({
       body: JSON.stringify(patch),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data?.error || "Save failed");
+    if (!res.ok) throw new Error(data?.error || t("errors.save"));
     replaceEntry(data);
     return data as InterviewCoachEntry;
   }
 
   async function deleteEntry(id: string) {
-    if (!window.confirm("Delete this question and its answer?")) return;
+    if (!window.confirm(t("confirmDelete"))) return;
     const res = await fetch(`/api/interview-coach/${id}`, { method: "DELETE" });
     if (res.ok) setEntries((prev) => prev.filter((e) => e.id !== id));
   }
@@ -145,13 +143,13 @@ export default function InterviewCoach({
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || "Could not add question");
+      if (!res.ok) throw new Error(data?.error || t("errors.addQuestion"));
       setEntries((prev) => [...prev, data]);
       setManualQ("");
     } catch (err) {
       setBanner({
         ok: false,
-        text: err instanceof Error ? err.message : "Could not add question",
+        text: err instanceof Error ? err.message : t("errors.addQuestion"),
       });
     } finally {
       setManualBusy(false);
@@ -174,18 +172,22 @@ export default function InterviewCoach({
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || "Question generation failed");
+      if (!res.ok) throw new Error(data?.error || t("errors.questionGeneration"));
       setEntries((prev) => [...prev, ...data.created]);
       setBanner({
         ok: true,
-        text: `${data.created.length} new question${
-          data.created.length === 1 ? "" : "s"
-        } added${data.skipped > 0 ? ` (${data.skipped} already existed)` : ""}.`,
+        text:
+          data.skipped > 0
+            ? t("bannerAddedSkipped", {
+                count: data.created.length,
+                skipped: data.skipped,
+              })
+            : t("bannerAdded", { count: data.created.length }),
       });
     } catch (err) {
       setBanner({
         ok: false,
-        text: err instanceof Error ? err.message : "Question generation failed",
+        text: err instanceof Error ? err.message : t("errors.questionGeneration"),
       });
     } finally {
       setGenBusy(false);
@@ -194,16 +196,13 @@ export default function InterviewCoach({
 
   return (
     <div>
-      <PageHeader
-        title="Interview Coach"
-        subtitle="Prepare questions and answers grounded in your Work Journal, resume, and the job you're targeting."
-      />
+      <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
       {/* Context selector */}
       <Card className="mb-4">
         <div className="flex flex-wrap items-center gap-3">
           <label className="text-sm font-medium text-foreground/80">
-            Preparing for
+            {t("preparingFor")}
           </label>
           <select
             value={scope}
@@ -213,11 +212,12 @@ export default function InterviewCoach({
             }}
             className={`${inputClass} max-w-full`}
           >
-            <option value="all">All questions</option>
-            <option value="general">General practice (no application)</option>
+            <option value="all">{t("allQuestions")}</option>
+            <option value="general">{t("generalPractice")}</option>
             {applications.map((a) => (
               <option key={a.id} value={a.id}>
-                {a.jobTitle || "Untitled role"} · {a.company || "Unknown company"}
+                {a.jobTitle || t("untitledRole")} ·{" "}
+                {a.company || t("unknownCompany")}
               </option>
             ))}
           </select>
@@ -227,13 +227,11 @@ export default function InterviewCoach({
               onClick={generateQuestions}
               disabled={genBusy || !selectedApp.hasJobDescription}
               title={
-                selectedApp.hasJobDescription
-                  ? undefined
-                  : "This application has no job description."
+                selectedApp.hasJobDescription ? undefined : t("noJobDescription")
               }
               className={buttonClass("primary")}
             >
-              {genBusy ? "Generating…" : "✦ Generate Questions from Job Description"}
+              {genBusy ? t("generating") : t("generateQuestions")}
             </button>
           )}
         </div>
@@ -241,32 +239,46 @@ export default function InterviewCoach({
         {selectedApp && (
           <div className="mt-3 grid gap-x-6 gap-y-1 border-t border-border pt-3 text-sm text-muted-foreground sm:grid-cols-2">
             <p>
-              <span className="font-medium text-foreground/80">Company:</span>{" "}
+              <span className="font-medium text-foreground/80">
+                {t("context.company")}
+              </span>{" "}
               {selectedApp.company || "—"}
             </p>
             <p>
-              <span className="font-medium text-foreground/80">Job title:</span>{" "}
+              <span className="font-medium text-foreground/80">
+                {t("context.jobTitle")}
+              </span>{" "}
               {selectedApp.jobTitle || "—"}
             </p>
             <p>
-              <span className="font-medium text-foreground/80">Job ID:</span>{" "}
+              <span className="font-medium text-foreground/80">
+                {t("context.jobId")}
+              </span>{" "}
               {selectedApp.jobId || "—"}
             </p>
             <p>
-              <span className="font-medium text-foreground/80">Status:</span>{" "}
-              {selectedApp.status}
+              <span className="font-medium text-foreground/80">
+                {t("context.status")}
+              </span>{" "}
+              {tStatus(selectedApp.status as never)}
             </p>
             <p>
-              <span className="font-medium text-foreground/80">Resume:</span>{" "}
-              {contextResumeName ?? "none linked"}
+              <span className="font-medium text-foreground/80">
+                {t("context.resume")}
+              </span>{" "}
+              {contextResumeName ?? t("context.noneLinked")}
             </p>
             <p>
-              <span className="font-medium text-foreground/80">Notes:</span>{" "}
-              {selectedApp.noteCount} used as evidence
+              <span className="font-medium text-foreground/80">
+                {t("context.notes")}
+              </span>{" "}
+              {t("context.notesUsed", { count: selectedApp.noteCount })}
             </p>
             {selectedApp.jobDescriptionPreview && (
               <p className="sm:col-span-2">
-                <span className="font-medium text-foreground/80">JD:</span>{" "}
+                <span className="font-medium text-foreground/80">
+                  {t("context.jd")}
+                </span>{" "}
                 {selectedApp.jobDescriptionPreview}
                 {selectedApp.jobDescriptionPreview.length >= 280 ? "…" : ""}
               </p>
@@ -282,7 +294,7 @@ export default function InterviewCoach({
             onKeyDown={(e) => {
               if (e.key === "Enter") addManual();
             }}
-            placeholder='Type a question, e.g. "Tell me about yourself"'
+            placeholder={t("manualPlaceholder")}
             className={`${inputClass} min-w-0 flex-1`}
           />
           <button
@@ -291,7 +303,7 @@ export default function InterviewCoach({
             disabled={manualBusy || !manualQ.trim()}
             className={buttonClass("secondary")}
           >
-            {manualBusy ? "Adding…" : "+ Add question"}
+            {manualBusy ? t("adding") : t("addQuestion")}
           </button>
         </div>
 
@@ -311,19 +323,16 @@ export default function InterviewCoach({
       {/* Question groups */}
       {visible.length === 0 ? (
         <EmptyState
-          title="No questions yet"
-          hint={
-            selectedApp
-              ? "Generate questions from the job description, or type one above."
-              : "Type a question above, or pick an application to generate JD-based questions."
-          }
+          title={t("empty.title")}
+          hint={selectedApp ? t("empty.hintApplication") : t("empty.hintGeneral")}
         />
       ) : (
         <div className="space-y-6">
           {grouped.map(({ category, items }) => (
             <section key={category}>
               <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                {category}
+                {/* Category VALUES stay English in the data; display localized. */}
+                {t(`category.${category}` as never)}
                 <span className="ml-2 font-normal normal-case">({items.length})</span>
               </h2>
               <div className="space-y-2">
@@ -358,6 +367,7 @@ function EntryCard({
   onReplace: (updated: InterviewCoachEntry) => void;
   onDelete: () => void;
 }) {
+  const t = useTranslations("interviewCoach");
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
@@ -371,8 +381,17 @@ function EntryCard({
   const [showHistory, setShowHistory] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const [statusLabel, statusClass] = STATUS_CHIP[entry.status];
+  const statusLabel = t(`statusChip.${entry.status}` as never);
+  const statusClass = STATUS_CHIP_CLASS[entry.status];
   const hasAnswer = entry.answer.trim().length > 0;
+
+  // Localized label for a revision action id; falls back to the raw id for
+  // unknown actions (e.g. legacy history entries).
+  function reviseLabel(action: string) {
+    return (REVISE_ACTIONS as readonly string[]).includes(action)
+      ? t(`revise.${action}` as never)
+      : action;
+  }
 
   async function run(fn: () => Promise<void>, key: string) {
     setBusy(key);
@@ -380,7 +399,7 @@ function EntryCard({
     try {
       await fn();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : t("errors.generic"));
     } finally {
       setBusy(null);
     }
@@ -388,12 +407,7 @@ function EntryCard({
 
   // Generate (no saved answer) or regenerate (explicit confirmation first).
   async function generateAnswer(regenerate: boolean) {
-    if (
-      regenerate &&
-      !window.confirm(
-        "Replace the saved answer with a newly generated one? Your current answer will be overwritten (revision history is kept)."
-      )
-    ) {
+    if (regenerate && !window.confirm(t("confirmRegenerate"))) {
       return;
     }
     await run(async () => {
@@ -407,7 +421,7 @@ function EntryCard({
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || "Answer generation failed");
+      if (!res.ok) throw new Error(data?.error || t("errors.answerGeneration"));
       onReplace(data);
       setEditing(false);
     }, "answer");
@@ -421,7 +435,7 @@ function EntryCard({
         body: JSON.stringify({ mode: "revise", entryId: entry.id, action }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || "Revision failed");
+      if (!res.ok) throw new Error(data?.error || t("errors.revision"));
       setRevision({ action: data.action, instruction: data.instruction, revised: data.revised });
     }, `revise:${action}`);
   }
@@ -480,7 +494,11 @@ function EntryCard({
             aria-expanded={expanded}
             className="rounded-md border border-input px-2 py-0.5 text-xs text-muted-foreground hover:bg-accent"
           >
-            {expanded ? "Collapse" : hasAnswer ? "Open" : "Answer"}
+            {expanded
+              ? t("entry.collapse")
+              : hasAnswer
+                ? t("entry.open")
+                : t("entry.answer")}
           </button>
         </div>
       </div>
@@ -498,9 +516,9 @@ function EntryCard({
               }
               className={inputClass}
             >
-              <option value="paragraph">Paragraph</option>
-              <option value="star">STAR</option>
-              <option value="bullets">Bullet points</option>
+              <option value="paragraph">{t("entry.formatParagraph")}</option>
+              <option value="star">{t("entry.formatStar")}</option>
+              <option value="bullets">{t("entry.formatBullets")}</option>
             </select>
             <select
               value={entry.tone}
@@ -511,16 +529,16 @@ function EntryCard({
               }
               className={inputClass}
             >
-              <option value="neutral">Neutral tone</option>
-              <option value="confident">Confident tone</option>
-              <option value="professional">Professional tone</option>
+              <option value="neutral">{t("entry.toneNeutral")}</option>
+              <option value="confident">{t("entry.toneConfident")}</option>
+              <option value="professional">{t("entry.toneProfessional")}</option>
             </select>
             {(entry.usedWorkJournal || entry.usedBaseResume) && (
               <span className="text-xs text-muted-foreground">
-                Evidence:
-                {entry.usedWorkJournal ? " Work Journal" : ""}
+                {t("entry.evidence")}
+                {entry.usedWorkJournal ? ` ${t("entry.workJournal")}` : ""}
                 {entry.usedWorkJournal && entry.usedBaseResume ? " +" : ""}
-                {entry.usedBaseResume ? " Base Resume" : ""}
+                {entry.usedBaseResume ? ` ${t("entry.baseResume")}` : ""}
               </span>
             )}
           </div>
@@ -532,7 +550,7 @@ function EntryCard({
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 rows={6}
-                placeholder="Write your answer here — or generate one with AI."
+                placeholder={t("entry.answerPlaceholder")}
                 className={`${inputClass} w-full`}
               />
               <div className="mt-2 flex flex-wrap gap-2">
@@ -542,7 +560,7 @@ function EntryCard({
                   disabled={busy !== null || !draft.trim()}
                   className={buttonClass("primary")}
                 >
-                  {busy === "save" ? "Saving…" : "Save answer"}
+                  {busy === "save" ? t("entry.saving") : t("entry.saveAnswer")}
                 </button>
                 {!hasAnswer && (
                   <button
@@ -551,7 +569,7 @@ function EntryCard({
                     disabled={busy !== null}
                     className={buttonClass("secondary")}
                   >
-                    {busy === "answer" ? "Generating…" : "✦ Generate answer"}
+                    {busy === "answer" ? t("generating") : t("entry.generateAnswer")}
                   </button>
                 )}
                 {editing && (
@@ -560,7 +578,7 @@ function EntryCard({
                     onClick={() => setEditing(false)}
                     className={buttonClass("secondary")}
                   >
-                    Cancel
+                    {t("entry.cancel")}
                   </button>
                 )}
               </div>
@@ -580,10 +598,10 @@ function EntryCard({
                   }}
                   className={buttonClass("secondary")}
                 >
-                  Edit
+                  {t("entry.edit")}
                 </button>
                 <button type="button" onClick={copyAnswer} className={buttonClass("secondary")}>
-                  {copied ? "Copied ✓" : "Copy"}
+                  {copied ? t("entry.copied") : t("entry.copy")}
                 </button>
                 {entry.status === "final" ? (
                   <button
@@ -591,7 +609,7 @@ function EntryCard({
                     onClick={() => run(async () => { await onPatch({ status: "userEdited" }); }, "final")}
                     className={buttonClass("secondary")}
                   >
-                    Unmark final
+                    {t("entry.unmarkFinal")}
                   </button>
                 ) : (
                   <button
@@ -599,7 +617,7 @@ function EntryCard({
                     onClick={() => run(async () => { await onPatch({ status: "final" }); }, "final")}
                     className={buttonClass("secondary")}
                   >
-                    Mark final ✓
+                    {t("entry.markFinal")}
                   </button>
                 )}
                 <button
@@ -608,21 +626,23 @@ function EntryCard({
                   disabled={busy !== null}
                   className={buttonClass("secondary")}
                 >
-                  {busy === "answer" ? "Regenerating…" : "Regenerate…"}
+                  {busy === "answer" ? t("entry.regenerating") : t("entry.regenerate")}
                 </button>
               </div>
 
               {/* AI revision actions */}
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {REVISE_BUTTONS.map((b) => (
+                {REVISE_ACTIONS.map((action) => (
                   <button
-                    key={b.action}
+                    key={action}
                     type="button"
                     disabled={busy !== null}
-                    onClick={() => revise(b.action)}
+                    onClick={() => revise(action)}
                     className="rounded-full border border-input px-2.5 py-1 text-xs text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
                   >
-                    {busy === `revise:${b.action}` ? "Working…" : `✦ ${b.label}`}
+                    {busy === `revise:${action}`
+                      ? t("entry.working")
+                      : `✦ ${reviseLabel(action)}`}
                   </button>
                 ))}
               </div>
@@ -633,7 +653,7 @@ function EntryCard({
           {revision && (
             <div className="rounded-lg border border-brand-200 bg-brand-50/50 p-4 dark:border-brand-800 dark:bg-brand-500/10">
               <p className="mb-1 text-sm font-semibold text-foreground">
-                Revised answer
+                {t("entry.revisedAnswer")}
               </p>
               <p className="mb-2 text-xs text-muted-foreground">{revision.instruction}</p>
               <p className="whitespace-pre-wrap text-sm text-foreground">
@@ -646,14 +666,14 @@ function EntryCard({
                   disabled={busy !== null}
                   className={buttonClass("primary")}
                 >
-                  {busy === "accept" ? "Saving…" : "Accept revision"}
+                  {busy === "accept" ? t("entry.saving") : t("entry.acceptRevision")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setRevision(null)}
                   className={buttonClass("secondary")}
                 >
-                  Reject
+                  {t("entry.reject")}
                 </button>
               </div>
             </div>
@@ -662,7 +682,9 @@ function EntryCard({
           {/* Evidence + gaps from the last generation */}
           {entry.evidenceUsed.length > 0 && (
             <div className="text-xs text-muted-foreground">
-              <p className="font-medium text-foreground/70">Evidence used</p>
+              <p className="font-medium text-foreground/70">
+                {t("entry.evidenceUsed")}
+              </p>
               <ul className="mt-0.5 list-disc pl-4">
                 {entry.evidenceUsed.map((e, i) => (
                   <li key={i}>{e}</li>
@@ -672,7 +694,7 @@ function EntryCard({
           )}
           {entry.gaps.length > 0 && (
             <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
-              <p className="font-medium">Missing evidence</p>
+              <p className="font-medium">{t("entry.missingEvidence")}</p>
               <ul className="mt-1 list-disc pl-4">
                 {entry.gaps.map((g, i) => (
                   <li key={i}>{g}</li>
@@ -689,14 +711,16 @@ function EntryCard({
                 onClick={() => setShowHistory((v) => !v)}
                 className="text-xs font-medium text-brand-700 hover:underline dark:text-brand-300"
               >
-                {showHistory ? "▾" : "▸"} Revision history (
-                {entry.aiRevisionHistory.length})
+                {showHistory ? "▾" : "▸"}{" "}
+                {t("entry.revisionHistory", {
+                  count: entry.aiRevisionHistory.length,
+                })}
               </button>
               {showHistory && (
                 <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
                   {[...entry.aiRevisionHistory].reverse().map((r) => (
                     <li key={r.id}>
-                      {new Date(r.createdAt).toLocaleString()} — {r.action}
+                      {new Date(r.createdAt).toLocaleString()} — {reviseLabel(r.action)}
                     </li>
                   ))}
                 </ul>
@@ -714,7 +738,7 @@ function EntryCard({
               onClick={onDelete}
               className="text-xs text-red-600 hover:underline dark:text-red-400"
             >
-              Delete question
+              {t("entry.deleteQuestion")}
             </button>
           </div>
         </div>

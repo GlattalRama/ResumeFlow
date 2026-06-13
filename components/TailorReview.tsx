@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { TailorChange, DiffPart } from "@/lib/tailorDiff";
 import { diffWords } from "@/lib/tailorDiff";
 import type { AtsScoreResult } from "@/lib/atsScore";
@@ -36,6 +37,7 @@ function DiffText({ parts }: { parts: DiffPart[] }) {
 }
 
 function ChangeBody({ change }: { change: TailorChange }) {
+  const t = useTranslations("ai");
   if (change.kind === "text") {
     return <DiffText parts={diffWords(change.before, change.after)} />;
   }
@@ -78,7 +80,7 @@ function ChangeBody({ change }: { change: TailorChange }) {
       </div>
       {change.dropped.length > 0 && (
         <p className="text-[11px] text-muted-foreground">
-          Dropped as less relevant:{" "}
+          {t("tailor.dropped")}{" "}
           {change.dropped.map((item, i) => (
             <del key={item} className="text-red-700/70 dark:text-red-400/70">
               {i > 0 ? ", " : ""}
@@ -100,6 +102,7 @@ export function TailorChangeCard({
   rejected: boolean;
   onToggle: () => void;
 }) {
+  const t = useTranslations("ai");
   return (
     <div
       className={`rounded-lg border p-3 transition ${
@@ -121,7 +124,7 @@ export function TailorChangeCard({
                 : "bg-green-600 text-white"
             }`}
           >
-            ✓ Accept
+            ✓ {t("tailor.accept")}
           </button>
           <button
             type="button"
@@ -133,7 +136,7 @@ export function TailorChangeCard({
                 : "bg-card text-muted-foreground hover:bg-muted/50"
             }`}
           >
-            Keep original
+            {t("tailor.keepOriginal")}
           </button>
         </div>
       </div>
@@ -156,6 +159,7 @@ export function ScoreDelta({
   before: AtsScoreResult;
   after: AtsScoreResult;
 }) {
+  const t = useTranslations("ai");
   const delta = after.overall - before.overall;
   return (
     <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/50 p-3">
@@ -167,7 +171,7 @@ export function ScoreDelta({
         <ScoreRing value={after.overall} size={40} />
         <div>
           <p className="text-sm font-semibold text-foreground">
-            ATS score{" "}
+            {t("tailor.atsScore")}{" "}
             <span
               className={
                 delta > 0
@@ -182,7 +186,7 @@ export function ScoreDelta({
           </p>
           {before.hasJobDescription && (
             <p className="text-[11px] text-muted-foreground">
-              Keywords {before.matchedCount}/{before.keywords.length} →{" "}
+              {t("tailor.keywords")} {before.matchedCount}/{before.keywords.length} →{" "}
               <span className={scoreBandClass(after.keywordScore ?? 0)}>
                 {after.matchedCount}/{after.keywords.length}
               </span>
