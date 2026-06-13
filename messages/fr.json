@@ -268,7 +268,6 @@
     "error": {
       "title": "Une erreur est survenue",
       "description": "Votre session a peut-être expiré. Déconnectez-vous puis reconnectez-vous pour rétablir l'accès à votre Google Drive, ou réessayez de charger la page.",
-      "reauth": "Se déconnecter et se reconnecter",
       "signingIn": "Connexion…",
       "tryAgain": "Réessayer",
       "reference": "Référence de l'erreur : {digest}"

@@ -268,7 +268,6 @@
     "error": {
       "title": "Etwas ist schiefgelaufen",
       "description": "Deine Sitzung ist möglicherweise abgelaufen. Melde dich ab und wieder an, um die Verbindung zu deinem Google Drive wiederherzustellen, oder lade die Seite erneut.",
-      "reauth": "Abmelden & erneut anmelden",
       "signingIn": "Anmeldung läuft…",
       "tryAgain": "Erneut versuchen",
       "reference": "Fehlerreferenz: {digest}"

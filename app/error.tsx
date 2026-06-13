@@ -6,18 +6,15 @@
 //
 // In production Next.js replaces server-side error messages with a generic
 // string, so we can't reliably branch on error.name. We instead lead with the
-// most likely cause — an expired/missing sign-in — and offer to re-authenticate,
-// while still providing a plain "Try again" for transient failures.
+// most likely cause — an expired/missing sign-in — and offer to re-authenticate.
 import { useEffect, useState } from "react";
 import { signIn, signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
 export default function Error({
   error,
-  reset,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
 }) {
   const t = useTranslations("ai");
   const [reauthing, setReauthing] = useState(false);
@@ -62,14 +59,7 @@ export default function Error({
             disabled={reauthing}
             className="inline-flex w-full items-center justify-center rounded-md bg-brand-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-brand-700 disabled:opacity-60"
           >
-            {reauthing ? t("error.signingIn") : t("error.reauth")}
-          </button>
-          <button
-            type="button"
-            onClick={() => reset()}
-            className="inline-flex w-full items-center justify-center rounded-md border border-input bg-card px-4 py-2.5 text-sm font-medium text-foreground/80 shadow-sm transition hover:bg-muted/50"
-          >
-            {t("error.tryAgain")}
+            {reauthing ? t("error.signingIn") : t("error.tryAgain")}
           </button>
         </div>
 

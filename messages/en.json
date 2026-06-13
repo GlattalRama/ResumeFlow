@@ -268,7 +268,6 @@
     "error": {
       "title": "Something went wrong",
       "description": "Your session may have expired. Sign out and back in to reconnect to your Google Drive, or retry the page.",
-      "reauth": "Sign out & sign in again",
       "signingIn": "Signing in…",
       "tryAgain": "Try again",
       "reference": "Error reference: {digest}"
