@@ -397,7 +397,7 @@
     },
     "import": {
       "title": "Mit einem vorhandenen Lebenslauf starten",
-      "description": "Lade eine PDF- oder Word-Datei (.docx) hoch und die KI ordnet sie in die Abschnitte unten ein. Nichts wird gespeichert, bis du „Lebenslauf erstellen“ drückst.",
+      "description": "Lade eine oder mehrere PDF- oder Word-Dateien (.docx) hoch und die KI ordnet und führt sie in den Abschnitten unten zusammen. Nichts wird gespeichert, bis du „Lebenslauf erstellen“ drückst.",
       "button": "Datei importieren",
       "reading": "Wird gelesen…",
       "parsing": "Analyse und Zuordnung mit KI — das kann ein paar Sekunden dauern.",

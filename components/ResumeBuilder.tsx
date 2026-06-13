@@ -687,16 +687,18 @@ export default function ResumeBuilder({
       .filter(Boolean);
   }
 
-  // Upload a resume file, parse it with AI, and replace the builder contents
-  // with the extracted data. Also seeds a sensible version name / target role
-  // from the parsed identity when those are still blank.
-  async function importResume(file: File) {
+  // Upload one or more resume files, parse them with AI, and replace the builder
+  // contents with the extracted data. When several files are given, the server
+  // merges them into a single resume. Also seeds a sensible version name /
+  // target role from the parsed identity when those are still blank.
+  async function importResume(files: File[]) {
+    if (files.length === 0) return;
     setImporting(true);
     setImportError("");
     setImportNote("");
     try {
       const form = new FormData();
-      form.append("file", file);
+      for (const file of files) form.append("file", file);
       const res = await fetch("/api/resumes/import", {
         method: "POST",
         body: form,
@@ -1788,14 +1790,15 @@ export default function ResumeBuilder({
                 {importing ? t("import.reading") : t("import.button")}
                 <input
                   type="file"
+                  multiple
                   accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                   className="hidden"
                   disabled={importing}
                   onChange={(e) => {
-                    const file = e.target.files?.[0];
+                    const files = e.target.files ? Array.from(e.target.files) : [];
                     // Reset so re-selecting the same file fires onChange again.
                     e.target.value = "";
-                    if (file) void importResume(file);
+                    if (files.length) void importResume(files);
                   }}
                 />
               </label>

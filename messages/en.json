@@ -397,7 +397,7 @@
     },
     "import": {
       "title": "Start from an existing resume",
-      "description": "Upload a PDF or Word (.docx) file and AI will sort it into the sections below. Nothing is saved until you press “Create resume”.",
+      "description": "Upload one or more PDF or Word (.docx) files and AI will sort and merge them into the sections below. Nothing is saved until you press “Create resume”.",
       "button": "Import file",
       "reading": "Reading…",
       "parsing": "Parsing and categorizing with AI — this can take a few seconds.",

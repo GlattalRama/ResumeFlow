@@ -134,13 +134,26 @@ const extractionSchema = jsonSchema<ExtractedResume>({
 
 // Build the parser system prompt. When `formatted` is true the input carries
 // inline <strong>/<em>/<u> tags (from a .docx) that we want preserved in the
-// rich-text fields; otherwise the input is plain text (e.g. a PDF).
-function buildSystemPrompt(formatted: boolean): string {
+// rich-text fields; otherwise the input is plain text (e.g. a PDF). When
+// `multiDoc` is true the input is SEVERAL resume documents (separated by
+// "===== DOCUMENT … =====" markers) that belong to the same person and must be
+// merged into one resume.
+function buildSystemPrompt(formatted: boolean, multiDoc = false): string {
   return [
-    "You are a resume parser. You are given the text extracted from a candidate's resume (PDF or Word). Sort that text into the structured sections of the schema.",
+    multiDoc
+      ? "You are a resume parser. You are given the text of SEVERAL resume documents that belong to the SAME person, each introduced by a '===== DOCUMENT: … =====' marker. Merge them into ONE resume and sort the content into the structured sections of the schema."
+      : "You are a resume parser. You are given the text extracted from a candidate's resume (PDF or Word). Sort that text into the structured sections of the schema.",
     "",
     "Strict rules:",
     "- EXTRACT ONLY. Never invent, embellish, or add facts, skills, dates, or figures that are not present in the text. If something is missing, return an empty string or empty array — do not guess.",
+    ...(multiDoc
+      ? [
+          "- MERGE, don't concatenate. The documents overlap. When the SAME job (same company + role), school, project, or certification appears in more than one document, output it ONCE: keep the most complete/specific dates, location, and title, and take the UNION of its highlights — drop bullets that are duplicates or near-duplicates of each other.",
+          "- For single-value fields (basics.name, title, email, phone, location, website, summary): pick the single best value across the documents — prefer the most complete, most recent, non-empty one. Never merge two different summaries into a run-on paragraph.",
+          "- For list fields (areasOfExpertise, skillCategories, projects, certifications, languages): take the union across documents and remove duplicates.",
+          "- Order experience and education most-recent-first across the merged set.",
+        ]
+      : []),
     "- basics.name, title (their headline/current role), email, phone, location, website: pull from the header/contact block.",
     "- basics.summary: the professional summary / objective / profile paragraph. Empty if there isn't one.",
     "- experience: one entry per job, most recent first. Put each bullet/accomplishment as a separate string in highlights (strip leading bullet glyphs). startDate/endDate are free text exactly as written (e.g. 'Jan 2020', 'Present').",
@@ -158,18 +171,21 @@ function buildSystemPrompt(formatted: boolean): string {
 // model/transport errors (the route maps those to a 502 and credit alerts).
 // `formatted` indicates the input carries inline <strong>/<em>/<u> tags that
 // should be preserved in the rich-text fields (summary, experience highlights).
+// `multiDoc` indicates the text is several resume documents to merge into one.
 export async function extractResumeFromText(
   text: string,
   model: LanguageModel,
-  formatted = false
+  formatted = false,
+  multiDoc = false
 ): Promise<ExtractedResume> {
   const { object } = await generateObject({
     model,
     schema: extractionSchema,
-    system: buildSystemPrompt(formatted),
+    system: buildSystemPrompt(formatted, multiDoc),
     // Cap the input so a pathological upload can't blow the context / cost.
-    prompt: `Resume text:\n\n${text.slice(0, 24000)}`,
-    maxOutputTokens: 4000,
+    // Allow more room when merging several documents.
+    prompt: `Resume text:\n\n${text.slice(0, multiDoc ? 48000 : 24000)}`,
+    maxOutputTokens: multiDoc ? 6000 : 4000,
   });
   // The model is asked to confine formatting to the rich-text fields, but never
   // trust it: keep only the allowed inline tags there and strip tags everywhere

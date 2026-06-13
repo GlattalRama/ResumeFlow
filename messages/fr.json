@@ -397,7 +397,7 @@
     },
     "import": {
       "title": "Partir d’un CV existant",
-      "description": "Téléversez un fichier PDF ou Word (.docx) et l’IA le répartira dans les sections ci-dessous. Rien n’est enregistré tant que vous n’appuyez pas sur « Créer le CV ».",
+      "description": "Téléversez un ou plusieurs fichiers PDF ou Word (.docx) et l’IA les répartira et les fusionnera dans les sections ci-dessous. Rien n’est enregistré tant que vous n’appuyez pas sur « Créer le CV ».",
       "button": "Importer un fichier",
       "reading": "Lecture…",
       "parsing": "Analyse et classement par l’IA — cela peut prendre quelques secondes.",

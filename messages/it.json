@@ -397,7 +397,7 @@
     },
     "import": {
       "title": "Parti da un curriculum esistente",
-      "description": "Carica un file PDF o Word (.docx) e l’IA lo organizzerà nelle sezioni qui sotto. Nulla viene salvato finché non premi “Crea curriculum”.",
+      "description": "Carica uno o più file PDF o Word (.docx) e l’IA li organizzerà e unirà nelle sezioni qui sotto. Nulla viene salvato finché non premi “Crea curriculum”.",
       "button": "Importa file",
       "reading": "Lettura…",
       "parsing": "Analisi e classificazione con l’IA — può richiedere qualche secondo.",

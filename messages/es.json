@@ -397,7 +397,7 @@
     },
     "import": {
       "title": "Empieza desde un currículum existente",
-      "description": "Sube un archivo PDF o Word (.docx) y la IA lo organizará en las secciones de abajo. No se guarda nada hasta que pulses “Crear currículum”.",
+      "description": "Sube uno o varios archivos PDF o Word (.docx) y la IA los organizará y combinará en las secciones de abajo. No se guarda nada hasta que pulses “Crear currículum”.",
       "button": "Importar archivo",
       "reading": "Leyendo…",
       "parsing": "Analizando y clasificando con IA — puede tardar unos segundos.",

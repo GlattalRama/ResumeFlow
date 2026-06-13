@@ -7,7 +7,8 @@ import { emptyResumeData, normalizeResumeData } from "@/lib/constants";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const MAX_BYTES = 5 * 1024 * 1024; // 5 MB — resumes are small; reject blobs early.
+const MAX_BYTES = 5 * 1024 * 1024; // 5 MB per file — resumes are small; reject blobs early.
+const MAX_FILES = 5; // cap how many documents one import can merge.
 
 function escHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -183,14 +184,16 @@ async function extractFileContent(
 // NOTHING — returns a draft the builder pre-fills; the user reviews and presses
 // "Create resume" to save through the normal /api/resumes path.
 export async function POST(req: Request) {
-  let file: File;
+  // Accept one OR several files under the "file" key. Multiple documents are
+  // merged into a single resume by the parser (people often keep more than one
+  // version of their CV and want them combined).
+  let files: File[];
   try {
     const form = await req.formData();
-    const f = form.get("file");
-    if (!(f instanceof File)) {
+    files = form.getAll("file").filter((f): f is File => f instanceof File);
+    if (files.length === 0) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
-    file = f;
   } catch {
     return NextResponse.json(
       { error: "Expected a file upload (multipart/form-data)." },
@@ -198,31 +201,54 @@ export async function POST(req: Request) {
     );
   }
 
-  if (file.size === 0) {
-    return NextResponse.json({ error: "The file is empty." }, { status: 400 });
-  }
-  if (file.size > MAX_BYTES) {
+  if (files.length > MAX_FILES) {
     return NextResponse.json(
-      { error: "File too large. Please upload a resume under 5 MB." },
+      { error: `Too many files. Please upload at most ${MAX_FILES} documents.` },
       { status: 413 }
     );
   }
+  for (const file of files) {
+    if (file.size === 0) {
+      return NextResponse.json(
+        { error: `“${file.name}” is empty.` },
+        { status: 400 }
+      );
+    }
+    if (file.size > MAX_BYTES) {
+      return NextResponse.json(
+        { error: `“${file.name}” is too large. Each file must be under 5 MB.` },
+        { status: 413 }
+      );
+    }
+  }
 
-  // Extract text BEFORE resolving access, so an unreadable file never burns a
-  // daily-cap unit.
+  // Extract text from every file BEFORE resolving access, so an unreadable file
+  // never burns a daily-cap unit. Multiple documents are concatenated with a
+  // marker so the parser can tell them apart and merge across them.
+  const multiDoc = files.length > 1;
   let text: string;
   let formatted = false;
   try {
-    const content = await extractFileContent(file);
-    text = content.text.trim();
-    formatted = content.formatted;
+    const parts: string[] = [];
+    for (const file of files) {
+      const content = await extractFileContent(file);
+      const trimmed = content.text.trim();
+      if (content.formatted) formatted = true;
+      parts.push(
+        multiDoc ? `===== DOCUMENT: ${file.name} =====\n${trimmed}` : trimmed
+      );
+    }
+    text = parts.join("\n\n").trim();
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Could not read that file.";
     return NextResponse.json({ error: message }, { status: 422 });
   }
 
-  if (text.length < 30) {
+  // Total readable text across all files must clear the floor; the marker lines
+  // don't count toward it.
+  const readableLen = text.replace(/^=====.*=====$/gm, "").trim().length;
+  if (readableLen < 30) {
     return NextResponse.json(
       {
         error:
@@ -232,7 +258,8 @@ export async function POST(req: Request) {
     );
   }
 
-  // One import = one cap unit (resolveAiAccess increments once).
+  // One import = one cap unit (resolveAiAccess increments once), regardless of
+  // how many files were merged.
   const access = await resolveAiAccess();
   if (!access.ok) {
     return NextResponse.json({ error: access.message }, { status: access.status });
@@ -242,7 +269,8 @@ export async function POST(req: Request) {
     const extracted = await extractResumeFromText(
       text,
       openrouterModel(access.apiKey, access.model),
-      formatted
+      formatted,
+      multiDoc
     );
     const resumeData = normalizeResumeData({
       ...emptyResumeData(),
