@@ -2,7 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { ACHIEVEMENT_CATEGORIES, type WorkJournalNote } from "@/lib/types";
+import {
+  ACHIEVEMENT_CATEGORIES,
+  EVIDENCE_TYPES,
+  METRIC_TYPES,
+  type Evidence,
+  type Metric,
+  type WorkJournalNote,
+} from "@/lib/types";
 import { Card, EmptyState, PageHeader, buttonClass } from "@/components/ui";
 
 // Category slug → i18n key (workJournal.cat*). Keep in sync with
@@ -18,6 +25,27 @@ const CATEGORY_KEY: Record<string, string> = {
   "customer-impact": "catCustomerImpact",
   "cost-optimization": "catCostOptimization",
   innovation: "catInnovation",
+};
+
+// Metric / evidence type slug → i18n key (workJournal.mt* / workJournal.et*).
+const METRIC_TYPE_KEY: Record<string, string> = {
+  "time-saved": "mtTimeSaved",
+  "cost-saved": "mtCostSaved",
+  "revenue-impact": "mtRevenueImpact",
+  "defects-prevented": "mtDefectsPrevented",
+  "risk-reduced": "mtRiskReduced",
+  "customers-impacted": "mtCustomersImpacted",
+  "people-influenced": "mtPeopleInfluenced",
+  "projects-delivered": "mtProjectsDelivered",
+  custom: "mtCustom",
+};
+const EVIDENCE_TYPE_KEY: Record<string, string> = {
+  jira: "etJira",
+  "azure-devops": "etAzureDevops",
+  servicenow: "etServicenow",
+  confluence: "etConfluence",
+  document: "etDocument",
+  url: "etUrl",
 };
 
 export interface ResumePickerOption {
@@ -48,7 +76,8 @@ interface NoteFormValues {
   role: string;
   period: string;
   toolsTechnologies: string;
-  metrics: string;
+  metricsList: Metric[];
+  evidence: Evidence[];
   tags: string; // comma-separated in the form, string[] on the model
   resumeReady: boolean;
 }
@@ -66,13 +95,22 @@ const EMPTY_FORM: NoteFormValues = {
   role: "",
   period: "",
   toolsTechnologies: "",
-  metrics: "",
+  metricsList: [],
+  evidence: [],
   tags: "",
   resumeReady: false,
 };
 
 function toForm(n: WorkJournalNote): NoteFormValues {
   const star = n.star ?? { situation: "", task: "", action: "", result: "" };
+  // Seed structured metrics from the legacy free-text string for older notes so
+  // the value isn't lost — the user can split it into typed rows.
+  const metricsList: Metric[] =
+    n.metricsList && n.metricsList.length > 0
+      ? n.metricsList
+      : n.metrics.trim()
+        ? [{ type: "custom", label: "", value: n.metrics, unit: "" }]
+        : [];
   return {
     title: n.title,
     category: n.category ?? "",
@@ -86,7 +124,8 @@ function toForm(n: WorkJournalNote): NoteFormValues {
     role: n.role,
     period: n.period,
     toolsTechnologies: n.toolsTechnologies,
-    metrics: n.metrics,
+    metricsList,
+    evidence: n.evidence ?? [],
     tags: n.tags.join(", "),
     resumeReady: n.resumeReady,
   };
@@ -110,7 +149,8 @@ function formPayload(f: NoteFormValues) {
     role: f.role,
     period: f.period,
     toolsTechnologies: f.toolsTechnologies,
-    metrics: f.metrics,
+    metricsList: f.metricsList,
+    evidence: f.evidence,
     resumeReady: f.resumeReady,
     tags: f.tags
       .split(",")
@@ -364,7 +404,8 @@ function NoteForm({
       initial.project ||
       initial.period ||
       initial.toolsTechnologies ||
-      initial.metrics ||
+      initial.metricsList.length ||
+      initial.evidence.length ||
       initial.tags ||
       initial.resumeReady,
   );
@@ -587,10 +628,15 @@ function NoteForm({
             {text("project", t("labelProject"))}
             {text("period", t("labelPeriod"), t("phPeriod"))}
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {text("toolsTechnologies", t("labelTools"), t("phTools"))}
-            {text("metrics", t("labelMetrics"), t("phMetrics"))}
-          </div>
+          {text("toolsTechnologies", t("labelTools"), t("phTools"))}
+          <MetricsEditor
+            metrics={values.metricsList}
+            onChange={(metricsList) => set("metricsList", metricsList)}
+          />
+          <EvidenceList
+            evidence={values.evidence}
+            onChange={(evidence) => set("evidence", evidence)}
+          />
           <div className="grid items-end gap-4 sm:grid-cols-2">
             {text("tags", t("labelTags"), t("phTags"))}
             <label className="flex items-center gap-2 text-sm text-foreground/80">
@@ -617,6 +663,152 @@ function NoteForm({
         </button>
       </div>
     </Card>
+  );
+}
+
+// ---- Metrics & evidence editors ----
+
+const selectClass =
+  "rounded-md border border-input bg-card text-foreground px-2 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500";
+
+function MetricsEditor({
+  metrics,
+  onChange,
+}: {
+  metrics: Metric[];
+  onChange: (next: Metric[]) => void;
+}) {
+  const t = useTranslations("workJournal");
+  const update = (i: number, patch: Partial<Metric>) =>
+    onChange(metrics.map((m, idx) => (idx === i ? { ...m, ...patch } : m)));
+  const remove = (i: number) => onChange(metrics.filter((_, idx) => idx !== i));
+  const add = () =>
+    onChange([...metrics, { type: "time-saved", label: "", value: "", unit: "" }]);
+
+  return (
+    <div>
+      <label className={labelClass}>{t("labelMetrics")}</label>
+      <div className="space-y-2">
+        {metrics.map((m, i) => (
+          <div key={i} className="flex flex-wrap items-center gap-2">
+            <select
+              value={m.type}
+              onChange={(e) => update(i, { type: e.target.value as Metric["type"] })}
+              className={`${selectClass} min-w-[8rem]`}
+            >
+              {METRIC_TYPES.map((mt) => (
+                <option key={mt} value={mt}>
+                  {t(METRIC_TYPE_KEY[mt])}
+                </option>
+              ))}
+            </select>
+            {m.type === "custom" && (
+              <input
+                value={m.label}
+                onChange={(e) => update(i, { label: e.target.value })}
+                placeholder={t("mtCustom")}
+                className={`${inputClass} w-32`}
+              />
+            )}
+            <input
+              value={m.value}
+              onChange={(e) => update(i, { value: e.target.value })}
+              placeholder={t("phMetricValue")}
+              className={`${inputClass} flex-1`}
+            />
+            <input
+              value={m.unit}
+              onChange={(e) => update(i, { unit: e.target.value })}
+              placeholder={t("phMetricUnit")}
+              className={`${inputClass} w-28`}
+            />
+            <button
+              type="button"
+              onClick={() => remove(i)}
+              aria-label={t("remove")}
+              className="rounded-md border border-input px-2 py-1.5 text-xs text-muted-foreground hover:bg-accent"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={add}
+          className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-300"
+        >
+          {t("addMetric")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function EvidenceList({
+  evidence,
+  onChange,
+}: {
+  evidence: Evidence[];
+  onChange: (next: Evidence[]) => void;
+}) {
+  const t = useTranslations("workJournal");
+  const update = (i: number, patch: Partial<Evidence>) =>
+    onChange(evidence.map((e, idx) => (idx === i ? { ...e, ...patch } : e)));
+  const remove = (i: number) => onChange(evidence.filter((_, idx) => idx !== i));
+  const add = () => onChange([...evidence, { type: "jira", label: "", url: "" }]);
+
+  return (
+    <div>
+      <label className={labelClass}>{t("labelEvidence")}</label>
+      <div className="space-y-2">
+        {evidence.map((e, i) => (
+          <div key={i} className="flex flex-wrap items-center gap-2">
+            <select
+              value={e.type}
+              onChange={(ev) => update(i, { type: ev.target.value as Evidence["type"] })}
+              className={`${selectClass} min-w-[8rem]`}
+            >
+              {EVIDENCE_TYPES.map((et) => (
+                <option key={et} value={et}>
+                  {t(EVIDENCE_TYPE_KEY[et])}
+                </option>
+              ))}
+            </select>
+            <input
+              value={e.label}
+              onChange={(ev) => update(i, { label: ev.target.value })}
+              placeholder={t("phEvidenceLabel")}
+              className={`${inputClass} flex-1`}
+            />
+            <input
+              value={e.url}
+              onChange={(ev) => update(i, { url: ev.target.value })}
+              placeholder={t("phEvidenceUrl")}
+              type="url"
+              className={`${inputClass} flex-1`}
+            />
+            <button
+              type="button"
+              onClick={() => remove(i)}
+              aria-label={t("remove")}
+              className="rounded-md border border-input px-2 py-1.5 text-xs text-muted-foreground hover:bg-accent"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={add}
+          className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-300"
+        >
+          {t("addEvidence")}
+        </button>
+        {evidence.length === 0 && (
+          <p className="text-xs text-muted-foreground">{t("evidenceHint")}</p>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -759,7 +951,48 @@ function NoteCard({
             </>
           )}
           <NoteField label={t("labelTools")} value={note.toolsTechnologies} />
-          <NoteField label={t("labelMetrics")} value={note.metrics} />
+          {note.metricsList && note.metricsList.length > 0 ? (
+            <div>
+              <p className={labelClass}>{t("labelMetrics")}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {note.metricsList.map((m, i) => (
+                  <span
+                    key={i}
+                    className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                  >
+                    {(m.label.trim() || t(METRIC_TYPE_KEY[m.type])) +
+                      (m.value.trim() ? `: ${m.value}${m.unit.trim() ? ` ${m.unit}` : ""}` : "")}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <NoteField label={t("labelMetrics")} value={note.metrics} />
+          )}
+          {note.evidence && note.evidence.length > 0 && (
+            <div>
+              <p className={labelClass}>{t("labelEvidence")}</p>
+              <ul className="space-y-1">
+                {note.evidence.map((e, i) => (
+                  <li key={i} className="text-sm">
+                    <span className="text-muted-foreground">{t(EVIDENCE_TYPE_KEY[e.type])}: </span>
+                    {e.url ? (
+                      <a
+                        href={e.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-brand-600 hover:underline dark:text-brand-300"
+                      >
+                        {e.label.trim() || e.url}
+                      </a>
+                    ) : (
+                      <span className="text-foreground">{e.label}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {note.starStory && <NoteField label={t("labelStarStory")} value={note.starStory} />}
 
           {/* Saved bullets + add-to-resume */}

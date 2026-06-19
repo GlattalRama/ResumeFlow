@@ -432,6 +432,49 @@ export const ACHIEVEMENT_CATEGORIES = [
 
 export type AchievementCategory = (typeof ACHIEVEMENT_CATEGORIES)[number];
 
+// Structured metrics. Stored as typed rows; display labels are localized in the
+// UI (messages/*.json → workJournal.mt*). "custom" lets the user name their own.
+export const METRIC_TYPES = [
+  "time-saved",
+  "cost-saved",
+  "revenue-impact",
+  "defects-prevented",
+  "risk-reduced",
+  "customers-impacted",
+  "people-influenced",
+  "projects-delivered",
+  "custom",
+] as const;
+
+export type MetricType = (typeof METRIC_TYPES)[number];
+
+export interface Metric {
+  type: MetricType;
+  // Free-text label, used when type is "custom" or to override the default.
+  label: string;
+  value: string; // "40%", "$200k", "0" — user-entered, never AI-invented
+  unit: string; // optional ("hrs/week", "USD"); "" when unset
+}
+
+// Evidence references that make an achievement traceable. URL-based in Phase 2;
+// uploaded screenshots/docs (Blob) are a later addition.
+export const EVIDENCE_TYPES = [
+  "jira",
+  "azure-devops",
+  "servicenow",
+  "confluence",
+  "document",
+  "url",
+] as const;
+
+export type EvidenceType = (typeof EVIDENCE_TYPES)[number];
+
+export interface Evidence {
+  type: EvidenceType;
+  label: string; // "VER-7.1 release ticket"
+  url: string; // external link; "" when unset
+}
+
 // One captured work memory: a project, achievement, or problem solved —
 // recorded while it's fresh so it can later be turned into resume bullets and
 // interview stories. All prose fields are plain text; empty string when unset.
@@ -472,6 +515,12 @@ export interface WorkJournalNote {
   category?: AchievementCategory | "";
   // 2 = STAR-native; absent or 1 = legacy. Set by the lazy migration on read.
   schemaVersion?: number;
+
+  // ---- Phase 2 (structured metrics & evidence) ----
+  // Typed metrics; the legacy free-text `metrics` string is kept as a derived
+  // mirror (joined for AI digests/search) so existing features keep working.
+  metricsList?: Metric[];
+  evidence?: Evidence[];
 }
 
 // ---- Interview Coach ----

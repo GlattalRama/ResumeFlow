@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createItem, readAll } from "@/lib/store";
 import { ACHIEVEMENT_CATEGORIES, type AchievementCategory, type Star, type WorkJournalNote } from "@/lib/types";
 import { STAR_SCHEMA_VERSION, legacyFromStar } from "@/lib/career/migrate";
+import { metricsToText, readEvidence, readMetricsList } from "@/lib/career/metrics";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,10 @@ export async function POST(req: Request) {
   const legacy = hasStar
     ? legacyFromStar(star)
     : { whatIDid: str(body.whatIDid), problemSolved: str(body.problemSolved), impactResult: str(body.impactResult) };
+  // Structured metrics are the source of truth; mirror to the legacy string.
+  const metricsList = readMetricsList(body.metricsList);
+  const evidence = readEvidence(body.evidence);
+  const metrics = metricsList.length > 0 ? metricsToText(metricsList) : str(body.metrics);
   const created = await createItem("workJournal", {
     title: str(body.title).trim(),
     company: str(body.company),
@@ -63,7 +68,7 @@ export async function POST(req: Request) {
     toolsTechnologies: str(body.toolsTechnologies),
     problemSolved: legacy.problemSolved,
     impactResult: legacy.impactResult,
-    metrics: str(body.metrics),
+    metrics,
     tags: tags(body.tags),
     resumeReady: Boolean(body.resumeReady),
     linkedResumeId: "",
@@ -75,6 +80,8 @@ export async function POST(req: Request) {
     star,
     category: readCategory(body.category),
     schemaVersion: STAR_SCHEMA_VERSION,
+    metricsList,
+    evidence,
   } satisfies Omit<WorkJournalNote, "id">);
   return NextResponse.json(created, { status: 201 });
 }

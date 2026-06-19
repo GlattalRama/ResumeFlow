@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { deleteItem, getItem, updateItem } from "@/lib/store";
 import { ACHIEVEMENT_CATEGORIES, type Star, type WorkJournalNote } from "@/lib/types";
 import { STAR_SCHEMA_VERSION, legacyFromStar } from "@/lib/career/migrate";
+import { metricsToText, readEvidence, readMetricsList } from "@/lib/career/metrics";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,15 @@ export async function PATCH(req: Request, { params }: Ctx) {
     patch.category = (ACHIEVEMENT_CATEGORIES as readonly string[]).includes(body.category)
       ? (body.category as WorkJournalNote["category"])
       : "";
+  }
+  // Structured metrics are the source of truth; re-mirror the legacy string.
+  if (Array.isArray(body.metricsList)) {
+    const metricsList = readMetricsList(body.metricsList);
+    patch.metricsList = metricsList;
+    patch.metrics = metricsToText(metricsList);
+  }
+  if (Array.isArray(body.evidence)) {
+    patch.evidence = readEvidence(body.evidence);
   }
 
   const updated = await updateItem("workJournal", id, patch);
