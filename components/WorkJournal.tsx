@@ -2,8 +2,23 @@
 
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import type { WorkJournalNote } from "@/lib/types";
+import { ACHIEVEMENT_CATEGORIES, type WorkJournalNote } from "@/lib/types";
 import { Card, EmptyState, PageHeader, buttonClass } from "@/components/ui";
+
+// Category slug → i18n key (workJournal.cat*). Keep in sync with
+// ACHIEVEMENT_CATEGORIES and messages/*.json.
+const CATEGORY_KEY: Record<string, string> = {
+  "technical-delivery": "catTechnicalDelivery",
+  leadership: "catLeadership",
+  "incident-resolution": "catIncidentResolution",
+  automation: "catAutomation",
+  "process-improvement": "catProcessImprovement",
+  "quality-improvement": "catQualityImprovement",
+  compliance: "catCompliance",
+  "customer-impact": "catCustomerImpact",
+  "cost-optimization": "catCostOptimization",
+  innovation: "catInnovation",
+};
 
 export interface ResumePickerOption {
   id: string;
@@ -21,15 +36,18 @@ const labelClass = "mb-1 block text-sm font-medium text-foreground/80";
 
 interface NoteFormValues {
   title: string;
+  category: string; // category slug or ""
+  // STAR — the structured story (source of truth).
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
   company: string;
   client: string;
   project: string;
   role: string;
   period: string;
-  whatIDid: string;
   toolsTechnologies: string;
-  problemSolved: string;
-  impactResult: string;
   metrics: string;
   tags: string; // comma-separated in the form, string[] on the model
   resumeReady: boolean;
@@ -37,41 +55,63 @@ interface NoteFormValues {
 
 const EMPTY_FORM: NoteFormValues = {
   title: "",
+  category: "",
+  situation: "",
+  task: "",
+  action: "",
+  result: "",
   company: "",
   client: "",
   project: "",
   role: "",
   period: "",
-  whatIDid: "",
   toolsTechnologies: "",
-  problemSolved: "",
-  impactResult: "",
   metrics: "",
   tags: "",
   resumeReady: false,
 };
 
 function toForm(n: WorkJournalNote): NoteFormValues {
+  const star = n.star ?? { situation: "", task: "", action: "", result: "" };
   return {
     title: n.title,
+    category: n.category ?? "",
+    situation: star.situation,
+    task: star.task,
+    action: star.action,
+    result: star.result,
     company: n.company,
     client: n.client,
     project: n.project,
     role: n.role,
     period: n.period,
-    whatIDid: n.whatIDid,
     toolsTechnologies: n.toolsTechnologies,
-    problemSolved: n.problemSolved,
-    impactResult: n.impactResult,
     metrics: n.metrics,
     tags: n.tags.join(", "),
     resumeReady: n.resumeReady,
   };
 }
 
+// Payload for POST/PATCH. STAR goes as a structured object; the server mirrors
+// it into the legacy prose fields, so we don't send those.
 function formPayload(f: NoteFormValues) {
   return {
-    ...f,
+    title: f.title,
+    category: f.category,
+    star: {
+      situation: f.situation,
+      task: f.task,
+      action: f.action,
+      result: f.result,
+    },
+    company: f.company,
+    client: f.client,
+    project: f.project,
+    role: f.role,
+    period: f.period,
+    toolsTechnologies: f.toolsTechnologies,
+    metrics: f.metrics,
+    resumeReady: f.resumeReady,
     tags: f.tags
       .split(",")
       .map((t) => t.trim())
@@ -249,6 +289,7 @@ export default function WorkJournal({
         <div className="mb-4">
           <NoteForm
             key={formTarget}
+            isNew={!editingNote}
             initial={editingNote ? toForm(editingNote) : newEntryInitial}
             heading={editingNote ? t("editEntry") : t("newEntryHeading")}
             onCancel={() => setFormTarget(null)}
@@ -296,11 +337,13 @@ export default function WorkJournal({
 // ---- Note form ----
 
 function NoteForm({
+  isNew,
   initial,
   heading,
   onSave,
   onCancel,
 }: {
+  isNew: boolean;
   initial: NoteFormValues;
   heading: string;
   onSave: (values: NoteFormValues) => Promise<void>;
@@ -310,9 +353,100 @@ function NoteForm({
   const [values, setValues] = useState(initial);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // "Help Me Write" capture box (new entries only).
+  const [capture, setCapture] = useState("");
+  const [aiBusy, setAiBusy] = useState<"expand" | "polish" | null>(null);
+  // Auto-expand the extra fields when editing an entry that already uses them.
+  const hasExtras = Boolean(
+    initial.role ||
+      initial.company ||
+      initial.client ||
+      initial.project ||
+      initial.period ||
+      initial.toolsTechnologies ||
+      initial.metrics ||
+      initial.tags ||
+      initial.resumeReady,
+  );
+  const [expanded, setExpanded] = useState(hasExtras);
 
   function set<K extends keyof NoteFormValues>(key: K, value: NoteFormValues[K]) {
     setValues((v) => ({ ...v, [key]: value }));
+  }
+
+  const hasStar = Boolean(values.situation || values.task || values.action || values.result);
+
+  async function callAi(body: Record<string, unknown>) {
+    const res = await fetch("/api/ai/career", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || t("aiExpandFailed"));
+    return data;
+  }
+
+  // "Help Me Write": expand a rough sentence into STAR + a suggested category.
+  async function helpMeWrite() {
+    if (capture.trim().length < 8) return;
+    setAiBusy("expand");
+    setError(null);
+    try {
+      const data = await callAi({
+        action: "expand",
+        text: capture,
+        role: values.role,
+        company: values.company,
+        client: values.client,
+        project: values.project,
+      });
+      const s = data.star ?? {};
+      setValues((v) => ({
+        ...v,
+        situation: s.situation ?? "",
+        task: s.task ?? "",
+        action: s.action ?? "",
+        result: s.result ?? "",
+        category: typeof data.category === "string" ? data.category : v.category,
+        // Seed a title from the rough text if the user hasn't typed one.
+        title: v.title.trim() ? v.title : capture.trim().slice(0, 80),
+      }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("aiExpandFailed"));
+    } finally {
+      setAiBusy(null);
+    }
+  }
+
+  // "Polish wording": tighten the current STAR draft, facts unchanged.
+  async function polish() {
+    if (!hasStar) return;
+    setAiBusy("polish");
+    setError(null);
+    try {
+      const data = await callAi({
+        action: "polish",
+        star: {
+          situation: values.situation,
+          task: values.task,
+          action: values.action,
+          result: values.result,
+        },
+      });
+      const s = data.star ?? {};
+      setValues((v) => ({
+        ...v,
+        situation: s.situation ?? v.situation,
+        task: s.task ?? v.task,
+        action: s.action ?? v.action,
+        result: s.result ?? v.result,
+      }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("aiExpandFailed"));
+    } finally {
+      setAiBusy(null);
+    }
   }
 
   async function submit() {
@@ -343,14 +477,14 @@ function NoteForm({
     </div>
   );
 
-  const area = (key: keyof NoteFormValues, label: string, placeholder = "") => (
+  const area = (key: keyof NoteFormValues, label: string, placeholder = "", rows = 2) => (
     <div>
       <label className={labelClass}>{label}</label>
       <textarea
         value={values[key] as string}
         onChange={(e) => set(key, e.target.value as never)}
         placeholder={placeholder}
-        rows={3}
+        rows={rows}
         className={inputClass}
       />
     </div>
@@ -359,35 +493,118 @@ function NoteForm({
   return (
     <Card>
       <h2 className="mb-4 font-semibold text-foreground">{heading}</h2>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {text("title", t("labelTitle"), t("phTitle"))}
-        {text("role", t("labelRole"), t("phRole"))}
-        {text("company", t("labelCompany"))}
-        {text("client", t("labelClient"))}
-        {text("project", t("labelProject"))}
-        {text("period", t("labelPeriod"), t("phPeriod"))}
-      </div>
-      <div className="mt-4 space-y-4">
-        {area("whatIDid", t("labelWhatIDid"), t("phWhatIDid"))}
-        {area("problemSolved", t("labelProblemSolved"), t("phProblemSolved"))}
-        {area("impactResult", t("labelImpactResult"), t("phImpactResult"))}
-        <div className="grid gap-4 sm:grid-cols-2">
-          {text("toolsTechnologies", t("labelTools"), t("phTools"))}
-          {text("metrics", t("labelMetrics"), t("phMetrics"))}
+
+      {/* Help Me Write — capture a rough sentence and let AI draft the STAR. */}
+      {isNew && (
+        <div className="mb-5 rounded-lg border border-brand-200 bg-brand-50/50 p-4 dark:border-brand-800 dark:bg-brand-500/10">
+          <label className={labelClass}>{t("captureHeading")}</label>
+          <textarea
+            value={capture}
+            onChange={(e) => setCapture(e.target.value)}
+            placeholder={t("phCapture")}
+            rows={2}
+            className={inputClass}
+          />
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground">{t("captureHint")}</p>
+            <button
+              type="button"
+              onClick={helpMeWrite}
+              disabled={aiBusy !== null || capture.trim().length < 8}
+              className={buttonClass("primary")}
+            >
+              {aiBusy === "expand" ? t("expanding") : t("helpMeWrite")}
+            </button>
+          </div>
         </div>
-        <div className="grid items-end gap-4 sm:grid-cols-2">
-          {text("tags", t("labelTags"), t("phTags"))}
-          <label className="flex items-center gap-2 text-sm text-foreground/80">
-            <input
-              type="checkbox"
-              checked={values.resumeReady}
-              onChange={(e) => set("resumeReady", e.target.checked)}
-              className="h-4 w-4 rounded border-input"
-            />
-            {t("resumeReady")}
-          </label>
+      )}
+
+      {/* Title */}
+      <div className="mb-4">{text("title", t("labelTitle"), t("phTitle"))}</div>
+
+      {/* Category */}
+      <div className="mb-4">
+        <label className={labelClass}>{t("labelCategory")}</label>
+        <div className="flex flex-wrap gap-1.5">
+          {ACHIEVEMENT_CATEGORIES.map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => set("category", values.category === c ? "" : c)}
+              className={`rounded-full border px-2.5 py-1 text-xs font-medium transition ${
+                values.category === c
+                  ? "border-brand-300 bg-brand-50 text-brand-700 dark:border-brand-700 dark:bg-brand-500/15 dark:text-brand-200"
+                  : "border-input text-muted-foreground hover:bg-accent"
+              }`}
+            >
+              {t(CATEGORY_KEY[c])}
+            </button>
+          ))}
         </div>
       </div>
+
+      {/* STAR — the story */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold text-foreground/80">{t("storyHeading")}</p>
+          <button
+            type="button"
+            onClick={polish}
+            disabled={aiBusy !== null || !hasStar}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 transition hover:text-brand-700 disabled:opacity-50 dark:text-brand-300"
+          >
+            {aiBusy === "polish" ? t("polishing") : t("polishWording")}
+          </button>
+        </div>
+        {area("situation", t("labelSituation"), t("phSituation"))}
+        {area("task", t("labelTask"), t("phTask"))}
+        {area("action", t("labelAction"), t("phAction"))}
+        {area("result", t("labelResult"), t("phResult"))}
+      </div>
+
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="mt-4 flex items-center gap-1.5 text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
+      >
+        <span
+          className={`inline-block transition-transform ${expanded ? "rotate-90" : ""}`}
+          aria-hidden
+        >
+          ▸
+        </span>
+        {expanded ? t("fewerDetails") : t("moreDetails")}
+      </button>
+
+      {/* Optional context, kept out of the way until needed. */}
+      {expanded && (
+        <div className="mt-4 space-y-4 border-t border-input pt-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            {text("role", t("labelRole"), t("phRole"))}
+            {text("company", t("labelCompany"))}
+            {text("client", t("labelClient"))}
+            {text("project", t("labelProject"))}
+            {text("period", t("labelPeriod"), t("phPeriod"))}
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {text("toolsTechnologies", t("labelTools"), t("phTools"))}
+            {text("metrics", t("labelMetrics"), t("phMetrics"))}
+          </div>
+          <div className="grid items-end gap-4 sm:grid-cols-2">
+            {text("tags", t("labelTags"), t("phTags"))}
+            <label className="flex items-center gap-2 text-sm text-foreground/80">
+              <input
+                type="checkbox"
+                checked={values.resumeReady}
+                onChange={(e) => set("resumeReady", e.target.checked)}
+                className="h-4 w-4 rounded border-input"
+              />
+              {t("resumeReady")}
+            </label>
+          </div>
+        </div>
+      )}
       {error && (
         <p className="mt-3 text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
@@ -479,7 +696,14 @@ function NoteCard({
       {/* Header row */}
       <div className="flex flex-wrap items-start justify-between gap-2">
         <button type="button" onClick={onToggle} className="min-w-0 flex-1 text-left">
-          <p className="font-semibold text-foreground">{note.title}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-semibold text-foreground">{note.title}</p>
+            {note.category && CATEGORY_KEY[note.category] && (
+              <span className="rounded-full border border-brand-200 bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-700 dark:border-brand-800 dark:bg-brand-500/15 dark:text-brand-200">
+                {t(CATEGORY_KEY[note.category])}
+              </span>
+            )}
+          </div>
           {meta && <p className="mt-0.5 text-xs text-muted-foreground">{meta}</p>}
           {note.tags.length > 0 && (
             <p className="mt-1 flex flex-wrap gap-1">
@@ -520,9 +744,20 @@ function NoteCard({
 
       {expanded && (
         <div className="mt-4 space-y-4 border-t border-border pt-4">
-          <NoteField label={t("labelWhatIDid")} value={note.whatIDid} />
-          <NoteField label={t("labelProblemSolved")} value={note.problemSolved} />
-          <NoteField label={t("labelImpactResult")} value={note.impactResult} />
+          {note.star ? (
+            <>
+              <NoteField label={t("labelSituation")} value={note.star.situation} />
+              <NoteField label={t("labelTask")} value={note.star.task} />
+              <NoteField label={t("labelAction")} value={note.star.action} />
+              <NoteField label={t("labelResult")} value={note.star.result} />
+            </>
+          ) : (
+            <>
+              <NoteField label={t("labelWhatIDid")} value={note.whatIDid} />
+              <NoteField label={t("labelProblemSolved")} value={note.problemSolved} />
+              <NoteField label={t("labelImpactResult")} value={note.impactResult} />
+            </>
+          )}
           <NoteField label={t("labelTools")} value={note.toolsTechnologies} />
           <NoteField label={t("labelMetrics")} value={note.metrics} />
           {note.starStory && <NoteField label={t("labelStarStory")} value={note.starStory} />}
@@ -548,14 +783,6 @@ function NoteCard({
               className={buttonClass("secondary")}
             >
               {aiBusy === "bullets" ? t("generating") : t("generateBullets")}
-            </button>
-            <button
-              type="button"
-              disabled={!!aiBusy}
-              onClick={() => runAi("improve")}
-              className={buttonClass("secondary")}
-            >
-              {aiBusy === "improve" ? t("improving") : t("improveWording")}
             </button>
             <button
               type="button"

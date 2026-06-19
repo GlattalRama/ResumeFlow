@@ -679,6 +679,15 @@ function EntryCard({
             </div>
           )}
 
+          {/* Which Work Journal STAR stories this answer was built from */}
+          {(entry.journalStoriesUsed?.length ?? 0) > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 rounded-md border border-brand-200 bg-brand-50 px-3 py-2 text-xs text-brand-800 dark:border-brand-800 dark:bg-brand-500/10 dark:text-brand-200">
+              <span aria-hidden>✦</span>
+              <span className="font-medium">{t("entry.builtFromStar")}</span>
+              <span>{entry.journalStoriesUsed!.join(", ")}</span>
+            </div>
+          )}
+
           {/* Evidence + gaps from the last generation */}
           {entry.evidenceUsed.length > 0 && (
             <div className="text-xs text-muted-foreground">

@@ -407,6 +407,31 @@ export interface QnaItem {
 
 // ---- Work Journal ----
 
+// STAR framing of an achievement — the structured story behind a journal entry.
+export interface Star {
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
+}
+
+// Achievement categories. Stored as stable slugs; display is localized in the UI
+// (messages/*.json → workJournal.cat*). Keep this list in sync with those keys.
+export const ACHIEVEMENT_CATEGORIES = [
+  "technical-delivery",
+  "leadership",
+  "incident-resolution",
+  "automation",
+  "process-improvement",
+  "quality-improvement",
+  "compliance",
+  "customer-impact",
+  "cost-optimization",
+  "innovation",
+] as const;
+
+export type AchievementCategory = (typeof ACHIEVEMENT_CATEGORIES)[number];
+
 // One captured work memory: a project, achievement, or problem solved —
 // recorded while it's fresh so it can later be turned into resume bullets and
 // interview stories. All prose fields are plain text; empty string when unset.
@@ -438,6 +463,15 @@ export interface WorkJournalNote {
   starStory: string;
   createdAt: string;
   updatedAt: string;
+
+  // ---- v2 (STAR-native capture) ----
+  // Structured STAR is the source of truth for the story; the legacy prose
+  // fields (whatIDid/problemSolved/impactResult) are kept as a derived mirror
+  // so existing AI features and add-to-resume keep working unchanged.
+  star?: Star;
+  category?: AchievementCategory | "";
+  // 2 = STAR-native; absent or 1 = legacy. Set by the lazy migration on read.
+  schemaVersion?: number;
 }
 
 // ---- Interview Coach ----
@@ -507,6 +541,9 @@ export interface InterviewCoachEntry {
   // Short references to the specific evidence the answer used (e.g. a journal
   // note title or resume bullet) — and what was missing.
   evidenceUsed: string[];
+  // Exact Work Journal story titles the answer was built from (validated).
+  // Optional: entries generated before this feature won't have it.
+  journalStoriesUsed?: string[];
   gaps: string[];
   aiRevisionHistory: InterviewAnswerRevision[];
   createdAt: string;

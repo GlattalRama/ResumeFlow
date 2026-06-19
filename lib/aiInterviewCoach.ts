@@ -13,6 +13,7 @@
 // in this module persists — routes/clients decide what to save after review.
 import { generateObject, jsonSchema, type LanguageModel } from "ai";
 import { htmlToLines } from "./richText";
+import { starFromLegacy } from "./career/migrate";
 import { INTERVIEW_QUESTION_CATEGORIES } from "./constants";
 import type {
   Application,
@@ -38,6 +39,9 @@ export interface InterviewEvidence {
   digest: string;
   usedBaseResume: boolean;
   usedWorkJournal: boolean;
+  // Titles of the Work Journal stories included in the digest, in priority
+  // order — used to attribute which STAR stories an answer was built from.
+  journalTitles: string[];
 }
 
 function resumeLines(d: ResumeData, label: string): string[] {
@@ -65,24 +69,48 @@ function resumeLines(d: ResumeData, label: string): string[] {
   return lines;
 }
 
-function journalLines(notes: WorkJournalNote[]): string[] {
-  // Most recently updated first; resume-ready notes are the strongest evidence.
-  const picked = [...notes]
+// "technical-delivery" → "Technical Delivery" for readable prompt evidence.
+function humanizeCategory(slug: string): string {
+  return slug
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function hasStarContent(n: WorkJournalNote): boolean {
+  const s = n.star;
+  return !!s && Boolean(s.situation || s.task || s.action || s.result);
+}
+
+// Strongest evidence first: resume-ready, then entries with a real STAR story,
+// then most recently updated. Capped to keep the prompt focused.
+function pickJournalNotes(notes: WorkJournalNote[]): WorkJournalNote[] {
+  return [...notes]
     .sort((a, b) => {
       if (a.resumeReady !== b.resumeReady) return a.resumeReady ? -1 : 1;
+      if (hasStarContent(a) !== hasStarContent(b)) return hasStarContent(a) ? -1 : 1;
       return b.updatedAt.localeCompare(a.updatedAt);
     })
     .slice(0, 12);
+}
+
+function journalLines(picked: WorkJournalNote[]): string[] {
   if (picked.length === 0) return [];
-  const lines = ["## Work Journal (the candidate's own captured stories)"];
+  const lines = ["## Work Journal (the candidate's own captured STAR stories)"];
   for (const n of picked) {
     const meta = [n.role, n.company, n.project, n.period].filter(Boolean).join(", ");
-    lines.push(`Story "${n.title}"${meta ? ` (${meta})` : ""}:`);
-    if (n.whatIDid) lines.push(`  What: ${n.whatIDid}`);
-    if (n.problemSolved) lines.push(`  Problem: ${n.problemSolved}`);
-    if (n.impactResult) lines.push(`  Impact: ${n.impactResult}`);
+    const cat = n.category ? ` [${humanizeCategory(n.category)}]` : "";
+    lines.push(`Story "${n.title}"${meta ? ` (${meta})` : ""}${cat}:`);
+    // Prefer the structured STAR; derive it from the legacy prose for entries
+    // captured before STAR-native capture so older notes still read as STAR.
+    const star = hasStarContent(n) ? n.star! : starFromLegacy(n);
+    if (star.situation) lines.push(`  Situation: ${star.situation}`);
+    if (star.task) lines.push(`  Task: ${star.task}`);
+    if (star.action) lines.push(`  Action: ${star.action}`);
+    if (star.result) lines.push(`  Result: ${star.result}`);
     if (n.metrics) lines.push(`  Metrics: ${n.metrics}`);
     if (n.toolsTechnologies) lines.push(`  Tools: ${n.toolsTechnologies}`);
+    if (n.tags.length > 0) lines.push(`  Tags: ${n.tags.join(", ")}`);
   }
   return lines;
 }
@@ -112,7 +140,8 @@ export function buildEvidence(opts: {
   applicationNotes: Note[];
 }): InterviewEvidence {
   const sections: string[] = [];
-  const journal = journalLines(opts.journalNotes);
+  const journalPicked = pickJournalNotes(opts.journalNotes);
+  const journal = journalLines(journalPicked);
   if (journal.length > 0) sections.push(journal.join("\n"));
   if (opts.baseResume) {
     sections.push(resumeLines(opts.baseResume, "Base Resume").join("\n"));
@@ -134,6 +163,7 @@ export function buildEvidence(opts: {
     digest: sections.join("\n\n"),
     usedBaseResume: !!opts.baseResume,
     usedWorkJournal: journal.length > 0,
+    journalTitles: journalPicked.map((n) => n.title).filter(Boolean),
   };
 }
 
@@ -200,12 +230,16 @@ export interface GeneratedAnswer {
   answer: string;
   evidenceUsed: string[];
   gaps: string[];
+  // Exact Work Journal story titles the answer was built from (validated
+  // against the titles that were actually provided to the model).
+  storiesUsed: string[];
 }
 
 const answerSchema = jsonSchema<{
   answer: string;
   evidenceUsed: string[];
   gaps: string[];
+  storiesUsed: string[];
 }>({
   type: "object",
   properties: {
@@ -219,6 +253,12 @@ const answerSchema = jsonSchema<{
       description:
         "Short references to the specific evidence drawn on, e.g. 'Work Journal: Migrated batch jobs' or 'Base Resume: role at Acme'. Empty if none.",
     },
+    storiesUsed: {
+      type: "array",
+      items: { type: "string" },
+      description:
+        "Exact titles, copied verbatim from the provided Work Journal story titles list, of the STAR stories this answer was built from. Empty if none were used.",
+    },
     gaps: {
       type: "array",
       items: { type: "string" },
@@ -226,7 +266,7 @@ const answerSchema = jsonSchema<{
         "What was missing: information the question needs that the evidence doesn't cover, each with a suggestion of what to add to the Work Journal. Empty if nothing was missing.",
     },
   },
-  required: ["answer", "evidenceUsed", "gaps"],
+  required: ["answer", "evidenceUsed", "gaps", "storiesUsed"],
   additionalProperties: false,
 });
 
@@ -267,15 +307,32 @@ export async function generateInterviewAnswer(
     prompt: [
       `Interview question: ${question}`,
       "",
+      evidence.journalTitles.length > 0
+        ? `Work Journal story titles available (copy verbatim into storiesUsed for any you build on): ${evidence.journalTitles
+            .map((t) => `"${t}"`)
+            .join(", ")}`
+        : "",
+      "",
       "Candidate evidence:",
       evidence.digest || "(none provided)",
-    ].join("\n"),
+    ]
+      .filter(Boolean)
+      .join("\n"),
     maxOutputTokens: 1000,
   });
+  // Only trust story titles that actually exist in the evidence we provided —
+  // map them back to their canonical casing so the UI shows the real title.
+  const canonical = new Map(evidence.journalTitles.map((t) => [t.toLowerCase(), t]));
+  const storiesUsed = [
+    ...new Set(object.storiesUsed.map((s) => s.trim().toLowerCase()).filter(Boolean)),
+  ]
+    .map((lower) => canonical.get(lower))
+    .filter((t): t is string => !!t);
   return {
     answer: object.answer.trim(),
     evidenceUsed: object.evidenceUsed.map((e) => e.trim()).filter(Boolean),
     gaps: object.gaps.map((g) => g.trim()).filter(Boolean),
+    storiesUsed,
   };
 }
 
