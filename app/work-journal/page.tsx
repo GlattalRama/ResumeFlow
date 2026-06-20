@@ -35,6 +35,7 @@ export default async function WorkJournalPage() {
       initialNotes={notes}
       resumes={resumeOptions}
       initialInsights={settings?.careerInsights ?? null}
+      initialPromotion={settings?.promotionReadiness ?? null}
     />
   );
 }

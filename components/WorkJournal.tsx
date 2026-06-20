@@ -10,6 +10,7 @@ import {
   type Evidence,
   type GeneratedOutputs,
   type Metric,
+  type PromotionReadiness,
   type WorkJournalNote,
 } from "@/lib/types";
 import { Card, EmptyState, PageHeader, buttonClass } from "@/components/ui";
@@ -48,6 +49,17 @@ const EVIDENCE_TYPE_KEY: Record<string, string> = {
   confluence: "etConfluence",
   document: "etDocument",
   url: "etUrl",
+};
+
+// Promotion dimension slug → i18n key (workJournal.pd*).
+const PD_KEY: Record<string, string> = {
+  "technical-excellence": "pdTechnicalExcellence",
+  leadership: "pdLeadership",
+  "stakeholder-management": "pdStakeholderManagement",
+  delivery: "pdDelivery",
+  innovation: "pdInnovation",
+  mentoring: "pdMentoring",
+  communication: "pdCommunication",
 };
 
 export interface ResumePickerOption {
@@ -172,10 +184,12 @@ export default function WorkJournal({
   initialNotes,
   resumes,
   initialInsights = null,
+  initialPromotion = null,
 }: {
   initialNotes: WorkJournalNote[];
   resumes: ResumePickerOption[];
   initialInsights?: CareerInsights | null;
+  initialPromotion?: PromotionReadiness | null;
 }) {
   const t = useTranslations("workJournal");
   const locale = useLocale();
@@ -186,8 +200,9 @@ export default function WorkJournal({
   // null = no form; "new" = creating; otherwise the id being edited.
   const [formTarget, setFormTarget] = useState<"new" | string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [view, setView] = useState<"entries" | "dashboard">("entries");
+  const [view, setView] = useState<"entries" | "dashboard" | "promotion">("entries");
   const [insights, setInsights] = useState<CareerInsights | null>(initialInsights);
+  const [promotion, setPromotion] = useState<PromotionReadiness | null>(initialPromotion);
 
   const allTags = useMemo(() => {
     const set = new Set<string>();
@@ -297,9 +312,9 @@ export default function WorkJournal({
         }
       />
 
-      {/* View toggle: entries list vs. dashboard */}
+      {/* View toggle: entries list vs. dashboard vs. promotion readiness */}
       <div className="mb-5 inline-flex rounded-lg border border-input p-0.5">
-        {(["entries", "dashboard"] as const).map((v) => (
+        {(["entries", "dashboard", "promotion"] as const).map((v) => (
           <button
             key={v}
             type="button"
@@ -310,7 +325,11 @@ export default function WorkJournal({
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            {v === "entries" ? t("viewEntries") : t("viewDashboard")}
+            {v === "entries"
+              ? t("viewEntries")
+              : v === "dashboard"
+                ? t("viewDashboard")
+                : t("viewPromotion")}
           </button>
         ))}
       </div>
@@ -320,6 +339,13 @@ export default function WorkJournal({
           notes={notes}
           insights={insights}
           onInsights={setInsights}
+          locale={locale}
+        />
+      ) : view === "promotion" ? (
+        <PromotionView
+          notes={notes}
+          readiness={promotion}
+          onReadiness={setPromotion}
           locale={locale}
         />
       ) : (
@@ -654,6 +680,178 @@ function InsightList({
         ))}
       </ul>
     </div>
+  );
+}
+
+// ---- Promotion readiness ----
+
+function PromotionView({
+  notes,
+  readiness,
+  onReadiness,
+  locale,
+}: {
+  notes: WorkJournalNote[];
+  readiness: PromotionReadiness | null;
+  onReadiness: (r: PromotionReadiness) => void;
+  locale: string;
+}) {
+  const t = useTranslations("workJournal");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const stale = !!readiness && readiness.noteCount !== notes.length;
+
+  async function generate() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/ai/promotion-readiness", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || t("aiRequestFailed"));
+      onReadiness(data.readiness);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("aiRequestFailed"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Weakest first so the eye lands on what to improve.
+  const ranked = readiness
+    ? [...readiness.scores].sort((a, b) => a.score - b.score)
+    : [];
+
+  return (
+    <Card>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="flex items-center gap-2 font-semibold text-foreground">
+            <span aria-hidden>✦</span> {t("promotionTitle")}
+          </p>
+          {readiness?.targetLevel && (
+            <p className="mt-0.5 text-sm text-muted-foreground">{readiness.targetLevel}</p>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={generate}
+          disabled={busy || notes.length < 3}
+          className={buttonClass("secondary")}
+        >
+          {busy
+            ? t("generatingOutputs")
+            : readiness
+              ? t("regenerateOutputs")
+              : t("generatePromotion")}
+        </button>
+      </div>
+
+      {!readiness ? (
+        <p className="mt-2 text-sm text-muted-foreground">
+          {notes.length < 3 ? t("promotionNeedMore") : t("promotionHint")}
+        </p>
+      ) : (
+        <div className="mt-4 space-y-5">
+          {stale && (
+            <p className="rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+              {t("promotionStale")}
+            </p>
+          )}
+          <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
+            <Radar
+              points={readiness.scores.map((s) => ({
+                label: t(PD_KEY[s.dimension] ?? s.dimension),
+                score: s.score,
+              }))}
+            />
+            <ul className="space-y-3">
+              {ranked.map((s) => (
+                <li key={s.dimension} className="text-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="w-40 shrink-0 text-foreground/80">
+                      {t(PD_KEY[s.dimension] ?? s.dimension)}
+                    </span>
+                    <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className={`h-full rounded-full ${
+                          s.score <= 3
+                            ? "bg-amber-500"
+                            : "bg-gradient-to-r from-brand-600 to-brand-400"
+                        }`}
+                        style={{ width: `${s.score * 10}%` }}
+                      />
+                    </div>
+                    <span className="w-10 text-right text-muted-foreground">{s.score}/10</span>
+                    <span className="w-16 text-right text-xs text-muted-foreground/70">
+                      {t("promotionEvidenceCount", { count: s.evidenceCount })}
+                    </span>
+                  </div>
+                  {s.note && (
+                    <p className="ml-[10.75rem] mt-0.5 text-xs text-muted-foreground">{s.note}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {readiness.recommendations.length > 0 && (
+            <InsightList
+              title={t("promotionRecommendations")}
+              items={readiness.recommendations}
+              tone="brand"
+            />
+          )}
+          <p className="text-xs text-muted-foreground/70">
+            {t("outputsGenerated", {
+              date: new Date(readiness.generatedAt).toLocaleDateString(locale),
+            })}
+          </p>
+        </div>
+      )}
+      {error && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
+    </Card>
+  );
+}
+
+// Hand-rolled SVG radar — no chart library. Scores are 0-10.
+function Radar({ points }: { points: { label: string; score: number }[] }) {
+  const n = points.length;
+  if (n < 3) return null;
+  const cx = 130;
+  const cy = 120;
+  const r = 78;
+  const at = (i: number, frac: number): [number, number] => {
+    const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
+    return [cx + Math.cos(angle) * r * frac, cy + Math.sin(angle) * r * frac];
+  };
+  const ring = (frac: number) => points.map((_, i) => at(i, frac).join(",")).join(" ");
+  const shape = points.map((p, i) => at(i, Math.max(0, Math.min(10, p.score)) / 10).join(",")).join(" ");
+  return (
+    <svg viewBox="0 0 260 240" className="mx-auto h-56 w-full max-w-[260px]">
+      {[0.25, 0.5, 0.75, 1].map((f) => (
+        <polygon key={f} points={ring(f)} className="fill-none stroke-border" strokeWidth={1} />
+      ))}
+      {points.map((_, i) => {
+        const [x, y] = at(i, 1);
+        return <line key={i} x1={cx} y1={cy} x2={x} y2={y} className="stroke-border" strokeWidth={1} />;
+      })}
+      <polygon points={shape} className="fill-brand-500/25 stroke-brand-400" strokeWidth={2} />
+      {points.map((p, i) => {
+        const [x, y] = at(i, 1.16);
+        return (
+          <text
+            key={i}
+            x={x}
+            y={y}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            className="fill-muted-foreground text-[8px]"
+          >
+            {p.label}
+          </text>
+        );
+      })}
+    </svg>
   );
 }
 

@@ -670,6 +670,8 @@ export interface UserSettings {
   // Cached Work Journal career insights (Phase 4). Regenerated on demand; the
   // UI flags it stale when the journal has changed since noteCount was captured.
   careerInsights?: CareerInsights;
+  // Cached promotion-readiness assessment (Phase 5).
+  promotionReadiness?: PromotionReadiness;
   updatedAt: string;
 }
 
@@ -682,6 +684,35 @@ export interface CareerInsights {
   suggestions: string[]; // what to capture next
   generatedAt: string; // ISO timestamp
   noteCount: number; // journal size when generated (staleness signal)
+}
+
+// Phase 5: promotion-readiness scoring across the dimensions that drive
+// promotions. Cached on the settings singleton like CareerInsights.
+export const PROMOTION_DIMENSIONS = [
+  "technical-excellence",
+  "leadership",
+  "stakeholder-management",
+  "delivery",
+  "innovation",
+  "mentoring",
+  "communication",
+] as const;
+
+export type PromotionDimension = (typeof PROMOTION_DIMENSIONS)[number];
+
+export interface PromotionScore {
+  dimension: PromotionDimension;
+  score: number; // 0-10
+  evidenceCount: number; // achievements supporting this dimension
+  note: string; // one-line rationale
+}
+
+export interface PromotionReadiness {
+  targetLevel: string; // e.g. "Senior → Staff" (AI-inferred; may be generic)
+  scores: PromotionScore[]; // one per PROMOTION_DIMENSIONS entry
+  recommendations: string[];
+  generatedAt: string;
+  noteCount: number;
 }
 
 // Map collection name -> stored entity type.

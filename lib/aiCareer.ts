@@ -9,7 +9,10 @@
 import { generateObject, jsonSchema, type LanguageModel } from "ai";
 import {
   ACHIEVEMENT_CATEGORIES,
+  PROMOTION_DIMENSIONS,
   type AchievementCategory,
+  type PromotionDimension,
+  type PromotionScore,
   type Star,
   type WorkJournalNote,
 } from "./types";
@@ -279,6 +282,94 @@ export async function generateInsights(
     strengths: object.strengths.map((s) => s.trim()).filter(Boolean),
     gaps: object.gaps.map((s) => s.trim()).filter(Boolean),
     suggestions: object.suggestions.map((s) => s.trim()).filter(Boolean),
+  };
+}
+
+// ---- Promotion readiness (Phase 5) -----------------------------------------
+
+const promotionSchema = jsonSchema<{
+  targetLevel: string;
+  scores: { dimension: string; score: number; evidenceCount: number; note: string }[];
+  recommendations: string[];
+}>({
+  type: "object",
+  properties: {
+    targetLevel: {
+      type: "string",
+      description:
+        "The next-level promotion this reads toward, inferred from the seniority in the achievements (e.g. 'Senior → Staff'). Keep it short; use a generic 'next level' if unclear.",
+    },
+    scores: {
+      type: "array",
+      description: "One entry per dimension below.",
+      items: {
+        type: "object",
+        properties: {
+          dimension: { type: "string", enum: PROMOTION_DIMENSIONS as unknown as string[] },
+          score: { type: "number", description: "0-10 readiness for this dimension." },
+          evidenceCount: { type: "number", description: "How many achievements support it." },
+          note: { type: "string", description: "One short sentence of rationale." },
+        },
+        required: ["dimension", "score", "evidenceCount", "note"],
+        additionalProperties: false,
+      },
+    },
+    recommendations: {
+      type: "array",
+      items: { type: "string" },
+      description: "2-4 concrete actions to raise the weakest dimensions.",
+    },
+  },
+  required: ["targetLevel", "scores", "recommendations"],
+  additionalProperties: false,
+});
+
+export interface PromotionResult {
+  targetLevel: string;
+  scores: PromotionScore[];
+  recommendations: string[];
+}
+
+const clamp = (n: number, lo: number, hi: number) =>
+  Math.max(lo, Math.min(hi, Math.round(n)));
+
+export async function generatePromotionReadiness(
+  notes: WorkJournalNote[],
+  model: LanguageModel
+): Promise<PromotionResult> {
+  const { object } = await generateObject({
+    model,
+    schema: promotionSchema,
+    system: [
+      "You assess someone's promotion readiness from their work-achievement journal. Score each dimension 0-10 based ONLY on evidence in the achievements: technical-excellence, leadership, stakeholder-management, delivery, innovation, mentoring, communication.",
+      "Be honest and evidence-based — a dimension with no supporting achievements scores low. Then give concrete recommendations to raise the weakest dimensions.",
+      "Don't invent achievements. Base evidenceCount on how many listed achievements genuinely support the dimension.",
+    ].join("\n"),
+    prompt: insightsDigest(notes),
+    maxOutputTokens: 900,
+  });
+
+  // Normalize: dedupe by dimension, clamp, and ensure all 7 are present so the
+  // radar always has a full ring even if the model skips one.
+  const byDim = new Map<string, PromotionScore>();
+  for (const s of object.scores) {
+    if (!(PROMOTION_DIMENSIONS as readonly string[]).includes(s.dimension)) continue;
+    const dim = s.dimension as PromotionDimension;
+    if (byDim.has(dim)) continue;
+    byDim.set(dim, {
+      dimension: dim,
+      score: clamp(s.score, 0, 10),
+      evidenceCount: clamp(s.evidenceCount, 0, notes.length),
+      note: (s.note || "").trim(),
+    });
+  }
+  const scores: PromotionScore[] = PROMOTION_DIMENSIONS.map(
+    (dim) => byDim.get(dim) ?? { dimension: dim, score: 0, evidenceCount: 0, note: "" }
+  );
+  return {
+    targetLevel: (object.targetLevel || "").trim(),
+    scores,
+    recommendations: object.recommendations.map((r) => r.trim()).filter(Boolean),
   };
 }
 
