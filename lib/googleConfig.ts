@@ -23,6 +23,7 @@ const DRIVE_FILE_NAMES: Record<CollectionName, string> = {
   resumeSnapshots: "resumeflow-resumeSnapshots.json",
   workJournal: "resumeflow-workJournal.json",
   interviewCoach: "resumeflow-interviewCoach.json",
+  interviewPracticeSessions: "resumeflow-interviewPracticeSessions.json",
 };
 
 export function driveFileName(name: CollectionName): string {
