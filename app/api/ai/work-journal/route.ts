@@ -6,20 +6,22 @@ import {
   generateBulletsFromNote,
   generateStarFromNote,
   improveNoteWording,
-  type WorkJournalAiAction,
 } from "@/lib/aiWorkJournal";
+import { generateOutputs } from "@/lib/aiCareer";
+import type { GeneratedOutputs } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const ACTIONS: WorkJournalAiAction[] = ["bullets", "improve", "star"];
+type Action = "bullets" | "improve" | "star" | "outputs";
+const ACTIONS: Action[] = ["bullets", "improve", "star", "outputs"];
 
 // Run one AI action over a Work Journal note. Persists nothing — the client
 // shows the result for review and saves only what the user accepts.
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
   const noteId = typeof body.noteId === "string" ? body.noteId : "";
-  const action = ACTIONS.includes(body.action) ? (body.action as WorkJournalAiAction) : null;
+  const action = ACTIONS.includes(body.action) ? (body.action as Action) : null;
 
   if (!noteId || !action) {
     return NextResponse.json(
@@ -63,6 +65,18 @@ export async function POST(req: Request) {
     if (action === "improve") {
       const fields = await improveNoteWording(note, model);
       return NextResponse.json({ fields });
+    }
+    if (action === "outputs") {
+      const result = await generateOutputs(note, model);
+      // Returned (not persisted) — the client saves it via PATCH, matching the
+      // app's "review before save" convention. generatedAt/model let the UI
+      // flag stale outputs after later edits.
+      const outputs: GeneratedOutputs = {
+        ...result,
+        generatedAt: new Date().toISOString(),
+        model: access.model,
+      };
+      return NextResponse.json({ outputs });
     }
     const star = await generateStarFromNote(note, model);
     return NextResponse.json({ star });

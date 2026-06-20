@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { deleteItem, getItem, updateItem } from "@/lib/store";
-import type { WorkJournalNote } from "@/lib/types";
+import { ACHIEVEMENT_CATEGORIES, type Star, type WorkJournalNote } from "@/lib/types";
+import { STAR_SCHEMA_VERSION, legacyFromStar } from "@/lib/career/migrate";
+import { metricsToText, readEvidence, readMetricsList } from "@/lib/career/metrics";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +54,48 @@ export async function PATCH(req: Request, { params }: Ctx) {
       .filter((b: unknown): b is string => typeof b === "string")
       .map((b: string) => b.trim())
       .filter(Boolean);
+  }
+
+  // STAR is the source of truth; when it changes, re-mirror the legacy prose
+  // fields so AI digests and add-to-resume stay in sync.
+  if (body.star && typeof body.star === "object") {
+    const s = body.star as Record<string, unknown>;
+    const star: Star = {
+      situation: typeof s.situation === "string" ? s.situation : "",
+      task: typeof s.task === "string" ? s.task : "",
+      action: typeof s.action === "string" ? s.action : "",
+      result: typeof s.result === "string" ? s.result : "",
+    };
+    patch.star = star;
+    patch.schemaVersion = STAR_SCHEMA_VERSION;
+    Object.assign(patch, legacyFromStar(star));
+  }
+  if (typeof body.category === "string") {
+    patch.category = (ACHIEVEMENT_CATEGORIES as readonly string[]).includes(body.category)
+      ? (body.category as WorkJournalNote["category"])
+      : "";
+  }
+  // Structured metrics are the source of truth; re-mirror the legacy string.
+  if (Array.isArray(body.metricsList)) {
+    const metricsList = readMetricsList(body.metricsList);
+    patch.metricsList = metricsList;
+    patch.metrics = metricsToText(metricsList);
+  }
+  if (Array.isArray(body.evidence)) {
+    patch.evidence = readEvidence(body.evidence);
+  }
+  if (body.outputs && typeof body.outputs === "object") {
+    const o = body.outputs as Record<string, unknown>;
+    patch.outputs = {
+      resumeBullet: typeof o.resumeBullet === "string" ? o.resumeBullet : "",
+      starStory: typeof o.starStory === "string" ? o.starStory : "",
+      linkedinPost: typeof o.linkedinPost === "string" ? o.linkedinPost : "",
+      perfReviewBlurb: typeof o.perfReviewBlurb === "string" ? o.perfReviewBlurb : "",
+      // Stamp generatedAt with this write's timestamp so freshly saved outputs
+      // are never instantly "stale" (updatedAt is bumped on every PATCH).
+      generatedAt: patch.updatedAt as string,
+      model: typeof o.model === "string" ? o.model : "",
+    };
   }
 
   const updated = await updateItem("workJournal", id, patch);

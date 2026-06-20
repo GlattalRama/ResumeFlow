@@ -4,7 +4,7 @@
 // ever decrypted transiently, server-side, at call time.
 import { readAll, writeAll } from "./store";
 import { encrypt, decrypt } from "./crypto";
-import type { UserSettings, AiProvider } from "./types";
+import type { CareerInsights, PromotionReadiness, UserSettings, AiProvider } from "./types";
 
 const SINGLETON = "singleton";
 
@@ -40,11 +40,23 @@ async function patchSettings(
     usage: s?.usage,
     baseResumeId: s?.baseResumeId,
     templateVisibility: s?.templateVisibility,
+    careerInsights: s?.careerInsights,
+    promotionReadiness: s?.promotionReadiness,
     ...patch,
     updatedAt: new Date().toISOString(),
   };
   await writeAll("settings", [merged]);
   return merged;
+}
+
+// Persist the cached career insights, preserving all other settings.
+export async function setCareerInsights(insights: CareerInsights): Promise<void> {
+  await patchSettings({ careerInsights: insights });
+}
+
+// Persist the cached promotion-readiness assessment, preserving other settings.
+export async function setPromotionReadiness(readiness: PromotionReadiness): Promise<void> {
+  await patchSettings({ promotionReadiness: readiness });
 }
 
 // Persist provider/model, and the API key only when a new one is supplied

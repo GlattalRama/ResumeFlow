@@ -143,6 +143,7 @@ async function handleQuestions(body: Record<string, unknown>) {
         usedBaseResume: false,
         usedWorkJournal: false,
         evidenceUsed: [],
+        journalStoriesUsed: [],
         gaps: [],
         aiRevisionHistory: [],
         createdAt: now,
@@ -197,6 +198,7 @@ async function handleAnswer(body: Record<string, unknown>) {
     usedBaseResume: evidence.usedBaseResume,
     usedWorkJournal: evidence.usedWorkJournal,
     evidenceUsed: result.evidenceUsed,
+    journalStoriesUsed: result.storiesUsed,
     gaps: result.gaps,
     updatedAt: new Date().toISOString(),
   });

@@ -407,6 +407,86 @@ export interface QnaItem {
 
 // ---- Work Journal ----
 
+// STAR framing of an achievement — the structured story behind a journal entry.
+export interface Star {
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
+}
+
+// Achievement categories. Stored as stable slugs; display is localized in the UI
+// (messages/*.json → workJournal.cat*). Keep this list in sync with those keys.
+export const ACHIEVEMENT_CATEGORIES = [
+  "technical-delivery",
+  "leadership",
+  "incident-resolution",
+  "automation",
+  "process-improvement",
+  "quality-improvement",
+  "compliance",
+  "customer-impact",
+  "cost-optimization",
+  "innovation",
+] as const;
+
+export type AchievementCategory = (typeof ACHIEVEMENT_CATEGORIES)[number];
+
+// Structured metrics. Stored as typed rows; display labels are localized in the
+// UI (messages/*.json → workJournal.mt*). "custom" lets the user name their own.
+export const METRIC_TYPES = [
+  "time-saved",
+  "cost-saved",
+  "revenue-impact",
+  "defects-prevented",
+  "risk-reduced",
+  "customers-impacted",
+  "people-influenced",
+  "projects-delivered",
+  "custom",
+] as const;
+
+export type MetricType = (typeof METRIC_TYPES)[number];
+
+export interface Metric {
+  type: MetricType;
+  // Free-text label, used when type is "custom" or to override the default.
+  label: string;
+  value: string; // "40%", "$200k", "0" — user-entered, never AI-invented
+  unit: string; // optional ("hrs/week", "USD"); "" when unset
+}
+
+// Evidence references that make an achievement traceable. URL-based in Phase 2;
+// uploaded screenshots/docs (Blob) are a later addition.
+export const EVIDENCE_TYPES = [
+  "jira",
+  "azure-devops",
+  "servicenow",
+  "confluence",
+  "document",
+  "url",
+] as const;
+
+export type EvidenceType = (typeof EVIDENCE_TYPES)[number];
+
+export interface Evidence {
+  type: EvidenceType;
+  label: string; // "VER-7.1 release ticket"
+  url: string; // external link; "" when unset
+}
+
+// Phase 3: the four ready-to-paste outputs generated from one achievement in a
+// single AI call. Cached on the note; regenerated on demand. Considered stale
+// when the note's updatedAt is newer than generatedAt.
+export interface GeneratedOutputs {
+  resumeBullet: string;
+  starStory: string; // narrative form, for interviews
+  linkedinPost: string;
+  perfReviewBlurb: string; // manager-friendly language
+  generatedAt: string; // ISO timestamp
+  model: string; // model that produced them
+}
+
 // One captured work memory: a project, achievement, or problem solved —
 // recorded while it's fresh so it can later be turned into resume bullets and
 // interview stories. All prose fields are plain text; empty string when unset.
@@ -438,6 +518,25 @@ export interface WorkJournalNote {
   starStory: string;
   createdAt: string;
   updatedAt: string;
+
+  // ---- v2 (STAR-native capture) ----
+  // Structured STAR is the source of truth for the story; the legacy prose
+  // fields (whatIDid/problemSolved/impactResult) are kept as a derived mirror
+  // so existing AI features and add-to-resume keep working unchanged.
+  star?: Star;
+  category?: AchievementCategory | "";
+  // 2 = STAR-native; absent or 1 = legacy. Set by the lazy migration on read.
+  schemaVersion?: number;
+
+  // ---- Phase 2 (structured metrics & evidence) ----
+  // Typed metrics; the legacy free-text `metrics` string is kept as a derived
+  // mirror (joined for AI digests/search) so existing features keep working.
+  metricsList?: Metric[];
+  evidence?: Evidence[];
+
+  // ---- Phase 3 (multi-output engine) ----
+  // Cached résumé bullet / STAR story / LinkedIn post / perf-review wording.
+  outputs?: GeneratedOutputs;
 }
 
 // ---- Interview Coach ----
@@ -507,6 +606,9 @@ export interface InterviewCoachEntry {
   // Short references to the specific evidence the answer used (e.g. a journal
   // note title or resume bullet) — and what was missing.
   evidenceUsed: string[];
+  // Exact Work Journal story titles the answer was built from (validated).
+  // Optional: entries generated before this feature won't have it.
+  journalStoriesUsed?: string[];
   gaps: string[];
   aiRevisionHistory: InterviewAnswerRevision[];
   createdAt: string;
@@ -565,7 +667,52 @@ export interface UserSettings {
   // hardcoded default (see lib/constants.resolveVisibleTemplates). Lets an admin
   // turn the otherwise-hidden templates on/off without a code change.
   templateVisibility?: Record<string, boolean>;
+  // Cached Work Journal career insights (Phase 4). Regenerated on demand; the
+  // UI flags it stale when the journal has changed since noteCount was captured.
+  careerInsights?: CareerInsights;
+  // Cached promotion-readiness assessment (Phase 5).
+  promotionReadiness?: PromotionReadiness;
   updatedAt: string;
+}
+
+// AI-generated, collection-level analysis of the Work Journal. Cached on the
+// settings singleton so it isn't recomputed (and re-billed) on every visit.
+export interface CareerInsights {
+  summary: string; // 1-2 sentence overview
+  strengths: string[]; // strongest areas, evidence-backed
+  gaps: string[]; // promotion-readiness gaps / thin areas
+  suggestions: string[]; // what to capture next
+  generatedAt: string; // ISO timestamp
+  noteCount: number; // journal size when generated (staleness signal)
+}
+
+// Phase 5: promotion-readiness scoring across the dimensions that drive
+// promotions. Cached on the settings singleton like CareerInsights.
+export const PROMOTION_DIMENSIONS = [
+  "technical-excellence",
+  "leadership",
+  "stakeholder-management",
+  "delivery",
+  "innovation",
+  "mentoring",
+  "communication",
+] as const;
+
+export type PromotionDimension = (typeof PROMOTION_DIMENSIONS)[number];
+
+export interface PromotionScore {
+  dimension: PromotionDimension;
+  score: number; // 0-10
+  evidenceCount: number; // achievements supporting this dimension
+  note: string; // one-line rationale
+}
+
+export interface PromotionReadiness {
+  targetLevel: string; // e.g. "Senior → Staff" (AI-inferred; may be generic)
+  scores: PromotionScore[]; // one per PROMOTION_DIMENSIONS entry
+  recommendations: string[];
+  generatedAt: string;
+  noteCount: number;
 }
 
 // Map collection name -> stored entity type.
