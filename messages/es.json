@@ -670,6 +670,8 @@
       "noneGraded": "No se evaluó ninguna respuesta en esta sesión.",
       "perQuestion": "Por pregunta",
       "done": "Listo",
+      "voiceStart": "Hablar",
+      "voiceListening": "Escuchando…",
       "requestFailed": "La solicitud falló"
     },
     "preparingFor": "Preparándote para",
