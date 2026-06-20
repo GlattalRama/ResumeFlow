@@ -10,6 +10,7 @@ import type {
 } from "@/lib/types";
 import { Card, EmptyState, PageHeader, buttonClass } from "@/components/ui";
 import InterviewPractice from "@/components/InterviewPractice";
+import ResumeTopicBank from "@/components/ResumeTopicBank";
 
 export interface CoachAppOption {
   id: string;
@@ -226,6 +227,14 @@ export default function InterviewCoach({
         />
       ) : (
         <>
+      {/* Build a deep question bank from the résumé, by topic */}
+      <ResumeTopicBank
+        resumes={resumes}
+        baseResumeId={baseResumeId}
+        entries={entries}
+        onCreated={(created) => setEntries((prev) => [...created, ...prev])}
+      />
+
       {/* Context selector */}
       <Card className="mb-4">
         <div className="flex flex-wrap items-center gap-3">

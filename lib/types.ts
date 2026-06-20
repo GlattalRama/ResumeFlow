@@ -561,6 +561,10 @@ export type InterviewQuestionSource =
   | "workJournal"
   | "applicationNotes";
 
+// Difficulty for résumé-topic question generation.
+export const INTERVIEW_DIFFICULTIES = ["junior", "senior", "expert"] as const;
+export type InterviewDifficulty = (typeof INTERVIEW_DIFFICULTIES)[number];
+
 // Grouping for generated questions (Flow B) plus "General" for manual ones.
 export type InterviewQuestionCategory =
   | "General"
@@ -600,6 +604,10 @@ export interface InterviewCoachEntry {
   status: InterviewEntryStatus;
   source: InterviewQuestionSource;
   category: InterviewQuestionCategory;
+  // Résumé-topic bank tagging (optional; set by topic generation). `topic` is
+  // free-form (e.g. "DB2", "Negotiation"); difficulty is the level requested.
+  topic?: string;
+  difficulty?: InterviewDifficulty;
   // Which evidence pools the last AI generation actually drew from.
   usedBaseResume: boolean;
   usedWorkJournal: boolean;
@@ -642,6 +650,13 @@ export interface PracticeFeedback {
   };
   // Work Journal evidence that would strengthen the answer.
   journalEvidenceToStrengthen: string[];
+  // Semantic match of the practice answer to the user's saved answer for this
+  // question (meaning, not wording). Present only when a saved answer exists.
+  modelAnswerMatch?: {
+    score: number; // 0-100 (%)
+    covered: string[]; // key points from the saved answer the attempt hit
+    missed: string[]; // key points it missed
+  };
   gradedAt: string;
 }
 
