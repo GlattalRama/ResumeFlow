@@ -19,6 +19,7 @@ import type {
   Application,
   InterviewAnswerFormat,
   InterviewAnswerTone,
+  InterviewDifficulty,
   InterviewQuestionCategory,
   Note,
   PracticeFeedback,
@@ -221,6 +222,115 @@ export async function generateInterviewQuestions(
       category: (valid.has(q.category)
         ? q.category
         : "Behavioral") as InterviewQuestionCategory,
+    }))
+    .filter((q) => q.question.length > 0);
+}
+
+// ---- Résumé topic bank (per-topic deep questions) --------------------------
+
+const topicsSchema = jsonSchema<{ topics: string[] }>({
+  type: "object",
+  properties: {
+    topics: {
+      type: "array",
+      items: { type: "string" },
+      description:
+        "8-16 concrete interview topics implied by this résumé: specific skills, tools, methodologies, domains, and role responsibilities an interviewer would probe. Specific to THIS candidate's field (e.g. 'DB2', 'Release management', 'Negotiation', 'Power systems'), not generic.",
+    },
+  },
+  required: ["topics"],
+  additionalProperties: false,
+});
+
+// Extract the interview topics implied by a résumé — works for any profession.
+export async function extractResumeTopics(
+  resume: ResumeData,
+  model: LanguageModel
+): Promise<string[]> {
+  const { object } = await generateObject({
+    model,
+    schema: topicsSchema,
+    system:
+      "Read the résumé and list the specific topics an interviewer would probe — the candidate's skills, tools, methodologies, domains, and responsibilities. Be concrete and specific to this person's field, whatever it is. No duplicates.",
+    prompt: resumeLines(resume, "Résumé").join("\n"),
+    maxOutputTokens: 400,
+  });
+  // De-dupe case-insensitively, keep original casing.
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of object.topics) {
+    const topic = raw.trim();
+    const key = topic.toLowerCase();
+    if (topic && !seen.has(key)) {
+      seen.add(key);
+      out.push(topic);
+    }
+  }
+  return out.slice(0, 24);
+}
+
+const DIFFICULTY_HINT: Record<InterviewDifficulty, string> = {
+  junior: "entry-level: fundamentals, definitions, and basic application.",
+  senior: "senior-level: deep, scenario-based, trade-offs, and real-world judgment.",
+  expert: "expert-level: hardcore — edge cases, internals, architecture, failure modes, and optimization.",
+};
+
+const topicQuestionsSchema = jsonSchema<{
+  questions: { question: string; category: string }[];
+}>({
+  type: "object",
+  properties: {
+    questions: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          question: { type: "string" },
+          category: { type: "string", enum: GENERATED_CATEGORIES as unknown as string[] },
+        },
+        required: ["question", "category"],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ["questions"],
+  additionalProperties: false,
+});
+
+// Generate in-depth questions for ONE topic at a chosen difficulty, avoiding any
+// already-collected questions for that topic.
+export async function generateTopicQuestions(
+  topic: string,
+  difficulty: InterviewDifficulty,
+  count: number,
+  avoid: string[],
+  resume: ResumeData | null,
+  model: LanguageModel
+): Promise<{ question: string; category: InterviewQuestionCategory }[]> {
+  const { object } = await generateObject({
+    model,
+    schema: topicQuestionsSchema,
+    system: [
+      `Generate ${count} interview questions focused specifically on the topic "${topic}".`,
+      `Difficulty — ${DIFFICULTY_HINT[difficulty]}`,
+      `Assign each question a category from: ${GENERATED_CATEGORIES.join(", ")}. Use 'Technical' for technical topics; 'Behavioral'/'HR' where the topic is about ways of working.`,
+      "Questions must be in-depth and specific to the topic — the real probing questions an interviewer asks, not generic. No numbering, no near-duplicates.",
+      avoid.length > 0
+        ? `Do NOT repeat or paraphrase these existing questions:\n- ${avoid.slice(0, 40).join("\n- ")}`
+        : "",
+    ]
+      .filter(Boolean)
+      .join("\n"),
+    prompt: resume
+      ? resumeLines(resume, "Candidate résumé (context)").join("\n")
+      : "(no résumé context)",
+    maxOutputTokens: 1600,
+  });
+  const valid = new Set<string>(GENERATED_CATEGORIES);
+  return object.questions
+    .map((q) => ({
+      question: q.question.trim(),
+      category: (valid.has(q.category) ? q.category : "Technical") as InterviewQuestionCategory,
     }))
     .filter((q) => q.question.length > 0);
 }
