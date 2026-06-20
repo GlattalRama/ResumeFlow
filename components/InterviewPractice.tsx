@@ -9,6 +9,7 @@ import type {
 } from "@/lib/types";
 import { Card, EmptyState, buttonClass } from "@/components/ui";
 import { useSpeechToText } from "@/components/useSpeechToText";
+import { analyzeDelivery } from "@/lib/deliveryCheck";
 
 const SPEECH_LANG: Record<string, string> = {
   en: "en-US",
@@ -697,6 +698,7 @@ function RunScreen({
             {busy === "grade" ? t("grading") : t("getFeedback")}
           </button>
         </div>
+        <DeliveryCheck text={draft} locale={locale} />
       </Card>
 
       {feedback && (
@@ -722,6 +724,70 @@ function RunScreen({
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+// Instant, on-device delivery analysis (no AI). Updates live as you type.
+function DeliveryCheck({ text, locale }: { text: string; locale: string }) {
+  const t = useTranslations("interviewCoach.practice");
+  const a = useMemo(() => analyzeDelivery(text, locale), [text, locale]);
+  if (a.wordCount === 0) return null;
+  const pct = Math.round(a.fillerDensity * 100);
+  const vocab =
+    a.wordCount < 20
+      ? null
+      : a.lexicalDiversity >= 0.6
+        ? t("dVaried")
+        : a.lexicalDiversity >= 0.45
+          ? t("dModerate")
+          : t("dRepetitive");
+  return (
+    <div className="mt-3 rounded-md border border-border bg-muted/20 p-3 text-sm">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="font-medium text-foreground">{t("deliveryTitle")}</p>
+        <span className="text-xs text-muted-foreground">{t("dWords", { n: a.wordCount })}</span>
+      </div>
+      <div className="flex flex-wrap items-center gap-1.5">
+        {a.fillerTotal === 0 ? (
+          <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-700 dark:text-emerald-300">
+            {t("dFillerNone")}
+          </span>
+        ) : (
+          <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-300">
+            {t("dFillerCount", { n: a.fillerTotal, pct })}
+          </span>
+        )}
+        {a.fillers.map((f) => (
+          <span key={f.word} className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+            “{f.word}” ×{f.count}
+          </span>
+        ))}
+      </div>
+      {vocab && (
+        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+          <span>
+            {t("dVocab")}: <span className="text-foreground/80">{vocab}</span>
+          </span>
+          <span>
+            · {t("dSentence")}: {Math.round(a.avgSentenceLength)} {t("dWordsShort")}
+          </span>
+          {a.longSentences > 0 && (
+            <span className="text-amber-600 dark:text-amber-400">· {t("dLong", { n: a.longSentences })}</span>
+          )}
+        </div>
+      )}
+      {a.repeated.length > 0 && (
+        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
+          <span className="text-muted-foreground">{t("dRepeated")}:</span>
+          {a.repeated.map((r) => (
+            <span key={r.word} className="rounded bg-muted px-1.5 py-0.5 text-muted-foreground">
+              {r.word} ×{r.count}
+            </span>
+          ))}
+        </div>
+      )}
+      <p className="mt-2 text-[11px] text-muted-foreground/70">{t("deliveryHint")}</p>
     </div>
   );
 }
