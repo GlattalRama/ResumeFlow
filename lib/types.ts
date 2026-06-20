@@ -642,6 +642,13 @@ export interface PracticeFeedback {
   };
   // Work Journal evidence that would strengthen the answer.
   journalEvidenceToStrengthen: string[];
+  // Semantic match of the practice answer to the user's saved answer for this
+  // question (meaning, not wording). Present only when a saved answer exists.
+  modelAnswerMatch?: {
+    score: number; // 0-100 (%)
+    covered: string[]; // key points from the saved answer the attempt hit
+    missed: string[]; // key points it missed
+  };
   gradedAt: string;
 }
 

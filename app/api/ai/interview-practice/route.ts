@@ -52,6 +52,7 @@ export async function POST(req: Request) {
       session.attempts[attemptIndex].question,
       practiceAnswer,
       isTechnical,
+      entry?.answer ?? "", // the user's saved answer = the model answer to match
       evidence,
       openrouterModel(access.apiKey, access.model)
     );

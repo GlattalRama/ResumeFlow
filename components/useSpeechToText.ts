@@ -28,6 +28,7 @@ interface SpeechRecognitionLike {
   start(): void;
   stop(): void;
   abort(): void;
+  onstart: (() => void) | null;
   onresult: ((e: SREvent) => void) | null;
   onerror: ((e: SRErrorEvent) => void) | null;
   onend: (() => void) | null;
@@ -88,6 +89,9 @@ export function useSpeechToText({
         }
       }
     };
+    recog.onstart = () => {
+      setListening(true);
+    };
     recog.onerror = (e) => {
       // "no-speech"/"aborted" are routine; surface only real problems.
       if (e.error !== "no-speech" && e.error !== "aborted") setError(e.error);
@@ -98,12 +102,14 @@ export function useSpeechToText({
     };
     setError(null);
     recogRef.current = recog;
-    setListening(true);
     try {
       recog.start();
-    } catch {
+    } catch (err) {
+      // Most often InvalidStateError (already started) — surface it instead of
+      // failing silently.
       recogRef.current = null;
       setListening(false);
+      setError(err instanceof Error ? err.name : "start-failed");
     }
   }, [lang]);
 

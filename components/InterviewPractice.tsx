@@ -555,7 +555,7 @@ function RunScreen({
 
   // Voice dictation: append finalized speech to the answer. Degrades silently
   // (button hidden) when the browser has no Web Speech API.
-  const { supported, listening, start, stop } = useSpeechToText({
+  const { supported, listening, error: voiceError, start, stop } = useSpeechToText({
     lang: SPEECH_LANG[locale] ?? "en-US",
     onFinal: (text) => setDraft((d) => (d ? d.replace(/\s+$/, "") + " " : "") + text),
   });
@@ -682,6 +682,17 @@ function RunScreen({
             </button>
           )}
         </div>
+        {voiceError && (
+          <p className="mb-1 text-xs text-amber-600 dark:text-amber-400">
+            {voiceError === "not-allowed" || voiceError === "service-not-allowed"
+              ? t("voiceBlocked")
+              : voiceError === "audio-capture"
+                ? t("voiceNoMic")
+                : voiceError === "network"
+                  ? t("voiceNetwork")
+                  : t("voiceError", { code: voiceError })}
+          </p>
+        )}
         <textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -827,6 +838,35 @@ function FeedbackCard({
           {t("overall")}: {feedback.overall}/10
         </span>
       </div>
+
+      {feedback.modelAnswerMatch && (
+        <div className="mt-3 rounded-md border border-border bg-muted/30 p-3">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-foreground">{t("matchTitle")}</p>
+            <span
+              className={`rounded-full px-2.5 py-0.5 text-sm font-bold ${
+                feedback.modelAnswerMatch.score >= 75
+                  ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                  : feedback.modelAnswerMatch.score >= 50
+                    ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+                    : "bg-red-500/15 text-red-700 dark:text-red-300"
+              }`}
+            >
+              {t("matchScore", { pct: feedback.modelAnswerMatch.score })}
+            </span>
+          </div>
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-brand-600 to-brand-400"
+              style={{ width: `${feedback.modelAnswerMatch.score}%` }}
+            />
+          </div>
+          <div className="mt-2 space-y-2">
+            <PointList title={t("matchCovered")} items={feedback.modelAnswerMatch.covered} tone="emerald" />
+            <PointList title={t("matchMissed")} items={feedback.modelAnswerMatch.missed} tone="red" />
+          </div>
+        </div>
+      )}
 
       <div className="mt-3 grid gap-x-4 gap-y-2 sm:grid-cols-2">
         {dims
