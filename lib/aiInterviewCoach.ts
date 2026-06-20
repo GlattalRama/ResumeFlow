@@ -434,14 +434,31 @@ const practiceSchema = jsonSchema<PracticeFeedbackCore>({
       items: { type: "string" },
       description: "Work Journal evidence (by topic/title) that would strengthen the answer.",
     },
+    modelAnswerMatch: {
+      type: "object",
+      description:
+        "Comparison to the candidate's saved answer. Set score 0 and arrays empty when no saved answer was provided.",
+      properties: {
+        score: {
+          type: "number",
+          description:
+            "0-100: how well the practice answer matches the MEANING of the saved answer (not wording).",
+        },
+        covered: { type: "array", items: { type: "string" }, description: "Saved-answer points the attempt covered." },
+        missed: { type: "array", items: { type: "string" }, description: "Saved-answer points the attempt missed." },
+      },
+      required: ["score", "covered", "missed"],
+      additionalProperties: false,
+    },
   },
   // Strict structured-output mode (Azure/OpenAI) requires EVERY property to be
-  // listed here. technicalAccuracy is always returned (0 when not applicable)
-  // and surfaced only for technical questions.
+  // listed here. technicalAccuracy/modelAnswerMatch are always returned and
+  // gated in code (technicalAccuracy only for technical questions;
+  // modelAnswerMatch only when the question has a saved answer).
   required: [
     "overall", "clarity", "relevance", "structure", "starQuality", "confidence",
     "technicalAccuracy", "goodPoints", "improvementPoints", "missingPoints",
-    "suggestedAnswer", "matched", "journalEvidenceToStrengthen",
+    "suggestedAnswer", "matched", "journalEvidenceToStrengthen", "modelAnswerMatch",
   ],
   additionalProperties: false,
 });
@@ -454,9 +471,11 @@ export async function gradePracticeAnswer(
   question: string,
   practiceAnswer: string,
   isTechnical: boolean,
+  modelAnswer: string,
   evidence: InterviewEvidence,
   model: LanguageModel
 ): Promise<PracticeFeedbackCore> {
+  const hasModelAnswer = modelAnswer.trim().length > 0;
   const { object } = await generateObject({
     model,
     schema: practiceSchema,
@@ -465,6 +484,9 @@ export async function gradePracticeAnswer(
       isTechnical
         ? "This is a technical question — score technicalAccuracy 0-10."
         : "This is not a technical question — set technicalAccuracy to 0.",
+      hasModelAnswer
+        ? "The candidate has a SAVED ANSWER below. In modelAnswerMatch, score 0-100 how well the practice answer matches its MEANING (not exact wording), and list the saved-answer points it covered vs missed."
+        : "No saved answer was provided — set modelAnswerMatch.score to 0 and its arrays empty.",
       "Set each 'matched' flag based on whether the answer's claims align with that evidence source. Suggest a stronger answer grounded ONLY in the evidence — never invent employers, tools, or numbers. List Work Journal evidence that would strengthen it.",
       GROUNDING_RULES,
     ].join("\n"),
@@ -473,6 +495,7 @@ export async function gradePracticeAnswer(
       "",
       "Candidate's practice answer:",
       practiceAnswer || "(empty)",
+      ...(hasModelAnswer ? ["", "Candidate's saved answer (the target to match):", modelAnswer] : []),
       "",
       "Candidate evidence:",
       evidence.digest || "(none provided)",
@@ -505,5 +528,12 @@ export async function gradePracticeAnswer(
     journalEvidenceToStrengthen: (o.journalEvidenceToStrengthen || [])
       .map((s) => s.trim())
       .filter(Boolean),
+    modelAnswerMatch: hasModelAnswer
+      ? {
+          score: Math.max(0, Math.min(100, Math.round(o.modelAnswerMatch?.score ?? 0))),
+          covered: (o.modelAnswerMatch?.covered || []).map((s) => s.trim()).filter(Boolean),
+          missed: (o.modelAnswerMatch?.missed || []).map((s) => s.trim()).filter(Boolean),
+        }
+      : undefined,
   };
 }
