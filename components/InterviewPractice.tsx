@@ -235,6 +235,7 @@ function HomeScreen({
   const [contextAppId, setContextAppId] = useState("");
   const [catFilter, setCatFilter] = useState("");
   const [appFilter, setAppFilter] = useState("");
+  const [topicFilter, setTopicFilter] = useState("");
   const [weakOnly, setWeakOnly] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -246,16 +247,21 @@ function HomeScreen({
     () => [...new Set(entries.map((e) => e.category))].sort(),
     [entries]
   );
+  const topics = useMemo(
+    () => [...new Set(entries.map((e) => e.topic).filter((x): x is string => !!x))].sort(),
+    [entries]
+  );
 
   const visible = useMemo(
     () =>
       entries.filter((e) => {
         if (catFilter && e.category !== catFilter) return false;
         if (appFilter && e.selectedApplicationId !== appFilter) return false;
+        if (topicFilter && e.topic !== topicFilter) return false;
         if (weakOnly && !isWeak(e)) return false;
         return true;
       }),
-    [entries, catFilter, appFilter, weakOnly] // eslint-disable-line react-hooks/exhaustive-deps
+    [entries, catFilter, appFilter, topicFilter, weakOnly] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   function toggle(id: string) {
@@ -342,6 +348,19 @@ function HomeScreen({
                   ))}
                 </select>
               </div>
+              {topics.length > 0 && (
+                <div>
+                  <label className={labelClass}>{t("filterTopic")}</label>
+                  <select value={topicFilter} onChange={(e) => setTopicFilter(e.target.value)} className={inputClass}>
+                    <option value="">{t("all")}</option>
+                    {topics.map((tp) => (
+                      <option key={tp} value={tp}>
+                        {tp}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">

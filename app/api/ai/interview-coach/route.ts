@@ -5,25 +5,39 @@ import { resolveAiAccess, openrouterModel } from "@/lib/aiServer";
 import { isCreditsError, notifyOwnerCreditsExhausted } from "@/lib/aiNotify";
 import { assembleEvidence } from "@/lib/interviewEvidence";
 import {
+  extractResumeTopics,
   generateInterviewAnswer,
   generateInterviewQuestions,
+  generateTopicQuestions,
   reviseInterviewAnswer,
   REVISION_ACTIONS,
   type RevisionAction,
 } from "@/lib/aiInterviewCoach";
-import type { InterviewCoachEntry } from "@/lib/types";
+import { getBaseResume } from "@/lib/baseResume";
+import {
+  INTERVIEW_DIFFICULTIES,
+  type InterviewCoachEntry,
+  type InterviewDifficulty,
+} from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
-  const mode = body.mode as "questions" | "answer" | "revise";
+  const mode = body.mode as
+    | "questions"
+    | "answer"
+    | "revise"
+    | "topics"
+    | "topic-questions";
 
   try {
     if (mode === "questions") return await handleQuestions(body);
     if (mode === "answer") return await handleAnswer(body);
     if (mode === "revise") return await handleRevise(body);
+    if (mode === "topics") return await handleTopics(body);
+    if (mode === "topic-questions") return await handleTopicQuestions(body);
   } catch (err) {
     if (isCreditsError(err)) {
       // Only alert the owner when the SHARED key was in play (no BYOK key).
@@ -208,4 +222,103 @@ async function handleRevise(body: Record<string, unknown>) {
     action,
     instruction: REVISION_ACTIONS[action],
   });
+}
+
+// Resolve a résumé for topic work: the given id, else the base résumé.
+async function resumeDataForId(resumeId: string) {
+  if (resumeId) {
+    const r = await getItem("resumes", resumeId);
+    if (r) return r.resumeData;
+  }
+  const base = await getBaseResume();
+  return base?.resumeData ?? null;
+}
+
+// Extract the candidate's interview topics from a résumé (profession-agnostic).
+async function handleTopics(body: Record<string, unknown>) {
+  const resumeId = typeof body.resumeId === "string" ? body.resumeId : "";
+  const resume = await resumeDataForId(resumeId);
+  if (!resume) {
+    return NextResponse.json(
+      { error: "No résumé found to read topics from. Create or pick a résumé first." },
+      { status: 400 }
+    );
+  }
+  const access = await resolveAiAccess();
+  if (!access.ok) {
+    return NextResponse.json({ error: access.message }, { status: access.status });
+  }
+  const topics = await extractResumeTopics(
+    resume,
+    openrouterModel(access.apiKey, access.model)
+  );
+  return NextResponse.json({ topics });
+}
+
+// Generate in-depth questions for ONE topic at a difficulty, de-duped against
+// existing questions for that topic, and persist them as draft entries.
+async function handleTopicQuestions(body: Record<string, unknown>) {
+  const topic = typeof body.topic === "string" ? body.topic.trim() : "";
+  const difficulty = INTERVIEW_DIFFICULTIES.includes(body.difficulty as InterviewDifficulty)
+    ? (body.difficulty as InterviewDifficulty)
+    : "senior";
+  const resumeId = typeof body.resumeId === "string" ? body.resumeId : "";
+  const count = Math.min(Math.max(Math.round(Number(body.count) || 8), 3), 12);
+  if (!topic) {
+    return NextResponse.json({ error: "A topic is required." }, { status: 400 });
+  }
+
+  const access = await resolveAiAccess();
+  if (!access.ok) {
+    return NextResponse.json({ error: access.message }, { status: access.status });
+  }
+
+  const resume = await resumeDataForId(resumeId);
+  const existing = await readAll("interviewCoach");
+  const avoid = existing
+    .filter((e) => (e.topic ?? "").toLowerCase() === topic.toLowerCase())
+    .map((e) => e.question);
+  const seen = new Set(existing.map((e) => e.question.trim().toLowerCase()));
+
+  const generated = await generateTopicQuestions(
+    topic,
+    difficulty,
+    count,
+    avoid,
+    resume,
+    openrouterModel(access.apiKey, access.model)
+  );
+
+  const now = new Date().toISOString();
+  const created: InterviewCoachEntry[] = [];
+  for (const q of generated) {
+    const key = q.question.trim().toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    created.push(
+      await createItem("interviewCoach", {
+        selectedApplicationId: "",
+        selectedResumeId: resumeId,
+        question: q.question,
+        answer: "",
+        originalAiAnswer: "",
+        answerFormat: "paragraph",
+        tone: "neutral",
+        status: "draft",
+        source: "baseResume",
+        category: q.category,
+        topic,
+        difficulty,
+        usedBaseResume: false,
+        usedWorkJournal: false,
+        evidenceUsed: [],
+        journalStoriesUsed: [],
+        gaps: [],
+        aiRevisionHistory: [],
+        createdAt: now,
+        updatedAt: now,
+      })
+    );
+  }
+  return NextResponse.json({ created, skipped: generated.length - created.length });
 }
