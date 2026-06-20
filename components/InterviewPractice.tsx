@@ -8,6 +8,15 @@ import type {
   PracticeSession,
 } from "@/lib/types";
 import { Card, EmptyState, buttonClass } from "@/components/ui";
+import { useSpeechToText } from "@/components/useSpeechToText";
+
+const SPEECH_LANG: Record<string, string> = {
+  en: "en-US",
+  de: "de-DE",
+  fr: "fr-FR",
+  it: "it-IT",
+  es: "es-ES",
+};
 
 const inputClass =
   "w-full rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500";
@@ -535,6 +544,7 @@ function RunScreen({
   onExit: () => void;
 }) {
   const t = useTranslations("interviewCoach.practice");
+  const locale = useLocale();
   const [i, setI] = useState(0);
   const attempt = session.attempts[i];
   const [draft, setDraft] = useState(attempt?.practiceAnswer ?? "");
@@ -542,12 +552,20 @@ function RunScreen({
   const [error, setError] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
 
-  // Reset the draft when navigating to a different question.
+  // Voice dictation: append finalized speech to the answer. Degrades silently
+  // (button hidden) when the browser has no Web Speech API.
+  const { supported, listening, start, stop } = useSpeechToText({
+    lang: SPEECH_LANG[locale] ?? "en-US",
+    onFinal: (text) => setDraft((d) => (d ? d.replace(/\s+$/, "") + " " : "") + text),
+  });
+
+  // Reset the draft (and stop dictation) when navigating to another question.
   useEffect(() => {
+    stop();
     setDraft(session.attempts[i]?.practiceAnswer ?? "");
     setError(null);
     setAccepted(false);
-  }, [i, session.attempts]);
+  }, [i, session.attempts, stop]);
 
   const total = session.attempts.length;
 
@@ -644,7 +662,25 @@ function RunScreen({
           <p className="mt-0.5 text-xs text-muted-foreground">{entry.category}</p>
         )}
 
-        <label className={`${labelClass} mt-4`}>{t("yourAnswer")}</label>
+        <div className="mt-4 mb-1 flex items-center justify-between gap-2">
+          <label className="text-sm font-medium text-foreground/80">{t("yourAnswer")}</label>
+          {supported && (
+            <button
+              type="button"
+              onClick={() => (listening ? stop() : start())}
+              className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition ${
+                listening
+                  ? "border-red-300 bg-red-50 text-red-600 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300"
+                  : "border-input text-muted-foreground hover:bg-accent"
+              }`}
+            >
+              <span className={listening ? "animate-pulse" : ""} aria-hidden>
+                🎙
+              </span>
+              {listening ? t("voiceListening") : t("voiceStart")}
+            </button>
+          )}
+        </div>
         <textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}

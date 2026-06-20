@@ -670,6 +670,8 @@
       "noneGraded": "In questa sessione non è stata valutata alcuna risposta.",
       "perQuestion": "Per domanda",
       "done": "Fatto",
+      "voiceStart": "Parla",
+      "voiceListening": "In ascolto…",
       "requestFailed": "Richiesta non riuscita"
     },
     "preparingFor": "Preparazione per",

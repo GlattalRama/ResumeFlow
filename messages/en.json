@@ -670,6 +670,8 @@
       "noneGraded": "No answers were graded this session.",
       "perQuestion": "Per question",
       "done": "Done",
+      "voiceStart": "Speak",
+      "voiceListening": "Listening…",
       "requestFailed": "Request failed"
     },
     "preparingFor": "Preparing for",
