@@ -84,6 +84,19 @@ export async function PATCH(req: Request, { params }: Ctx) {
   if (Array.isArray(body.evidence)) {
     patch.evidence = readEvidence(body.evidence);
   }
+  if (body.outputs && typeof body.outputs === "object") {
+    const o = body.outputs as Record<string, unknown>;
+    patch.outputs = {
+      resumeBullet: typeof o.resumeBullet === "string" ? o.resumeBullet : "",
+      starStory: typeof o.starStory === "string" ? o.starStory : "",
+      linkedinPost: typeof o.linkedinPost === "string" ? o.linkedinPost : "",
+      perfReviewBlurb: typeof o.perfReviewBlurb === "string" ? o.perfReviewBlurb : "",
+      // Stamp generatedAt with this write's timestamp so freshly saved outputs
+      // are never instantly "stale" (updatedAt is bumped on every PATCH).
+      generatedAt: patch.updatedAt as string,
+      model: typeof o.model === "string" ? o.model : "",
+    };
+  }
 
   const updated = await updateItem("workJournal", id, patch);
   if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });

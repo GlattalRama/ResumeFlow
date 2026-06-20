@@ -7,6 +7,7 @@ import {
   EVIDENCE_TYPES,
   METRIC_TYPES,
   type Evidence,
+  type GeneratedOutputs,
   type Metric,
   type WorkJournalNote,
 } from "@/lib/types";
@@ -812,6 +813,101 @@ function EvidenceList({
   );
 }
 
+// ---- Multi-output engine ----
+
+function OutputsPanel({
+  outputs,
+  stale,
+  busy,
+  onGenerate,
+  locale,
+}: {
+  outputs?: GeneratedOutputs;
+  stale: boolean;
+  busy: boolean;
+  onGenerate: () => void;
+  locale: string;
+}) {
+  const t = useTranslations("workJournal");
+  const rows: [string, string][] = outputs
+    ? [
+        [t("outputResumeBullet"), outputs.resumeBullet],
+        [t("outputStarStory"), outputs.starStory],
+        [t("outputLinkedin"), outputs.linkedinPost],
+        [t("outputPerfReview"), outputs.perfReviewBlurb],
+      ]
+    : [];
+
+  return (
+    <div className="rounded-lg border border-border bg-muted/20 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-semibold text-foreground">{t("outputsHeading")}</p>
+        <button
+          type="button"
+          onClick={onGenerate}
+          disabled={busy}
+          className={buttonClass("secondary")}
+        >
+          {busy
+            ? t("generatingOutputs")
+            : outputs
+              ? t("regenerateOutputs")
+              : t("generateOutputs")}
+        </button>
+      </div>
+      {!outputs ? (
+        <p className="mt-2 text-xs text-muted-foreground">{t("outputsHint")}</p>
+      ) : (
+        <>
+          {stale && (
+            <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+              {t("outputsStale")}
+            </p>
+          )}
+          <div className="mt-3 space-y-2">
+            {rows
+              .filter(([, value]) => value)
+              .map(([label, value]) => (
+                <OutputRow key={label} label={label} value={value} />
+              ))}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground/70">
+            {t("outputsGenerated", {
+              date: new Date(outputs.generatedAt).toLocaleDateString(locale),
+            })}
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
+
+function OutputRow({ label, value }: { label: string; value: string }) {
+  const t = useTranslations("workJournal");
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="rounded-md border border-border bg-card p-3">
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {label}
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            navigator.clipboard?.writeText(value);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+          }}
+          className="text-xs text-brand-600 hover:text-brand-700 dark:text-brand-300"
+        >
+          {copied ? "✓" : t("copy")}
+        </button>
+      </div>
+      <p className="whitespace-pre-wrap text-sm text-foreground/90">{value}</p>
+    </div>
+  );
+}
+
 // ---- Note card ----
 
 function NoteCard({
@@ -881,6 +977,26 @@ function NoteCard({
       });
     }
     setPreview(null);
+  }
+
+  // Generate all four outputs in one call and cache them on the note.
+  async function generateOutputs() {
+    setAiBusy("outputs");
+    setAiError(null);
+    try {
+      const res = await fetch("/api/ai/work-journal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ noteId: note.id, action: "outputs" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || t("aiRequestFailed"));
+      await onPatch({ outputs: data.outputs });
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : t("aiRequestFailed"));
+    } finally {
+      setAiBusy(null);
+    }
   }
 
   return (
@@ -994,6 +1110,15 @@ function NoteCard({
             </div>
           )}
           {note.starStory && <NoteField label={t("labelStarStory")} value={note.starStory} />}
+
+          {/* Multi-output engine: 4 ready-to-paste outputs from one AI call. */}
+          <OutputsPanel
+            outputs={note.outputs}
+            stale={!!note.outputs && note.updatedAt > note.outputs.generatedAt}
+            busy={aiBusy === "outputs"}
+            onGenerate={generateOutputs}
+            locale={locale}
+          />
 
           {/* Saved bullets + add-to-resume */}
           {note.generatedResumeBullets.length > 0 && (

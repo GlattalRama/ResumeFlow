@@ -7,7 +7,12 @@
 // but must not invent employers, clients, tools, numbers, or outcomes. Nothing
 // here persists — results are returned for the user to accept.
 import { generateObject, jsonSchema, type LanguageModel } from "ai";
-import { ACHIEVEMENT_CATEGORIES, type AchievementCategory, type Star } from "./types";
+import {
+  ACHIEVEMENT_CATEGORIES,
+  type AchievementCategory,
+  type Star,
+  type WorkJournalNote,
+} from "./types";
 
 const EVIDENCE_RULE =
   "Hard rule: use ONLY facts present in the user's text. Never invent employers, clients, tools, numbers, or outcomes. If a metric isn't stated, describe impact qualitatively — do not fabricate figures. Leave a STAR field as an empty string if the text gives nothing for it.";
@@ -103,6 +108,93 @@ const polishSchema = jsonSchema<{
   required: ["situation", "task", "action", "result"],
   additionalProperties: false,
 });
+
+// ---- Multi-output engine (Phase 3) -----------------------------------------
+
+// Compact, fact-bound digest of an achievement for output generation. Prefers
+// structured STAR; falls back to the legacy prose. Includes the real metrics.
+function outputsDigest(n: WorkJournalNote): string {
+  const star = n.star;
+  const lines = [
+    `Title: ${n.title}`,
+    n.role && `Role: ${n.role}`,
+    n.company && `Company: ${n.company}`,
+    n.client && `Client: ${n.client}`,
+    n.project && `Project: ${n.project}`,
+    n.period && `Period: ${n.period}`,
+    star?.situation && `Situation: ${star.situation}`,
+    star?.task && `Task: ${star.task}`,
+    star?.action ? `Action: ${star.action}` : n.whatIDid && `Action: ${n.whatIDid}`,
+    star?.result ? `Result: ${star.result}` : n.impactResult && `Result: ${n.impactResult}`,
+    n.toolsTechnologies && `Tools/technologies: ${n.toolsTechnologies}`,
+    n.metrics && `Metrics: ${n.metrics}`,
+  ];
+  return lines.filter(Boolean).join("\n");
+}
+
+const outputsSchema = jsonSchema<{
+  resumeBullet: string;
+  starStory: string;
+  linkedinPost: string;
+  perfReviewBlurb: string;
+}>({
+  type: "object",
+  properties: {
+    resumeBullet: {
+      type: "string",
+      description:
+        "One strong resume bullet: action verb + what was done + concrete impact. Past tense, no first person, single line, no leading dash.",
+    },
+    starStory: {
+      type: "string",
+      description:
+        "A spoken-style STAR interview answer, first person, 4 short labeled parts (Situation / Task / Action / Result).",
+    },
+    linkedinPost: {
+      type: "string",
+      description:
+        "A short first-person LinkedIn post (2-4 sentences) celebrating the achievement; professional, lightly personable. No hashtags spam (0-2 max).",
+    },
+    perfReviewBlurb: {
+      type: "string",
+      description:
+        "2-3 sentences for a performance review / promotion packet, in manager-friendly language describing the contribution and its business impact.",
+    },
+  },
+  required: ["resumeBullet", "starStory", "linkedinPost", "perfReviewBlurb"],
+  additionalProperties: false,
+});
+
+export interface OutputsResult {
+  resumeBullet: string;
+  starStory: string;
+  linkedinPost: string;
+  perfReviewBlurb: string;
+}
+
+// Generate all four outputs in ONE call (cap-aware — one daily-cap unit).
+export async function generateOutputs(
+  note: WorkJournalNote,
+  model: LanguageModel
+): Promise<OutputsResult> {
+  const { object } = await generateObject({
+    model,
+    schema: outputsSchema,
+    system: [
+      "You turn one captured work achievement into four ready-to-use outputs: a resume bullet, a STAR interview story, a LinkedIn post, and performance-review wording.",
+      "Each must be self-contained and immediately usable.",
+      EVIDENCE_RULE.replace("user's text", "achievement"),
+    ].join("\n"),
+    prompt: outputsDigest(note),
+    maxOutputTokens: 1100,
+  });
+  return {
+    resumeBullet: object.resumeBullet.trim(),
+    starStory: object.starStory.trim(),
+    linkedinPost: object.linkedinPost.trim(),
+    perfReviewBlurb: object.perfReviewBlurb.trim(),
+  };
+}
 
 export async function polishStar(star: Star, model: LanguageModel): Promise<Star> {
   const { object } = await generateObject({

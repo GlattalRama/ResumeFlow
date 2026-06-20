@@ -475,6 +475,18 @@ export interface Evidence {
   url: string; // external link; "" when unset
 }
 
+// Phase 3: the four ready-to-paste outputs generated from one achievement in a
+// single AI call. Cached on the note; regenerated on demand. Considered stale
+// when the note's updatedAt is newer than generatedAt.
+export interface GeneratedOutputs {
+  resumeBullet: string;
+  starStory: string; // narrative form, for interviews
+  linkedinPost: string;
+  perfReviewBlurb: string; // manager-friendly language
+  generatedAt: string; // ISO timestamp
+  model: string; // model that produced them
+}
+
 // One captured work memory: a project, achievement, or problem solved —
 // recorded while it's fresh so it can later be turned into resume bullets and
 // interview stories. All prose fields are plain text; empty string when unset.
@@ -521,6 +533,10 @@ export interface WorkJournalNote {
   // mirror (joined for AI digests/search) so existing features keep working.
   metricsList?: Metric[];
   evidence?: Evidence[];
+
+  // ---- Phase 3 (multi-output engine) ----
+  // Cached résumé bullet / STAR story / LinkedIn post / perf-review wording.
+  outputs?: GeneratedOutputs;
 }
 
 // ---- Interview Coach ----
