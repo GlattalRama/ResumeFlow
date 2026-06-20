@@ -407,7 +407,7 @@ const practiceSchema = jsonSchema<PracticeFeedbackCore>({
     confidence: { type: "number", description: "0-10: how confident/assured it reads." },
     technicalAccuracy: {
       type: "number",
-      description: "0-10 technical correctness — ONLY for technical questions; omit otherwise.",
+      description: "0-10 technical correctness for technical questions; use 0 for non-technical questions.",
     },
     goodPoints: { type: "array", items: { type: "string" }, description: "What the answer did well." },
     improvementPoints: { type: "array", items: { type: "string" }, description: "What to improve." },
@@ -435,10 +435,13 @@ const practiceSchema = jsonSchema<PracticeFeedbackCore>({
       description: "Work Journal evidence (by topic/title) that would strengthen the answer.",
     },
   },
+  // Strict structured-output mode (Azure/OpenAI) requires EVERY property to be
+  // listed here. technicalAccuracy is always returned (0 when not applicable)
+  // and surfaced only for technical questions.
   required: [
     "overall", "clarity", "relevance", "structure", "starQuality", "confidence",
-    "goodPoints", "improvementPoints", "missingPoints", "suggestedAnswer",
-    "matched", "journalEvidenceToStrengthen",
+    "technicalAccuracy", "goodPoints", "improvementPoints", "missingPoints",
+    "suggestedAnswer", "matched", "journalEvidenceToStrengthen",
   ],
   additionalProperties: false,
 });
@@ -460,8 +463,8 @@ export async function gradePracticeAnswer(
     system: [
       "You are an interview coach grading a candidate's PRACTICE answer to an interview question. Score each dimension 0-10 and give specific, actionable feedback.",
       isTechnical
-        ? "This is a technical question — include technicalAccuracy."
-        : "This is not a technical question — omit technicalAccuracy.",
+        ? "This is a technical question — score technicalAccuracy 0-10."
+        : "This is not a technical question — set technicalAccuracy to 0.",
       "Set each 'matched' flag based on whether the answer's claims align with that evidence source. Suggest a stronger answer grounded ONLY in the evidence — never invent employers, tools, or numbers. List Work Journal evidence that would strengthen it.",
       GROUNDING_RULES,
     ].join("\n"),
