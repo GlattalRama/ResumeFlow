@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { readAll } from "@/lib/store";
 import { resolveBaseResumeId } from "@/lib/baseResume";
+import { loadSettings } from "@/lib/aiSettings";
 import { toV2 } from "@/lib/career/migrate";
 import WorkJournal from "@/components/WorkJournal";
 
@@ -8,10 +9,11 @@ export const dynamic = "force-dynamic";
 
 export default async function WorkJournalPage() {
   const t = await getTranslations("workJournal");
-  const [rawNotes, resumes, baseResumeId] = await Promise.all([
+  const [rawNotes, resumes, baseResumeId, settings] = await Promise.all([
     readAll("workJournal"),
     readAll("resumes"),
     resolveBaseResumeId(),
+    loadSettings(),
   ]);
   // Lazily migrate legacy notes to the STAR-native shape for display/editing.
   // Non-destructive: stored data is only rewritten when the user next saves.
@@ -28,5 +30,11 @@ export default async function WorkJournalPage() {
     ),
   }));
 
-  return <WorkJournal initialNotes={notes} resumes={resumeOptions} />;
+  return (
+    <WorkJournal
+      initialNotes={notes}
+      resumes={resumeOptions}
+      initialInsights={settings?.careerInsights ?? null}
+    />
+  );
 }

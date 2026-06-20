@@ -667,7 +667,21 @@ export interface UserSettings {
   // hardcoded default (see lib/constants.resolveVisibleTemplates). Lets an admin
   // turn the otherwise-hidden templates on/off without a code change.
   templateVisibility?: Record<string, boolean>;
+  // Cached Work Journal career insights (Phase 4). Regenerated on demand; the
+  // UI flags it stale when the journal has changed since noteCount was captured.
+  careerInsights?: CareerInsights;
   updatedAt: string;
+}
+
+// AI-generated, collection-level analysis of the Work Journal. Cached on the
+// settings singleton so it isn't recomputed (and re-billed) on every visit.
+export interface CareerInsights {
+  summary: string; // 1-2 sentence overview
+  strengths: string[]; // strongest areas, evidence-backed
+  gaps: string[]; // promotion-readiness gaps / thin areas
+  suggestions: string[]; // what to capture next
+  generatedAt: string; // ISO timestamp
+  noteCount: number; // journal size when generated (staleness signal)
 }
 
 // Map collection name -> stored entity type.

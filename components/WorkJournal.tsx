@@ -6,6 +6,7 @@ import {
   ACHIEVEMENT_CATEGORIES,
   EVIDENCE_TYPES,
   METRIC_TYPES,
+  type CareerInsights,
   type Evidence,
   type GeneratedOutputs,
   type Metric,
@@ -170,9 +171,11 @@ type AiPreview =
 export default function WorkJournal({
   initialNotes,
   resumes,
+  initialInsights = null,
 }: {
   initialNotes: WorkJournalNote[];
   resumes: ResumePickerOption[];
+  initialInsights?: CareerInsights | null;
 }) {
   const t = useTranslations("workJournal");
   const locale = useLocale();
@@ -183,6 +186,8 @@ export default function WorkJournal({
   // null = no form; "new" = creating; otherwise the id being edited.
   const [formTarget, setFormTarget] = useState<"new" | string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [view, setView] = useState<"entries" | "dashboard">("entries");
+  const [insights, setInsights] = useState<CareerInsights | null>(initialInsights);
 
   const allTags = useMemo(() => {
     const set = new Set<string>();
@@ -280,16 +285,45 @@ export default function WorkJournal({
         title={t("title")}
         subtitle={t("subtitle")}
         action={
-          <button
-            type="button"
-            className={buttonClass("primary")}
-            onClick={() => setFormTarget("new")}
-          >
-            {t("newEntry")}
-          </button>
+          view === "entries" ? (
+            <button
+              type="button"
+              className={buttonClass("primary")}
+              onClick={() => setFormTarget("new")}
+            >
+              {t("newEntry")}
+            </button>
+          ) : undefined
         }
       />
 
+      {/* View toggle: entries list vs. dashboard */}
+      <div className="mb-5 inline-flex rounded-lg border border-input p-0.5">
+        {(["entries", "dashboard"] as const).map((v) => (
+          <button
+            key={v}
+            type="button"
+            onClick={() => setView(v)}
+            className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+              view === v
+                ? "bg-brand-600 text-white"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {v === "entries" ? t("viewEntries") : t("viewDashboard")}
+          </button>
+        ))}
+      </div>
+
+      {view === "dashboard" ? (
+        <Dashboard
+          notes={notes}
+          insights={insights}
+          onInsights={setInsights}
+          locale={locale}
+        />
+      ) : (
+        <>
       {/* Search + filters */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <input
@@ -371,6 +405,254 @@ export default function WorkJournal({
           ))}
         </div>
       )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ---- Dashboard ----
+
+const DASH_TECHNICAL = new Set([
+  "technical-delivery",
+  "automation",
+  "quality-improvement",
+  "incident-resolution",
+]);
+const DASH_LEADERSHIP = new Set([
+  "leadership",
+  "process-improvement",
+  "customer-impact",
+]);
+
+function Dashboard({
+  notes,
+  insights,
+  onInsights,
+  locale,
+}: {
+  notes: WorkJournalNote[];
+  insights: CareerInsights | null;
+  onInsights: (i: CareerInsights) => void;
+  locale: string;
+}) {
+  const t = useTranslations("workJournal");
+
+  const stats = useMemo(() => {
+    const total = notes.length;
+    const resumeReady = notes.filter((n) => n.resumeReady).length;
+    const starStories = notes.filter(
+      (n) => n.star && (n.star.situation || n.star.task || n.star.action || n.star.result)
+    ).length;
+    const leadership = notes.filter((n) => n.category && DASH_LEADERSHIP.has(n.category)).length;
+    const technical = notes.filter((n) => n.category && DASH_TECHNICAL.has(n.category)).length;
+    const withOutputs = notes.filter((n) => n.outputs).length;
+    return { total, resumeReady, starStories, leadership, technical, withOutputs };
+  }, [notes]);
+
+  // Achievements per month for the last 12 months (by createdAt).
+  const trend = useMemo(() => {
+    const buckets: { key: string; label: string; count: number }[] = [];
+    const now = new Date();
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      buckets.push({
+        key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+        label: d.toLocaleDateString(locale, { month: "short" }),
+        count: 0,
+      });
+    }
+    const index = new Map(buckets.map((b, i) => [b.key, i]));
+    for (const n of notes) {
+      const key = (n.createdAt || "").slice(0, 7);
+      const i = index.get(key);
+      if (i !== undefined) buckets[i].count++;
+    }
+    return buckets;
+  }, [notes, locale]);
+
+  const byCategory = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const n of notes) if (n.category) counts.set(n.category, (counts.get(n.category) ?? 0) + 1);
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  }, [notes]);
+
+  const maxTrend = Math.max(1, ...trend.map((b) => b.count));
+  const maxCat = Math.max(1, ...byCategory.map(([, n]) => n));
+
+  const cards: [string, number][] = [
+    [t("statTotal"), stats.total],
+    [t("statResumeReady"), stats.resumeReady],
+    [t("statStarStories"), stats.starStories],
+    [t("statLeadership"), stats.leadership],
+    [t("statTechnical"), stats.technical],
+    [t("statWithOutputs"), stats.withOutputs],
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        {cards.map(([label, value]) => (
+          <div key={label} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+            <p className="text-3xl font-bold text-foreground">{value}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <p className="mb-4 font-semibold text-foreground">{t("trendTitle")}</p>
+          <div className="flex h-32 items-end gap-1.5">
+            {trend.map((b) => (
+              <div key={b.key} className="flex flex-1 flex-col items-center gap-1">
+                <div className="flex w-full flex-1 items-end">
+                  <div
+                    className="w-full rounded-t bg-gradient-to-t from-brand-600 to-brand-400"
+                    style={{ height: `${(b.count / maxTrend) * 100}%` }}
+                    title={`${b.count}`}
+                  />
+                </div>
+                <span className="text-[10px] text-muted-foreground">{b.label}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card>
+          <p className="mb-4 font-semibold text-foreground">{t("byCategoryTitle")}</p>
+          {byCategory.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t("noCategoryData")}</p>
+          ) : (
+            <ul className="space-y-2.5">
+              {byCategory.map(([c, n]) => (
+                <li key={c} className="flex items-center gap-3 text-sm">
+                  <span className="w-36 shrink-0 truncate text-muted-foreground">
+                    {CATEGORY_KEY[c] ? t(CATEGORY_KEY[c]) : c}
+                  </span>
+                  <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-brand-600 to-brand-400"
+                      style={{ width: `${(n / maxCat) * 100}%` }}
+                    />
+                  </div>
+                  <span className="w-6 text-right text-muted-foreground">{n}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      </div>
+
+      <InsightsPanel
+        notes={notes}
+        insights={insights}
+        onInsights={onInsights}
+        locale={locale}
+      />
+    </div>
+  );
+}
+
+function InsightsPanel({
+  notes,
+  insights,
+  onInsights,
+  locale,
+}: {
+  notes: WorkJournalNote[];
+  insights: CareerInsights | null;
+  onInsights: (i: CareerInsights) => void;
+  locale: string;
+}) {
+  const t = useTranslations("workJournal");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const stale = !!insights && insights.noteCount !== notes.length;
+
+  async function generate() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/ai/career-insights", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || t("aiRequestFailed"));
+      onInsights(data.insights);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("aiRequestFailed"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="flex items-center gap-2 font-semibold text-foreground">
+          <span aria-hidden>✦</span> {t("insightsTitle")}
+        </p>
+        <button
+          type="button"
+          onClick={generate}
+          disabled={busy || notes.length < 3}
+          className={buttonClass("secondary")}
+        >
+          {busy ? t("generatingOutputs") : insights ? t("regenerateOutputs") : t("generateInsights")}
+        </button>
+      </div>
+
+      {!insights ? (
+        <p className="mt-2 text-sm text-muted-foreground">
+          {notes.length < 3 ? t("insightsNeedMore") : t("insightsHint")}
+        </p>
+      ) : (
+        <div className="mt-3 space-y-4">
+          {stale && (
+            <p className="rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+              {t("insightsStale")}
+            </p>
+          )}
+          <p className="text-sm text-foreground/90">{insights.summary}</p>
+          <InsightList title={t("insightsStrengths")} items={insights.strengths} tone="emerald" />
+          <InsightList title={t("insightsGaps")} items={insights.gaps} tone="amber" />
+          <InsightList title={t("insightsSuggestions")} items={insights.suggestions} tone="brand" />
+          <p className="text-xs text-muted-foreground/70">
+            {t("outputsGenerated", {
+              date: new Date(insights.generatedAt).toLocaleDateString(locale),
+            })}
+          </p>
+        </div>
+      )}
+      {error && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
+    </Card>
+  );
+}
+
+function InsightList({
+  title,
+  items,
+  tone,
+}: {
+  title: string;
+  items: string[];
+  tone: "emerald" | "amber" | "brand";
+}) {
+  if (items.length === 0) return null;
+  const dot =
+    tone === "emerald" ? "bg-emerald-500" : tone === "amber" ? "bg-amber-500" : "bg-brand-500";
+  return (
+    <div>
+      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {title}
+      </p>
+      <ul className="space-y-1">
+        {items.map((it, i) => (
+          <li key={i} className="flex gap-2 text-sm text-foreground/90">
+            <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />
+            {it}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

@@ -196,6 +196,92 @@ export async function generateOutputs(
   };
 }
 
+// ---- Career insights (Phase 4) ---------------------------------------------
+
+function humanize(slug: string): string {
+  return slug
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+// Compact collection-level digest: one line per achievement plus a category
+// tally, so the model can reason about breadth, strengths, and gaps.
+function insightsDigest(notes: WorkJournalNote[]): string {
+  const counts = new Map<string, number>();
+  const lines: string[] = [];
+  for (const n of notes) {
+    if (n.category) counts.set(n.category, (counts.get(n.category) ?? 0) + 1);
+    const bits = [
+      n.category ? `[${humanize(n.category)}]` : "[uncategorized]",
+      n.title,
+      n.role && `as ${n.role}`,
+      n.metrics && `— ${n.metrics}`,
+      n.resumeReady ? "(resume-ready)" : "",
+    ].filter(Boolean);
+    lines.push(`- ${bits.join(" ")}`);
+  }
+  const tally = [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([c, n]) => `${humanize(c)}: ${n}`)
+    .join(", ");
+  return [
+    `Total achievements: ${notes.length}`,
+    tally ? `By category: ${tally}` : "",
+    "",
+    "Achievements:",
+    ...lines.slice(0, 60),
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+const insightsSchema = jsonSchema<{
+  summary: string;
+  strengths: string[];
+  gaps: string[];
+  suggestions: string[];
+}>({
+  type: "object",
+  properties: {
+    summary: { type: "string", description: "1-2 sentence overview of the person's documented career story so far." },
+    strengths: { type: "array", items: { type: "string" }, description: "2-4 evidence-backed strengths (e.g. strongest categories, demonstrated skills)." },
+    gaps: { type: "array", items: { type: "string" }, description: "2-4 promotion-readiness gaps or thin areas, based on what's missing or sparse." },
+    suggestions: { type: "array", items: { type: "string" }, description: "2-4 concrete next achievements or evidence to capture next." },
+  },
+  required: ["summary", "strengths", "gaps", "suggestions"],
+  additionalProperties: false,
+});
+
+export interface InsightsResult {
+  summary: string;
+  strengths: string[];
+  gaps: string[];
+  suggestions: string[];
+}
+
+export async function generateInsights(
+  notes: WorkJournalNote[],
+  model: LanguageModel
+): Promise<InsightsResult> {
+  const { object } = await generateObject({
+    model,
+    schema: insightsSchema,
+    system: [
+      "You are a career coach analyzing someone's work-achievement journal. Give a concise, useful read on their career story: strengths, gaps for promotion readiness, and what to capture next.",
+      "Base everything ONLY on the achievements listed. Don't invent accomplishments. Be specific and reference categories/patterns you actually see.",
+    ].join("\n"),
+    prompt: insightsDigest(notes),
+    maxOutputTokens: 700,
+  });
+  return {
+    summary: object.summary.trim(),
+    strengths: object.strengths.map((s) => s.trim()).filter(Boolean),
+    gaps: object.gaps.map((s) => s.trim()).filter(Boolean),
+    suggestions: object.suggestions.map((s) => s.trim()).filter(Boolean),
+  };
+}
+
 export async function polishStar(star: Star, model: LanguageModel): Promise<Star> {
   const { object } = await generateObject({
     model,
