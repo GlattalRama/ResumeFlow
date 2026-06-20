@@ -21,6 +21,7 @@ import type {
   InterviewAnswerTone,
   InterviewQuestionCategory,
   Note,
+  PracticeFeedback,
   ResumeData,
   WorkJournalNote,
 } from "./types";
@@ -389,4 +390,117 @@ export async function reviseInterviewAnswer(
     maxOutputTokens: 1000,
   });
   return object.answer.trim();
+}
+
+// ---- Practice answer grading (Review / Practice / Repeat) -------------------
+
+type PracticeFeedbackCore = Omit<PracticeFeedback, "gradedAt">;
+
+const practiceSchema = jsonSchema<PracticeFeedbackCore>({
+  type: "object",
+  properties: {
+    overall: { type: "number", description: "Overall answer quality, 0-10." },
+    clarity: { type: "number", description: "0-10." },
+    relevance: { type: "number", description: "0-10: how well it answers the question." },
+    structure: { type: "number", description: "0-10." },
+    starQuality: { type: "number", description: "0-10: STAR structure quality (situation/task/action/result)." },
+    confidence: { type: "number", description: "0-10: how confident/assured it reads." },
+    technicalAccuracy: {
+      type: "number",
+      description: "0-10 technical correctness — ONLY for technical questions; omit otherwise.",
+    },
+    goodPoints: { type: "array", items: { type: "string" }, description: "What the answer did well." },
+    improvementPoints: { type: "array", items: { type: "string" }, description: "What to improve." },
+    missingPoints: { type: "array", items: { type: "string" }, description: "Key points the answer missed." },
+    suggestedAnswer: {
+      type: "string",
+      description: "A stronger version of the answer, grounded only in the evidence. The user must accept it before it's used.",
+    },
+    matched: {
+      type: "object",
+      properties: {
+        baseResume: { type: "boolean" },
+        workJournal: { type: "boolean" },
+        selectedResume: { type: "boolean" },
+        application: { type: "boolean" },
+        jobDescription: { type: "boolean" },
+      },
+      required: ["baseResume", "workJournal", "selectedResume", "application", "jobDescription"],
+      additionalProperties: false,
+      description: "Whether the answer aligned with each evidence source.",
+    },
+    journalEvidenceToStrengthen: {
+      type: "array",
+      items: { type: "string" },
+      description: "Work Journal evidence (by topic/title) that would strengthen the answer.",
+    },
+  },
+  required: [
+    "overall", "clarity", "relevance", "structure", "starQuality", "confidence",
+    "goodPoints", "improvementPoints", "missingPoints", "suggestedAnswer",
+    "matched", "journalEvidenceToStrengthen",
+  ],
+  additionalProperties: false,
+});
+
+const clampScore = (n: number) => Math.max(0, Math.min(10, Math.round(n)));
+
+// Grade a single practice answer against the candidate's own evidence. Returns
+// feedback for review — never mutates the saved answer.
+export async function gradePracticeAnswer(
+  question: string,
+  practiceAnswer: string,
+  isTechnical: boolean,
+  evidence: InterviewEvidence,
+  model: LanguageModel
+): Promise<PracticeFeedbackCore> {
+  const { object } = await generateObject({
+    model,
+    schema: practiceSchema,
+    system: [
+      "You are an interview coach grading a candidate's PRACTICE answer to an interview question. Score each dimension 0-10 and give specific, actionable feedback.",
+      isTechnical
+        ? "This is a technical question — include technicalAccuracy."
+        : "This is not a technical question — omit technicalAccuracy.",
+      "Set each 'matched' flag based on whether the answer's claims align with that evidence source. Suggest a stronger answer grounded ONLY in the evidence — never invent employers, tools, or numbers. List Work Journal evidence that would strengthen it.",
+      GROUNDING_RULES,
+    ].join("\n"),
+    prompt: [
+      `Interview question: ${question}`,
+      "",
+      "Candidate's practice answer:",
+      practiceAnswer || "(empty)",
+      "",
+      "Candidate evidence:",
+      evidence.digest || "(none provided)",
+    ].join("\n"),
+    maxOutputTokens: 1100,
+  });
+  const o = object as PracticeFeedbackCore;
+  return {
+    overall: clampScore(o.overall),
+    clarity: clampScore(o.clarity),
+    relevance: clampScore(o.relevance),
+    structure: clampScore(o.structure),
+    starQuality: clampScore(o.starQuality),
+    confidence: clampScore(o.confidence),
+    technicalAccuracy:
+      isTechnical && typeof o.technicalAccuracy === "number"
+        ? clampScore(o.technicalAccuracy)
+        : undefined,
+    goodPoints: (o.goodPoints || []).map((s) => s.trim()).filter(Boolean),
+    improvementPoints: (o.improvementPoints || []).map((s) => s.trim()).filter(Boolean),
+    missingPoints: (o.missingPoints || []).map((s) => s.trim()).filter(Boolean),
+    suggestedAnswer: (o.suggestedAnswer || "").trim(),
+    matched: {
+      baseResume: !!o.matched?.baseResume,
+      workJournal: !!o.matched?.workJournal,
+      selectedResume: !!o.matched?.selectedResume,
+      application: !!o.matched?.application,
+      jobDescription: !!o.matched?.jobDescription,
+    },
+    journalEvidenceToStrengthen: (o.journalEvidenceToStrengthen || [])
+      .map((s) => s.trim())
+      .filter(Boolean),
+  };
 }

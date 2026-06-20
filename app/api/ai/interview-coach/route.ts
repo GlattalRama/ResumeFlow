@@ -1,57 +1,20 @@
 import { NextResponse } from "next/server";
-import { createItem, getItem, readAll, readByApplication, updateItem } from "@/lib/store";
-import { getBaseResume } from "@/lib/baseResume";
+import { createItem, getItem, readAll, updateItem } from "@/lib/store";
 import { decryptApiKey, loadSettings } from "@/lib/aiSettings";
 import { resolveAiAccess, openrouterModel } from "@/lib/aiServer";
 import { isCreditsError, notifyOwnerCreditsExhausted } from "@/lib/aiNotify";
+import { assembleEvidence } from "@/lib/interviewEvidence";
 import {
-  buildEvidence,
   generateInterviewAnswer,
   generateInterviewQuestions,
   reviseInterviewAnswer,
   REVISION_ACTIONS,
-  type InterviewEvidence,
   type RevisionAction,
 } from "@/lib/aiInterviewCoach";
 import type { InterviewCoachEntry } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
-
-// Gather everything the coach may ground an answer in. The base resume and
-// work journal always participate; application context only when linked.
-async function assembleEvidence(
-  applicationId: string,
-  resumeId: string
-): Promise<InterviewEvidence> {
-  const [journalNotes, baseResume, settings] = await Promise.all([
-    readAll("workJournal"),
-    getBaseResume(),
-    loadSettings(),
-  ]);
-  const application = applicationId
-    ? (await getItem("applications", applicationId)) ?? null
-    : null;
-  const applicationNotes = application
-    ? await readByApplication("notes", application.id)
-    : [];
-  // The selected version only adds signal when it isn't the base itself.
-  const baseId = settings?.baseResumeId ?? "";
-  const selected =
-    resumeId && resumeId !== baseId
-      ? (await getItem("resumes", resumeId)) ?? null
-      : null;
-
-  return buildEvidence({
-    journalNotes,
-    baseResume: baseResume?.resumeData ?? null,
-    selectedResume: selected
-      ? { name: selected.versionName, data: selected.resumeData }
-      : null,
-    application,
-    applicationNotes,
-  });
-}
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));

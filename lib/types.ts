@@ -615,6 +615,66 @@ export interface InterviewCoachEntry {
   updatedAt: string;
 }
 
+// ---- Interview practice (Review / Practice / Repeat) ----
+
+// AI feedback on a single practice answer. All scores 0-10. Never auto-applied:
+// suggestedAnswer becomes the saved answer only when the user accepts it.
+export interface PracticeFeedback {
+  overall: number;
+  clarity: number;
+  relevance: number;
+  structure: number;
+  starQuality: number;
+  confidence: number;
+  // Only meaningful for technical questions; omitted otherwise.
+  technicalAccuracy?: number;
+  goodPoints: string[];
+  improvementPoints: string[];
+  missingPoints: string[];
+  suggestedAnswer: string;
+  // Whether the practice answer aligned with each evidence source.
+  matched: {
+    baseResume: boolean;
+    workJournal: boolean;
+    selectedResume: boolean;
+    application: boolean;
+    jobDescription: boolean;
+  };
+  // Work Journal evidence that would strengthen the answer.
+  journalEvidenceToStrengthen: string[];
+  gradedAt: string;
+}
+
+// One question within a practice session: the user's practice answer (kept
+// separate from the canonical InterviewCoachEntry.answer) plus optional feedback.
+export interface PracticeAttempt {
+  entryId: string; // -> InterviewCoachEntry.id
+  question: string; // snapshot, so history stays stable if the entry changes
+  practiceAnswer: string;
+  feedback?: PracticeFeedback;
+  answeredAt: string; // "" until first answered
+}
+
+export type PracticeSessionStatus = "in-progress" | "completed";
+
+export interface PracticeSession {
+  id: string;
+  // Groups repeats of the same question set; a repeat reuses the original setId.
+  setId: string;
+  name: string;
+  source: string; // how the set was built (display label)
+  entryIds: string[]; // questions, in order
+  attempts: PracticeAttempt[];
+  status: PracticeSessionStatus;
+  overallScore: number; // average of graded attempts' overall (0 when none)
+  repeatOf?: string; // previous session id this repeats, for comparison
+  // Context for grounding feedback (mirrors the entries' selection).
+  selectedApplicationId: string;
+  selectedResumeId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ---- Status history ----
 
 export interface StatusHistoryEntry {
@@ -744,6 +804,7 @@ export interface Collections {
   resumeSnapshots: ResumeSnapshot;
   workJournal: WorkJournalNote;
   interviewCoach: InterviewCoachEntry;
+  interviewPracticeSessions: PracticeSession;
 }
 
 export type CollectionName = keyof Collections;

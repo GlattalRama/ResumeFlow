@@ -9,6 +9,7 @@ import type {
   InterviewCoachEntry,
 } from "@/lib/types";
 import { Card, EmptyState, PageHeader, buttonClass } from "@/components/ui";
+import InterviewPractice from "@/components/InterviewPractice";
 
 export interface CoachAppOption {
   id: string;
@@ -72,6 +73,7 @@ export default function InterviewCoach({
   const t = useTranslations("interviewCoach");
   const tStatus = useTranslations("status");
   const [entries, setEntries] = useState(initialEntries);
+  const [mode, setMode] = useState<"questions" | "practice">("questions");
   const [scope, setScope] = useState<Scope>(initialApplicationId || "all");
   const [manualQ, setManualQ] = useState("");
   const [manualBusy, setManualBusy] = useState(false);
@@ -198,6 +200,32 @@ export default function InterviewCoach({
     <div>
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
+      {/* Questions vs. Practice */}
+      <div className="mb-5 inline-flex rounded-lg border border-input p-0.5">
+        {(["questions", "practice"] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => setMode(m)}
+            className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+              mode === m ? "bg-brand-600 text-white" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {m === "questions" ? t("viewQuestions") : t("viewPractice")}
+          </button>
+        ))}
+      </div>
+
+      {mode === "practice" ? (
+        <InterviewPractice
+          entries={entries}
+          applications={applications}
+          resumes={resumes}
+          baseResumeId={baseResumeId}
+          onEntryUpdated={replaceEntry}
+        />
+      ) : (
+        <>
       {/* Context selector */}
       <Card className="mb-4">
         <div className="flex flex-wrap items-center gap-3">
@@ -349,6 +377,8 @@ export default function InterviewCoach({
             </section>
           ))}
         </div>
+      )}
+        </>
       )}
     </div>
   );
