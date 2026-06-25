@@ -164,7 +164,7 @@ export default function ResumeBuilder({
   );
   // Per-version collapse + order of the builder form cards. Merged with the
   // canonical card list so new cards appear and removed cards drop out.
-  const [formCards, setFormCards] = useState<ResumeFormCardState[]>(() =>
+  const [formCards] = useState<ResumeFormCardState[]>(() =>
     resolveFormCardState(initial?.formCardState)
   );
   // Per-version document section order + visibility. Drives the live preview and
@@ -292,19 +292,6 @@ export default function ResumeBuilder({
   >("idle");
   // Skip the autosave that the initialization render would otherwise trigger.
   const skipFirstAutosave = useRef(true);
-
-  // ----- Form card layout (rail order) -----
-  // Move a card up (-1) or down (+1) one position in the form and renumber.
-  function moveCard(cardId: string, dir: -1 | 1) {
-    setFormCards((cards) => {
-      const ordered = [...cards].sort((a, b) => a.order - b.order);
-      const from = ordered.findIndex((c) => c.cardId === cardId);
-      const to = from + dir;
-      if (from === -1 || to < 0 || to >= ordered.length) return cards;
-      [ordered[from], ordered[to]] = [ordered[to], ordered[from]];
-      return ordered.map((c, i) => ({ ...c, order: i }));
-    });
-  }
 
   // ----- Document section layout (reorder + visibility) -----
   // Default sections and custom sections share one document order. Moving any
@@ -1483,9 +1470,17 @@ export default function ResumeBuilder({
   const setupEntries = railEntries.filter(({ card }) =>
     CONFIG_CARD_IDS.has(card.cardId)
   );
-  const contentEntries = railEntries.filter(
-    ({ card }) => !CONFIG_CARD_IDS.has(card.cardId)
-  );
+  // Content cards listed in document order so the sidebar mirrors the live
+  // preview. basics (the header) is pinned first and the single Custom Sections
+  // card last; reorderable default sections sort by their document order.
+  const contentRank = (cardId: string): number => {
+    if (cardId === "basics") return -1;
+    if (cardId === "customSections") return Number.MAX_SAFE_INTEGER;
+    return sectionById[cardId]?.order ?? 0;
+  };
+  const contentEntries = railEntries
+    .filter(({ card }) => !CONFIG_CARD_IDS.has(card.cardId))
+    .sort((a, b) => contentRank(a.card.cardId) - contentRank(b.card.cardId));
 
   // Rail completion status per content card; null for Setup cards (which have
   // no notion of "done").
@@ -1641,7 +1636,7 @@ export default function ResumeBuilder({
         {label}
       </p>
       <div className="space-y-0.5">
-        {entries.map(({ card, i }, gi) => {
+        {entries.map(({ card, i }) => {
           const status = cardStatus(card.cardId);
           const active = i === safeCurrent;
           return (
@@ -1677,26 +1672,36 @@ export default function ResumeBuilder({
                     />
                   ))}
               </button>
-              {reorderable && active && (
-                <div className="flex items-center gap-2 px-2.5 pb-1 pt-0.5">
-                  <button
-                    type="button"
-                    disabled={gi === 0}
-                    onClick={() => moveCard(card.cardId, -1)}
-                    className="text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-30"
-                  >
-                    ↑ {t("actions.moveUp")}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={gi === entries.length - 1}
-                    onClick={() => moveCard(card.cardId, 1)}
-                    className="text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-30"
-                  >
-                    ↓ {t("actions.moveDown")}
-                  </button>
-                </div>
-              )}
+              {reorderable && active && sectionById[card.cardId] && (() => {
+                // Reorder the actual document section (live preview + every
+                // export). The sidebar list re-sorts to match because it is
+                // ordered by sectionState. Disabled state and bounds mirror the
+                // merged document order, which interleaves custom sections.
+                const docEntries = orderedDocSections(data, sectionState);
+                const di = docEntries.findIndex(
+                  (e) => e.kind === "default" && e.sectionId === card.cardId
+                );
+                return (
+                  <div className="flex items-center gap-2 px-2.5 pb-1 pt-0.5">
+                    <button
+                      type="button"
+                      disabled={di <= 0}
+                      onClick={() => moveDocSection("default", card.cardId, -1)}
+                      className="text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-30"
+                    >
+                      ↑ {t("actions.moveUp")}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={di === -1 || di >= docEntries.length - 1}
+                      onClick={() => moveDocSection("default", card.cardId, 1)}
+                      className="text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-30"
+                    >
+                      ↓ {t("actions.moveDown")}
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
           );
         })}
