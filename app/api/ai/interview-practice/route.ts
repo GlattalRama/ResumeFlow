@@ -8,7 +8,7 @@ import { computeOverall } from "@/lib/practice";
 import type { PracticeAttempt, PracticeFeedback } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // Grade one practice answer and store the feedback on the session attempt.
 // Never touches the canonical InterviewCoachEntry answer.

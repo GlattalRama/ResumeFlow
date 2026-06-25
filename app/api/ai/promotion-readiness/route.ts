@@ -7,7 +7,7 @@ import { generatePromotionReadiness } from "@/lib/aiCareer";
 import type { PromotionReadiness } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // Assess promotion readiness across the 7 dimensions from the whole Work
 // Journal and cache it on the settings singleton. Regenerated on demand only.

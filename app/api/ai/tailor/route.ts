@@ -6,7 +6,7 @@ import { tailorResumeData } from "@/lib/aiTailor";
 import type { TailoredResumeMetadata } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // Generate a job-tailored resume DRAFT from a source resume + an application's
 // job description. Returns the tailored resumeData, the section-level change

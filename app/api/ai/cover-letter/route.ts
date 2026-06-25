@@ -9,7 +9,7 @@ import {
 } from "@/lib/aiCoverLetter";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // Generate a cover letter DRAFT from a source resume + an application's job
 // description. Persists nothing — the client saves the (possibly edited)

@@ -11,7 +11,7 @@ import { generateOutputs } from "@/lib/aiCareer";
 import type { GeneratedOutputs } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 type Action = "bullets" | "improve" | "star" | "outputs";
 const ACTIONS: Action[] = ["bullets", "improve", "star", "outputs"];

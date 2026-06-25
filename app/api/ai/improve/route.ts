@@ -3,7 +3,7 @@ import { resolveAiAccess, openrouterModel } from "@/lib/aiServer";
 import { isCreditsError, notifyOwnerCreditsExhausted } from "@/lib/aiNotify";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // Section-specific system prompts. Each is told to return ONLY the rewritten
 // content (no preamble, no markdown fences) so the result can drop straight
