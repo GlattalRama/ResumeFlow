@@ -586,6 +586,27 @@ export default function ResumeBuilder({
     }));
   }
 
+  // Swap the entry at `i` with its neighbour in direction `dir` (-1 up, +1
+  // down). Out-of-range moves are a no-op. Used to reorder the items within a
+  // section (work experience, education, projects) in both the form and the
+  // live preview, which read the same arrays.
+  function swapItems<T>(arr: T[], i: number, dir: -1 | 1): T[] {
+    const to = i + dir;
+    if (i < 0 || to < 0 || to >= arr.length) return arr;
+    const next = [...arr];
+    [next[i], next[to]] = [next[to], next[i]];
+    return next;
+  }
+  function moveExperience(i: number, dir: -1 | 1) {
+    setData((d) => ({ ...d, experience: swapItems(d.experience, i, dir) }));
+  }
+  function moveEducation(i: number, dir: -1 | 1) {
+    setData((d) => ({ ...d, education: swapItems(d.education, i, dir) }));
+  }
+  function moveProject(i: number, dir: -1 | 1) {
+    setData((d) => ({ ...d, projects: swapItems(d.projects, i, dir) }));
+  }
+
   // ----- Custom sections -----
   // Add a custom section at the end of the document order (one past the current
   // last default or custom section).
@@ -1239,6 +1260,16 @@ export default function ResumeBuilder({
                 removeExperience(i);
                 setActiveItem(null);
               }}
+              canMoveUp={i > 0}
+              canMoveDown={i < data.experience.length - 1}
+              onMoveUp={() => {
+                moveExperience(i, -1);
+                setActiveItem(`experience:${i - 1}`);
+              }}
+              onMoveDown={() => {
+                moveExperience(i, 1);
+                setActiveItem(`experience:${i + 1}`);
+              }}
             >
               <div className="grid gap-2 sm:grid-cols-2">
                 <Field label={t("experience.role")} value={exp.role} onChange={(v) => updateExperience(i, { role: v })} />
@@ -1314,6 +1345,16 @@ export default function ResumeBuilder({
                 removeEducation(i);
                 setActiveItem(null);
               }}
+              canMoveUp={i > 0}
+              canMoveDown={i < data.education.length - 1}
+              onMoveUp={() => {
+                moveEducation(i, -1);
+                setActiveItem(`education:${i - 1}`);
+              }}
+              onMoveDown={() => {
+                moveEducation(i, 1);
+                setActiveItem(`education:${i + 1}`);
+              }}
             >
               <div className="grid gap-2 sm:grid-cols-2">
                 <Field label={t("education.school")} value={ed.school} onChange={(v) => updateEducation(i, { school: v })} />
@@ -1359,6 +1400,16 @@ export default function ResumeBuilder({
               onRemove={() => {
                 removeProject(i);
                 setActiveItem(null);
+              }}
+              canMoveUp={i > 0}
+              canMoveDown={i < data.projects.length - 1}
+              onMoveUp={() => {
+                moveProject(i, -1);
+                setActiveItem(`projects:${i - 1}`);
+              }}
+              onMoveDown={() => {
+                moveProject(i, 1);
+                setActiveItem(`projects:${i + 1}`);
               }}
             >
               <div className="grid gap-2">
@@ -3052,6 +3103,10 @@ function ColorField({
 function ItemCard({
   children,
   onRemove,
+  onMoveUp,
+  onMoveDown,
+  canMoveUp,
+  canMoveDown,
   dataKey,
   onActive,
   summary,
@@ -3061,6 +3116,12 @@ function ItemCard({
 }: {
   children: React.ReactNode;
   onRemove: () => void;
+  // Reorder this entry within its section. Omit to hide the controls (e.g.
+  // single-entry sections). The can* flags disable the button at a list edge.
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
   // "cardId:index" identity for preview↔form item linking: the preview's
   // click-to-edit scrolls to this card via data-rf-form-item, and onActive
   // fires when the user works in this entry so the preview narrows to it.
@@ -3104,13 +3165,39 @@ function ItemCard({
             </span>
           )}
         </button>
-        <button
-          type="button"
-          onClick={onRemove}
-          className="shrink-0 text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
-        >
-          {t("actions.remove")}
-        </button>
+        <div className="flex shrink-0 items-center gap-1">
+          {(onMoveUp || onMoveDown) && (
+            <>
+              <button
+                type="button"
+                aria-label={t("actions.moveUp")}
+                title={t("actions.moveUp")}
+                disabled={!canMoveUp}
+                onClick={onMoveUp}
+                className="text-xs text-muted-foreground/70 hover:text-foreground disabled:opacity-30"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                aria-label={t("actions.moveDown")}
+                title={t("actions.moveDown")}
+                disabled={!canMoveDown}
+                onClick={onMoveDown}
+                className="text-xs text-muted-foreground/70 hover:text-foreground disabled:opacity-30"
+              >
+                ↓
+              </button>
+            </>
+          )}
+          <button
+            type="button"
+            onClick={onRemove}
+            className="text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
+          >
+            {t("actions.remove")}
+          </button>
+        </div>
       </div>
       {expanded && <div className="border-t border-border p-3">{children}</div>}
     </div>
