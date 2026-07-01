@@ -34,6 +34,13 @@ const DEFAULT_RANGE: Record<Period, number> = {
   all: 1,
 };
 
+// Subtitle under each metric total, describing the window the total covers.
+function windowLabel(period: Period, range: number): string {
+  if (period === "all") return "all-time total";
+  const unit = { day: "day", week: "week", month: "month", year: "year" }[period];
+  return `last ${range} ${unit}${range === 1 ? "" : "s"}`;
+}
+
 // 2-letter ISO country code -> flag emoji (regional indicator symbols).
 function flagEmoji(cc: string): string {
   if (!/^[A-Z]{2}$/.test(cc)) return "🏳️";
@@ -110,6 +117,7 @@ function Bars({
 function MetricCard({
   title,
   total,
+  subtitle,
   values,
   labels,
   icon,
@@ -117,6 +125,7 @@ function MetricCard({
 }: {
   title: string;
   total: number;
+  subtitle: string;
   values: number[];
   labels: string[];
   icon: React.ReactNode;
@@ -130,7 +139,7 @@ function MetricCard({
           <p className="mt-1 text-3xl font-bold tracking-tight text-foreground">
             {total}
           </p>
-          <p className="text-[11px] text-muted-foreground/70">all-time total</p>
+          <p className="text-[11px] text-muted-foreground/70">{subtitle}</p>
         </div>
         <span
           className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${grad} text-white shadow-sm transition group-hover:scale-110`}
@@ -161,6 +170,7 @@ export default async function AnalyticsDashboard({
 
   const report = await getReport(period, range);
   const { buckets, series, totals, countries } = report;
+  const subtitle = windowLabel(period, range);
 
   const exportMax = Math.max(
     1,
@@ -209,6 +219,7 @@ export default async function AnalyticsDashboard({
         <MetricCard
           title="Logins"
           total={totals.login}
+          subtitle={subtitle}
           values={series.login}
           labels={buckets}
           icon={<LoginIcon />}
@@ -217,6 +228,7 @@ export default async function AnalyticsDashboard({
         <MetricCard
           title="Active users"
           total={totals.activeUsers}
+          subtitle={subtitle}
           values={series.activeUsers}
           labels={buckets}
           icon={<UsersIcon />}
@@ -225,6 +237,7 @@ export default async function AnalyticsDashboard({
         <MetricCard
           title="Resumes created"
           total={totals.resume_created}
+          subtitle={subtitle}
           values={series.resume_created}
           labels={buckets}
           icon={<DocIcon />}
@@ -233,6 +246,7 @@ export default async function AnalyticsDashboard({
         <MetricCard
           title="Applications created"
           total={totals.application_created}
+          subtitle={subtitle}
           values={series.application_created}
           labels={buckets}
           icon={<BriefcaseIcon />}
@@ -241,6 +255,7 @@ export default async function AnalyticsDashboard({
         <MetricCard
           title="AI-tailored resumes"
           total={totals.ai_tailored}
+          subtitle={subtitle}
           values={series.ai_tailored}
           labels={buckets}
           icon={<BoltIcon />}
@@ -249,6 +264,7 @@ export default async function AnalyticsDashboard({
         <MetricCard
           title="Exports (all formats)"
           total={totals.resume_exported.total}
+          subtitle={subtitle}
           values={series.resume_exported.total}
           labels={buckets}
           icon={<DownloadIcon />}
@@ -262,7 +278,7 @@ export default async function AnalyticsDashboard({
           <h3 className="text-sm font-semibold text-foreground">
             Exports by format
           </h3>
-          <p className="mb-4 text-xs text-muted-foreground/70">all-time</p>
+          <p className="mb-4 text-xs text-muted-foreground/70">{subtitle}</p>
           <ul className="space-y-3">
             {EXPORT_FORMATS.map((fmt) => {
               const n = totals.resume_exported[fmt];
