@@ -44,9 +44,47 @@ export default function ApplicationForm({
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [autofilling, setAutofilling] = useState(false);
+  const [autofillNote, setAutofillNote] = useState("");
 
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((f) => ({ ...f, [key]: value }));
+  }
+
+  // Pull company / title / job ID / description out of the linked posting and
+  // drop them into the form. Only fills EMPTY fields for the identity bits
+  // (company, title, ID) so a manual entry is never clobbered; the description
+  // is always replaced since that's the field the user is autofilling for.
+  async function autofill() {
+    const link = form.jobLink.trim();
+    setAutofillNote("");
+    setError("");
+    if (!link) {
+      setError(t("form.autofillNoLink"));
+      return;
+    }
+    setAutofilling(true);
+    try {
+      const res = await fetch("/api/applications/autofill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobLink: link }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || t("form.autofillFailed"));
+      setForm((f) => ({
+        ...f,
+        company: f.company.trim() || data.company || f.company,
+        jobTitle: f.jobTitle.trim() || data.jobTitle || f.jobTitle,
+        jobId: f.jobId.trim() || data.jobId || f.jobId,
+        jobDescription: data.jobDescription || f.jobDescription,
+      }));
+      setAutofillNote(t("form.autofillDone"));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t("form.autofillFailed"));
+    } finally {
+      setAutofilling(false);
+    }
   }
 
   async function save() {
@@ -91,7 +129,26 @@ export default function ApplicationForm({
           </div>
           <div>
             <label className={labelClass}>{t("form.jobLink")}</label>
-            <input className={inputClass} value={form.jobLink} onChange={(e) => set("jobLink", e.target.value)} />
+            <div className="flex gap-2">
+              <input
+                className={inputClass}
+                value={form.jobLink}
+                onChange={(e) => set("jobLink", e.target.value)}
+                placeholder="https://…"
+              />
+              <button
+                type="button"
+                onClick={autofill}
+                disabled={autofilling}
+                className={buttonClass("secondary") + " shrink-0 whitespace-nowrap"}
+              >
+                {autofilling ? t("form.autofilling") : t("form.autofill")}
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">{t("form.autofillHint")}</p>
+            {autofillNote && (
+              <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">{autofillNote}</p>
+            )}
           </div>
           <div>
             <label className={labelClass}>{t("form.status")}</label>
