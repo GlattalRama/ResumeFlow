@@ -1,5 +1,5 @@
-// Dashboard aggregation: read counter series for a period + all-time totals,
-// plus active-user counts and a country breakdown.
+// Dashboard aggregation: read counter series for a period, derive totals for
+// the selected window, plus active-user counts and an all-time country breakdown.
 
 import { recentBucketKeys, storageKey } from "./buckets";
 import { getStore, type CounterDoc } from "./store";
@@ -35,17 +35,10 @@ export interface AnalyticsReport {
     application_created: number;
     ai_tailored: number;
     resume_exported: { total: number } & Record<ExportFormat, number>;
-    activeUsers: number; // all-time distinct users
+    activeUsers: number; // distinct users across the selected window
   };
   countries: CountryCount[]; // all-time logins by country, desc
 }
-
-const SIMPLE_EVENTS: Exclude<AnalyticsEventType, "resume_exported">[] = [
-  "login",
-  "resume_created",
-  "application_created",
-  "ai_tailored",
-];
 
 // Count distinct keys under a prefix — each `uu|period|bucket|<token>` key is one
 // distinct user, so the key count is the distinct-user count for that bucket.
@@ -54,6 +47,24 @@ function countPrefix(doc: CounterDoc, prefix: string): number {
   for (const k in doc) if (k.startsWith(prefix)) n++;
   return n;
 }
+
+// Distinct users across several buckets: union the `<token>` parts so a user
+// active in more than one bucket is counted once (summing per-bucket counts
+// would double-count them).
+function distinctUsersAcross(
+  doc: CounterDoc,
+  period: Period,
+  buckets: string[]
+): number {
+  const seen = new Set<string>();
+  for (const b of buckets) {
+    const prefix = `uu|${period}|${b}|`;
+    for (const k in doc) if (k.startsWith(prefix)) seen.add(k.slice(prefix.length));
+  }
+  return seen.size;
+}
+
+const sum = (arr: number[]): number => arr.reduce((a, b) => a + b, 0);
 
 export async function getReport(
   period: Period,
@@ -67,6 +78,11 @@ export async function getReport(
   const simpleSeries = (ev: AnalyticsEventType): number[] =>
     buckets.map((b) => at(storageKey(ev, period, b)));
 
+  const loginSeries = simpleSeries("login");
+  const resumeCreatedSeries = simpleSeries("resume_created");
+  const applicationCreatedSeries = simpleSeries("application_created");
+  const aiTailoredSeries = simpleSeries("ai_tailored");
+
   // Exports per format + total, per bucket.
   const exportSeries = { total: buckets.map(() => 0) } as ExportSeries;
   for (const fmt of EXPORT_FORMATS) {
@@ -75,18 +91,21 @@ export async function getReport(
     );
   }
   exportSeries.total = buckets.map((_, i) =>
-    EXPORT_FORMATS.reduce((sum, fmt) => sum + exportSeries[fmt][i], 0)
+    EXPORT_FORMATS.reduce((s, fmt) => s + exportSeries[fmt][i], 0)
   );
 
+  // Totals reflect the selected period + range window: sum each metric's
+  // visible per-bucket series rather than reading the all-time counter.
   const exportTotals = { total: 0 } as { total: number } & Record<ExportFormat, number>;
   for (const fmt of EXPORT_FORMATS) {
-    exportTotals[fmt] = at(storageKey("resume_exported", "all", "all", fmt));
+    exportTotals[fmt] = sum(exportSeries[fmt]);
   }
   exportTotals.total = EXPORT_FORMATS.reduce((s, fmt) => s + exportTotals[fmt], 0);
 
-  // Active (distinct) users: count `uu|period|bucket|<token>` keys per bucket.
+  // Active (distinct) users: count `uu|period|bucket|<token>` keys per bucket,
+  // and union tokens across the window for the total.
   const activeUsers = buckets.map((b) => countPrefix(doc, `uu|${period}|${b}|`));
-  const activeUsersTotal = countPrefix(doc, "uu|all|all|");
+  const activeUsersTotal = distinctUsersAcross(doc, period, buckets);
 
   // All-time logins by country, descending.
   const countryPrefix = "country|all|all|";
@@ -100,18 +119,18 @@ export async function getReport(
     period,
     buckets,
     series: {
-      login: simpleSeries("login"),
-      resume_created: simpleSeries("resume_created"),
-      application_created: simpleSeries("application_created"),
-      ai_tailored: simpleSeries("ai_tailored"),
+      login: loginSeries,
+      resume_created: resumeCreatedSeries,
+      application_created: applicationCreatedSeries,
+      ai_tailored: aiTailoredSeries,
       resume_exported: exportSeries,
       activeUsers,
     },
     totals: {
-      login: at(storageKey("login", "all", "all")),
-      resume_created: at(storageKey("resume_created", "all", "all")),
-      application_created: at(storageKey("application_created", "all", "all")),
-      ai_tailored: at(storageKey("ai_tailored", "all", "all")),
+      login: sum(loginSeries),
+      resume_created: sum(resumeCreatedSeries),
+      application_created: sum(applicationCreatedSeries),
+      ai_tailored: sum(aiTailoredSeries),
       resume_exported: exportTotals,
       activeUsers: activeUsersTotal,
     },
