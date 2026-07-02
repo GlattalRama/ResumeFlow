@@ -505,6 +505,7 @@
       "uploadPhoto": "Upload photo",
       "removePhoto": "Remove photo",
       "shape": "Shape:",
+      "dragToReposition": "Drag the photo to reposition",
       "shapes": {
         "square": "Square",
         "circle": "Circle"

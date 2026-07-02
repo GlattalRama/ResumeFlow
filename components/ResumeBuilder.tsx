@@ -20,6 +20,7 @@ import type {
   TemplateMeta,
   TemplateStyleSettings,
 } from "@/lib/types";
+import { DEFAULT_PROFILE_PHOTO_POSITION } from "@/lib/types";
 import {
   BULLET_STYLE_OPTIONS,
   CUSTOM_LAYOUT_OPTIONS,
@@ -247,6 +248,14 @@ export default function ResumeBuilder({
   // Mobile-only: which pane is showing. On large screens both are always
   // visible side-by-side, so this is ignored there.
   const [mobileView, setMobileView] = useState<"edit" | "preview">("edit");
+  // Mobile section chip grid: collapsed to ~2 rows by default with a "More"
+  // expander. chipClip is measured from the wrapped layout so the clip lands
+  // exactly on a row boundary (no half-cut chips); null until measured.
+  const [sectionsExpanded, setSectionsExpanded] = useState(false);
+  const chipRowRef = useRef<HTMLDivElement>(null);
+  const [chipClip, setChipClip] = useState<{ maxH: number; hidden: number } | null>(
+    null
+  );
   // Mobile preview zoom (1 = fit to screen width). Desktop ignores this.
   const [previewZoom, setPreviewZoom] = useState(1);
   // Which form card (section) is in focus — drives the rail, the mobile
@@ -413,6 +422,43 @@ export default function ResumeBuilder({
     : data.profilePhoto || "";
   // Selected photo shape (ATS Corporate Style template); older records default to "square".
   const photoShape = data.profilePhotoShape ?? "square";
+  // Focal point for the photo's cover-crop; the user drags the preview to set it.
+  const photoPos = data.profilePhotoPosition ?? DEFAULT_PROFILE_PHOTO_POSITION;
+  const photoDragging = useRef(false);
+  // Drag the preview to reposition the crop. Moving the image one way shifts the
+  // visible focal point the opposite way (like dragging a photo under a mask).
+  function onPhotoPointerDown(e: React.PointerEvent<HTMLImageElement>) {
+    if (!photoSrc) return;
+    photoDragging.current = true;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+  function onPhotoPointerMove(e: React.PointerEvent<HTMLImageElement>) {
+    if (!photoDragging.current) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const dx = (e.movementX / rect.width) * 100;
+    const dy = (e.movementY / rect.height) * 100;
+    setData((prev) => {
+      const cur = prev.profilePhotoPosition ?? DEFAULT_PROFILE_PHOTO_POSITION;
+      return {
+        ...prev,
+        profilePhotoPosition: {
+          x: Math.round(Math.min(100, Math.max(0, cur.x - dx))),
+          y: Math.round(Math.min(100, Math.max(0, cur.y - dy))),
+        },
+      };
+    });
+  }
+  function onPhotoPointerUp(e: React.PointerEvent<HTMLImageElement>) {
+    photoDragging.current = false;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // pointer capture may already be released; ignore.
+    }
+  }
+  const photoRepositioned =
+    photoPos.x !== DEFAULT_PROFILE_PHOTO_POSITION.x ||
+    photoPos.y !== DEFAULT_PROFILE_PHOTO_POSITION.y;
 
   // ----- Profile photo -----
   // Upload through the server, which stores the image in Google Drive
@@ -1119,12 +1165,19 @@ export default function ResumeBuilder({
                 <img
                   src={photoSrc}
                   alt={t("basics.photoAlt")}
-                  className={`h-16 w-16 border border-border object-cover ${
+                  draggable={false}
+                  onPointerDown={onPhotoPointerDown}
+                  onPointerMove={onPhotoPointerMove}
+                  onPointerUp={onPhotoPointerUp}
+                  onPointerCancel={onPhotoPointerUp}
+                  title={t("basics.dragToReposition")}
+                  className={`h-20 w-20 cursor-move touch-none select-none border border-border object-cover ${
                     photoShape === "circle" ? "rounded-full" : "rounded-md"
                   }`}
+                  style={{ objectPosition: `${photoPos.x}% ${photoPos.y}%` }}
                 />
               ) : (
-                <div className="flex h-16 w-16 items-center justify-center rounded-md border border-dashed border-input text-[10px] text-muted-foreground/70">
+                <div className="flex h-20 w-20 items-center justify-center rounded-md border border-dashed border-input text-[10px] text-muted-foreground/70">
                   {t("basics.noPhoto")}
                 </div>
               )}
@@ -1176,6 +1229,29 @@ export default function ResumeBuilder({
                     </button>
                   ))}
                 </div>
+              </div>
+            )}
+            {/* Reposition hint + reset. The user drags the preview above to set
+                the crop's focal point; reset returns it to the default. */}
+            {photoSrc && (
+              <div className="mt-2 flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">
+                  {t("basics.dragToReposition")}
+                </span>
+                {photoRepositioned && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setData((d) => ({
+                        ...d,
+                        profilePhotoPosition: { ...DEFAULT_PROFILE_PHOTO_POSITION },
+                      }))
+                    }
+                    className="text-xs font-medium text-brand-600 hover:text-brand-700 dark:text-brand-300"
+                  >
+                    {t("actions.resetToDefault")}
+                  </button>
+                )}
               </div>
             )}
             <p className="mt-1 text-xs text-muted-foreground/70">
@@ -1606,6 +1682,53 @@ export default function ResumeBuilder({
     return () => clearTimeout(t);
   }, [activeItem]);
 
+  // Measure the wrapped mobile section chips so the collapsed grid clips exactly
+  // at the end of the second row (never mid-chip) and we know how many chips are
+  // hidden behind "More". Re-measures on resize (ResizeObserver) and whenever the
+  // chip set / labels / completion dots change (via chipSignature dep below).
+  const chipSignature = orderedCards
+    .map((c) => `${cardTitle(c)}|${cardStatus(c.cardId)?.done ? 1 : 0}`)
+    .join(",");
+  useEffect(() => {
+    const el = chipRowRef.current;
+    if (!el) return;
+    const measure = () => {
+      const chips = Array.from(
+        el.querySelectorAll<HTMLElement>("[data-section-chip]")
+      );
+      let next: { maxH: number; hidden: number } | null = null;
+      if (chips.length > 0) {
+        const rowTops: number[] = [];
+        for (const c of chips) {
+          const top = c.offsetTop;
+          if (rowTops.length === 0 || top - rowTops[rowTops.length - 1] > 2) {
+            rowTops.push(top);
+          }
+        }
+        if (rowTops.length > 2) {
+          const thirdRowTop = rowTops[2];
+          const visible = chips.filter((c) => c.offsetTop < thirdRowTop - 2);
+          const last = visible[visible.length - 1];
+          next = {
+            maxH: last.offsetTop + last.offsetHeight,
+            hidden: chips.length - visible.length,
+          };
+        }
+      }
+      setChipClip((prev) => {
+        if (!prev && !next) return prev;
+        if (prev && next && prev.maxH === next.maxH && prev.hidden === next.hidden) {
+          return prev;
+        }
+        return next;
+      });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [chipSignature, mobileView]);
+
   // Click-to-edit: clicking a section inside the live preview focuses its form
   // card (and flips to the edit pane on mobile); clicking a tagged list entry
   // (data-rf-item) additionally narrows to that entry and scrolls its form
@@ -1706,7 +1829,7 @@ export default function ResumeBuilder({
 
   return (
     <div className="pb-16 lg:pb-0">
-      <div className="grid gap-4 lg:grid-cols-[11.5rem_minmax(0,10fr)_minmax(0,11fr)] lg:items-start lg:gap-5">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[11.5rem_minmax(0,10fr)_minmax(0,11fr)] lg:items-start lg:gap-5">
         {/* Desktop rail: section navigation, completion, and save actions. */}
         <aside className="hidden lg:sticky lg:top-20 lg:block lg:self-start">
           {/* Live ATS score — the rail's headline. Opens the score panel. */}
@@ -1767,7 +1890,7 @@ export default function ResumeBuilder({
 
         {/* Middle: the active section's form */}
         <div
-          className={`space-y-4 lg:block ${
+          className={`min-w-0 space-y-4 lg:block ${
             mobileView === "preview" ? "hidden" : ""
           }`}
         >
@@ -1816,22 +1939,79 @@ export default function ResumeBuilder({
             )}
           </div>
         )}
-        {/* Mobile section stepper: tappable chip bar (one section at a time). */}
-        <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1.5 lg:hidden">
-          {orderedCards.map((card, i) => (
+        {/* Mobile section switcher: a wrapping chip grid so every section is
+            visible at once and fills the width (no sideways scroll). Collapsed to
+            two rows by default with a "+N / chevron" expander (chipClip is
+            measured so the clip lands on a row boundary, never mid-chip). The
+            active section is a filled brand pill; sections that have content show
+            a completion dot. Config cards (Template, Version, …) have no dot. */}
+        <div className="pb-1 lg:hidden">
+          <div
+            ref={chipRowRef}
+            className="relative flex flex-wrap gap-1.5 overflow-hidden transition-[max-height] duration-200"
+            style={
+              chipClip
+                ? { maxHeight: sectionsExpanded ? 1000 : chipClip.maxH }
+                : undefined
+            }
+          >
+            {orderedCards.map((card, i) => {
+              const active = i === safeCurrent;
+              const done = Boolean(cardStatus(card.cardId)?.done);
+              return (
+                <button
+                  key={card.cardId}
+                  type="button"
+                  data-section-chip
+                  onClick={() => goToCard(i)}
+                  aria-current={active ? "true" : undefined}
+                  className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                    active
+                      ? "bg-brand-600 text-white"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {cardTitle(card)}
+                  {done && (
+                    <span
+                      className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                        active ? "bg-white/80" : "bg-green-500"
+                      }`}
+                      aria-hidden
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {chipClip && (
             <button
-              key={card.cardId}
               type="button"
-              onClick={() => goToCard(i)}
-              className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                i === safeCurrent
-                  ? "bg-brand-600 text-white"
-                  : "bg-muted text-muted-foreground"
-              }`}
+              onClick={() => setSectionsExpanded((v) => !v)}
+              aria-expanded={sectionsExpanded}
+              className="mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium text-brand-600 hover:bg-brand-50 dark:text-brand-300 dark:hover:bg-brand-500/15"
             >
-              {cardTitle(card)}
+              {!sectionsExpanded && (
+                <span className="tabular-nums">+{chipClip.hidden}</span>
+              )}
+              <svg
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className={`h-3.5 w-3.5 transition-transform ${
+                  sectionsExpanded ? "rotate-180" : ""
+                }`}
+                aria-hidden
+              >
+                <path
+                  d="M5 8l5 5 5-5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </button>
-          ))}
+          )}
         </div>
         {orderedCards.map((card, i) => {
           const content = cardContent[card.cardId];
@@ -1880,32 +2060,13 @@ export default function ResumeBuilder({
         })}
 
         {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
-
-        {/* Mobile save actions; on desktop these live in the rail. */}
-        <div className="flex items-center gap-2 lg:hidden">
-          <button onClick={save} disabled={saving} className={buttonClass("primary")}>
-            {saving
-              ? t("actions.saving")
-              : mode === "create"
-                ? t("actions.createResume")
-                : t("actions.saveAndView")}
-          </button>
-          <button
-            onClick={() => router.back()}
-            className={buttonClass("secondary")}
-            type="button"
-          >
-            {t("actions.cancel")}
-          </button>
-        </div>
       </div>
 
-        {/* Right: live preview */}
-        <div
-          className={`lg:block lg:sticky lg:top-20 lg:self-start ${
-            mobileView === "edit" ? "hidden" : ""
-          }`}
-        >
+        {/* Right (desktop) / below the form (mobile): live preview. On mobile it
+            stacks under the form so short config panels are followed by the
+            résumé instead of blank space; the bottom-bar "Preview" toggle
+            collapses the form for a focused, full-height preview. */}
+        <div className="lg:block lg:sticky lg:top-20 lg:self-start">
           <div className="mb-2 flex items-center justify-between gap-2">
             <div className="min-w-0">
               <p className="text-sm font-semibold text-foreground/80">
@@ -1924,7 +2085,7 @@ export default function ResumeBuilder({
                   setMobileView("edit");
                 }}
                 title={t("ats.openPanel")}
-                className={`rounded-full border border-border bg-card px-2 py-0.5 text-[11px] font-bold tabular-nums shadow-sm ${scoreBandClass(
+                className={`hidden rounded-full border border-border bg-card px-2 py-0.5 text-[11px] font-bold tabular-nums shadow-sm lg:inline-flex ${scoreBandClass(
                   atsResult.overall
                 )}`}
               >
@@ -1966,9 +2127,13 @@ export default function ResumeBuilder({
                   type="checkbox"
                   checked={atsView}
                   onChange={(e) => setAtsView(e.target.checked)}
+                  aria-label={t("ats.safeView")}
                   className="h-3.5 w-3.5"
                 />
-                {t("ats.safeView")}
+                {/* Full label on desktop; a short "ATS" marker on mobile to keep
+                    the inline preview header from crowding. */}
+                <span className="hidden lg:inline">{t("ats.safeView")}</span>
+                <span className="lg:hidden">ATS</span>
               </label>
             </div>
           </div>
@@ -1993,6 +2158,25 @@ export default function ResumeBuilder({
               </A4Preview>
             </div>
           </div>
+        </div>
+
+        {/* Mobile save actions; on desktop these live in the rail. Placed after
+            the preview so the flow reads form → live preview → save. */}
+        <div className="flex items-center gap-2 lg:hidden">
+          <button onClick={save} disabled={saving} className={buttonClass("primary")}>
+            {saving
+              ? t("actions.saving")
+              : mode === "create"
+                ? t("actions.createResume")
+                : t("actions.saveAndView")}
+          </button>
+          <button
+            onClick={() => router.back()}
+            className={buttonClass("secondary")}
+            type="button"
+          >
+            {t("actions.cancel")}
+          </button>
         </div>
       </div>
 

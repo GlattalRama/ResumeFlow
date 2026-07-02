@@ -4,6 +4,7 @@ import type {
   ResumeSectionState,
   TemplateStyleSettings,
 } from "@/lib/types";
+import { DEFAULT_PROFILE_PHOTO_POSITION } from "@/lib/types";
 import {
   getBulletSymbol,
   orderedVisibleDocSections,
@@ -48,6 +49,8 @@ export default function AtsCorporateTemplate({
     (data.profilePhotoShape ?? "square") === "circle"
       ? "h-28 w-28 rounded-full"
       : "h-28 w-32 rounded-md";
+  // User-chosen focal point (drag-to-reposition); defaults to a top-biased crop.
+  const photoPos = data.profilePhotoPosition ?? DEFAULT_PROFILE_PHOTO_POSITION;
 
   const sections: Partial<Record<ResumeSectionId, React.ReactNode>> = {
     summary: (
@@ -208,7 +211,10 @@ export default function AtsCorporateTemplate({
             <img
               src={profilePhoto}
               alt={basics.name || "Profile photo"}
+              // Cover-crop anchored to the user's chosen focal point so the frame
+              // keeps the part they want (headshots default to a top-biased crop).
               className={`shrink-0 border border-gray-200 object-cover ${photoShapeClass}`}
+              style={{ objectPosition: `${photoPos.x}% ${photoPos.y}%` }}
             />
           )}
           <div className="min-w-0 flex-1">

@@ -5,6 +5,7 @@ import type {
   ResumeSectionState,
   TemplateStyleSettings,
 } from "@/lib/types";
+import { DEFAULT_PROFILE_PHOTO_POSITION } from "@/lib/types";
 import {
   customSectionHasContent,
   getBulletSymbol,
@@ -97,6 +98,8 @@ export default function CognizantTemplate({
   const profilePhoto = data.profilePhotoMeta?.driveFileId
     ? `/api/drive/photos/${data.profilePhotoMeta.driveFileId}`
     : data.profilePhoto ?? "";
+  // User-chosen focal point (drag-to-reposition); defaults to a top-biased crop.
+  const photoPos = data.profilePhotoPosition ?? DEFAULT_PROFILE_PHOTO_POSITION;
 
   const areasMarker = getBulletSymbol(data.areasOfExpertiseBulletStyle);
 
@@ -127,7 +130,10 @@ export default function CognizantTemplate({
             <img
               src={profilePhoto}
               alt={basics.name || "Profile photo"}
+              // Cover-crop anchored to the user's chosen focal point (defaults to
+              // a top-biased crop so a portrait headshot keeps the head/face).
               className="h-28 w-28 shrink-0 rounded-full border border-gray-200 object-cover"
+              style={{ objectPosition: `${photoPos.x}% ${photoPos.y}%` }}
             />
           ) : (
             <div

@@ -505,6 +505,7 @@
       "uploadPhoto": "Foto hochladen",
       "removePhoto": "Foto entfernen",
       "shape": "Form:",
+      "dragToReposition": "Foto zum Ausrichten ziehen",
       "shapes": {
         "square": "Quadratisch",
         "circle": "Rund"

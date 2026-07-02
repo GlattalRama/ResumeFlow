@@ -505,6 +505,7 @@
       "uploadPhoto": "Carica foto",
       "removePhoto": "Rimuovi foto",
       "shape": "Forma:",
+      "dragToReposition": "Trascina la foto per riposizionarla",
       "shapes": {
         "square": "Quadrata",
         "circle": "Rotonda"

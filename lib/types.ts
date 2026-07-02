@@ -66,6 +66,18 @@ export interface ProfilePhotoMeta {
 // "square" = rounded rectangle, "circle" = circular (square frame).
 export type ProfilePhotoShape = "square" | "circle";
 
+// Focal point for the profile photo, as CSS object-position percentages (0–100).
+// The user sets this by dragging the photo in the editor so the cover-crop keeps
+// the part they want (e.g. the face) instead of a fixed centered/top crop.
+export interface ProfilePhotoPosition {
+  x: number;
+  y: number;
+}
+
+// Default focal point: horizontally centered, biased toward the top so portrait
+// headshots keep the head. Used wherever profilePhotoPosition is unset.
+export const DEFAULT_PROFILE_PHOTO_POSITION: ProfilePhotoPosition = { x: 50, y: 15 };
+
 // Marker style for the Areas of Expertise list. Honored by the ATS Corporate Style template
 // (and any template that renders Areas of Expertise) plus the DOCX/PPTX
 // exporters as closely as each format allows.
@@ -126,6 +138,9 @@ export interface ResumeData {
   // "square" is a rounded rectangle (default), "circle" is circular. Older
   // records may not have this; consumers default to "square".
   profilePhotoShape?: ProfilePhotoShape;
+  // Focal point (object-position %) chosen by the user by dragging the photo.
+  // Unset on older records; consumers fall back to DEFAULT_PROFILE_PHOTO_POSITION.
+  profilePhotoPosition?: ProfilePhotoPosition;
   areasOfExpertise: string[];
   // Marker style used when rendering Areas of Expertise. Older records may not
   // have this; consumers default to "bullet".
