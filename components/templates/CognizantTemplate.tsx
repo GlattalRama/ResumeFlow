@@ -100,6 +100,12 @@ export default function CognizantTemplate({
     : data.profilePhoto ?? "";
   // User-chosen focal point (drag-to-reposition); defaults to a top-biased crop.
   const photoPos = data.profilePhotoPosition ?? DEFAULT_PROFILE_PHOTO_POSITION;
+  // Honor the chosen photo shape: "circle" is a true circle, "square" a rounded
+  // square (both use the same square frame).
+  const photoShapeClass =
+    (data.profilePhotoShape ?? "square") === "circle"
+      ? "rounded-full"
+      : "rounded-md";
 
   const areasMarker = getBulletSymbol(data.areasOfExpertiseBulletStyle);
 
@@ -132,13 +138,13 @@ export default function CognizantTemplate({
               alt={basics.name || "Profile photo"}
               // Cover-crop anchored to the user's chosen focal point (defaults to
               // a top-biased crop so a portrait headshot keeps the head/face).
-              className="h-28 w-28 shrink-0 rounded-full border border-gray-200 object-cover"
+              className={`h-28 w-28 shrink-0 ${photoShapeClass} border border-gray-200 object-cover`}
               style={{ objectPosition: `${photoPos.x}% ${photoPos.y}%` }}
             />
           ) : (
             <div
               aria-hidden
-              className="h-28 w-28 shrink-0 rounded-full bg-gray-200"
+              className={`h-28 w-28 shrink-0 ${photoShapeClass} bg-gray-200`}
             />
           ))}
         <div className="min-w-0 flex-1">

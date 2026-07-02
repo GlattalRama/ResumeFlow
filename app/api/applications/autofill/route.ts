@@ -2,39 +2,20 @@ import { NextResponse } from "next/server";
 import { generateObject, jsonSchema } from "ai";
 import { resolveAiAccess, openrouterModel } from "@/lib/aiServer";
 import { isCreditsError, notifyOwnerCreditsExhausted } from "@/lib/aiNotify";
+import { fetchStructuredJob, htmlToText } from "@/lib/jobBoards";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-// Fetch a job posting URL, extract its visible text, then have the model pull
-// out the structured fields our "New application" form needs. PERSISTS NOTHING —
-// the client drops the result into the form for the user to review before they
-// save. One run = one daily-cap unit (resolveAiAccess increments once).
+// Fetch a job posting URL and return the structured fields our "New application"
+// form needs. Known ATS platforms (Workday, Greenhouse, Lever) are read straight
+// from their public JSON APIs — no AI, no daily-cap unit. Everything else falls
+// back to fetching the page, stripping it to text, and having the model extract
+// the fields. PERSISTS NOTHING — the client drops the result into the form for
+// the user to review before they save.
 
 const MAX_HTML_BYTES = 2_000_000; // don't try to parse enormous pages
 const MAX_TEXT_CHARS = 12_000; // cap what we send to the model
-
-// Strip a raw HTML document down to readable text: drop script/style/noscript,
-// convert tags to spaces, collapse whitespace, decode the few entities that
-// matter for job descriptions.
-function htmlToText(html: string): string {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
-    .replace(/<!--[\s\S]*?-->/g, " ")
-    .replace(/<\/(p|div|li|br|h[1-6]|tr)>/gi, "\n")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&#39;|&rsquo;|&lsquo;/gi, "'")
-    .replace(/&quot;|&ldquo;|&rdquo;/gi, '"')
-    .replace(/[ \t]+/g, " ")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
 
 const extractSchema = jsonSchema<{
   company: string;
@@ -89,6 +70,20 @@ export async function POST(req: Request) {
       { error: "That doesn't look like a valid http(s) link." },
       { status: 400 }
     );
+  }
+
+  // Fast path: known ATS platforms (Workday, Greenhouse, Lever) render the
+  // posting client-side, so a plain fetch gets an empty shell. Read them from
+  // their public JSON API instead — structured, accurate, and no AI/cap unit.
+  const structured = await fetchStructuredJob(url).catch(() => null);
+  if (structured && structured.jobDescription.length >= 200) {
+    return NextResponse.json({
+      company: structured.company,
+      jobTitle: structured.jobTitle,
+      jobId: structured.jobId,
+      jobDescription: structured.jobDescription,
+      source: structured.source,
+    });
   }
 
   // Fetch the page BEFORE resolving access, so an unreachable link never burns a
