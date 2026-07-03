@@ -2,6 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { isNativePlatform, nativeGoogleSignIn } from "@/lib/nativeAuth";
 
 export default function SignInButton({
   callbackUrl = "/",
@@ -9,20 +10,44 @@ export default function SignInButton({
   callbackUrl?: string;
 }) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSignIn() {
+    setError(null);
+    setLoading(true);
+    try {
+      // Inside the Capacitor shell Google blocks the WebView OAuth redirect, so
+      // sign in natively and let the server mint the session cookie.
+      if (isNativePlatform()) {
+        await nativeGoogleSignIn();
+        window.location.assign(callbackUrl);
+        return;
+      }
+      // Web: normal NextAuth redirect (this navigates away).
+      await signIn("google", { callbackUrl });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Sign-in failed. Try again.");
+      setLoading(false);
+    }
+  }
 
   return (
-    <button
-      type="button"
-      disabled={loading}
-      onClick={() => {
-        setLoading(true);
-        signIn("google", { callbackUrl });
-      }}
-      className="inline-flex w-full items-center justify-center gap-3 rounded-md border border-input bg-card px-4 py-2.5 text-sm font-medium text-foreground/80 shadow-sm transition hover:bg-muted/50 disabled:opacity-60"
-    >
-      <GoogleIcon />
-      {loading ? "Redirecting…" : "Sign in with Google"}
-    </button>
+    <>
+      <button
+        type="button"
+        disabled={loading}
+        onClick={handleSignIn}
+        className="inline-flex w-full items-center justify-center gap-3 rounded-md border border-input bg-card px-4 py-2.5 text-sm font-medium text-foreground/80 shadow-sm transition hover:bg-muted/50 disabled:opacity-60"
+      >
+        <GoogleIcon />
+        {loading ? "Signing in…" : "Sign in with Google"}
+      </button>
+      {error && (
+        <p className="mt-3 text-center text-xs text-red-600 dark:text-red-400">
+          {error}
+        </p>
+      )}
+    </>
   );
 }
 
