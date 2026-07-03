@@ -30,6 +30,31 @@ export function isNativePlatform(): boolean {
   return cap()?.isNativePlatform?.() === true;
 }
 
+// The Google scopes the app needs — must match the web flow (lib/googleConfig).
+const GOOGLE_SCOPES = [
+  "openid",
+  "email",
+  "profile",
+  "https://www.googleapis.com/auth/drive.appdata",
+];
+
+let initialized = false;
+
+// Initialize @capgo/capacitor-social-login once, in `offline` mode so Google
+// returns a server auth code (redeemable by our web client's secret) plus a
+// refresh token. The webClientId is the public web OAuth client ID.
+async function ensureInitialized(plugin: any): Promise<void> {
+  if (initialized) return;
+  const webClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  if (!webClientId) {
+    throw new Error("NEXT_PUBLIC_GOOGLE_CLIENT_ID is not set.");
+  }
+  await plugin.initialize({
+    google: { webClientId, mode: "offline" },
+  });
+  initialized = true;
+}
+
 // Runs native Google sign-in, then establishes the web session by posting the
 // server auth code to the mobile endpoint. Resolves once the session cookie is
 // set; the caller then navigates into the app. Throws with a readable message
@@ -43,11 +68,13 @@ export async function nativeGoogleSignIn(): Promise<void> {
     );
   }
 
+  await ensureInitialized(plugin);
+
   const result = await plugin.login({
     provider: "google",
     // Ask for a server auth code + offline refresh so the server can obtain a
     // refresh token and Drive access, matching the web flow's scopes/offline.
-    options: { forceRefreshToken: true },
+    options: { scopes: GOOGLE_SCOPES, forceRefreshToken: true },
   });
 
   // Different plugin versions nest the code differently — accept the known shapes.
