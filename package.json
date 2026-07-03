@@ -10,6 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
     "@openrouter/ai-sdk-provider": "^2.9.0",
     "@vercel/blob": "^2.4.0",
     "ai": "^6.0.197",
@@ -31,6 +33,7 @@
     "unpdf": "^1.6.2"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.4.1",
     "@types/node": "20.17.16",
     "@types/react": "19.0.8",
     "@types/react-dom": "19.0.3",
