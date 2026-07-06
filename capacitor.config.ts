@@ -10,9 +10,12 @@ const config: CapacitorConfig = {
   appName: 'Resumeflow ATS',
   webDir: 'mobile-shell',
   server: {
+    // Production: the native shell loads the live HTTPS site. For local device
+    // testing, temporarily switch url to 'http://10.0.2.2:3001' (emulator
+    // loopback) with androidScheme:'http' + cleartext:true — but do NOT ship
+    // that; release builds must point at production over HTTPS.
     url: 'https://resumeflow-ats.com',
     androidScheme: 'https',
-    // Keep cleartext off — production is HTTPS-only.
     cleartext: false,
   },
 };
