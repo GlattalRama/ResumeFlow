@@ -701,7 +701,21 @@
       "dWordsShort": "mots",
       "dLong": "{n} longues",
       "dRepeated": "Souvent répété",
-      "requestFailed": "Échec de la requête"
+      "requestFailed": "Échec de la requête",
+      "practiceMode": "Mode",
+      "modeFull": "Entraînement complet",
+      "modeCards": "Cartes mémo",
+      "orderLabel": "Ordre",
+      "orderInOrder": "Dans l'ordre",
+      "orderShuffle": "Aléatoire",
+      "cardN": "Carte {n} sur {total}",
+      "gradedCount": "{n} sur {total} évaluées",
+      "tapToReveal": "Appuyez pour révéler la réponse",
+      "noSavedAnswer": "Pas encore de réponse enregistrée — rédigez-en une dans l'onglet Questions.",
+      "gradeMissed": "Raté",
+      "gradeAlmost": "Presque",
+      "gradeGotIt": "Acquise",
+      "ungradedCount": "{n} non évaluées"
     },
     "topicBank": {
       "title": "Créez une banque de questions à partir de votre CV",

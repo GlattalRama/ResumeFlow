@@ -5,6 +5,9 @@ import { useLocale, useTranslations } from "next-intl";
 import type {
   InterviewCoachEntry,
   PracticeFeedback,
+  PracticeMode,
+  PracticeOrder,
+  PracticeSelfGrade,
   PracticeSession,
 } from "@/lib/types";
 import { Card, EmptyState, buttonClass } from "@/components/ui";
@@ -102,6 +105,8 @@ export default function InterviewPractice({
     name: string;
     source: string;
     contextAppId: string;
+    mode?: PracticeMode;
+    order?: PracticeOrder;
     repeatOf?: string;
     setId?: string;
     review?: boolean;
@@ -117,6 +122,8 @@ export default function InterviewPractice({
         source: opts.source,
         selectedApplicationId: opts.contextAppId,
         selectedResumeId: resumeId,
+        mode: opts.mode,
+        order: opts.order,
         repeatOf: opts.repeatOf,
         setId: opts.setId,
       }),
@@ -145,6 +152,17 @@ export default function InterviewPractice({
     );
   }
   if (screen === "run" && active) {
+    if (active.mode === "flashcards") {
+      return (
+        <FlashcardsScreen
+          session={active}
+          entryById={entryById}
+          onSession={upsertSession}
+          onFinish={() => setScreen("summary")}
+          onExit={() => setScreen("home")}
+        />
+      );
+    }
     return (
       <RunScreen
         session={active}
@@ -167,6 +185,8 @@ export default function InterviewPractice({
             name: active.name,
             source: active.source,
             contextAppId: active.selectedApplicationId,
+            mode: active.mode,
+            order: active.order,
             repeatOf: active.id,
             setId: active.setId,
           })
@@ -193,6 +213,8 @@ export default function InterviewPractice({
           name: s.name,
           source: s.source,
           contextAppId: s.selectedApplicationId,
+          mode: s.mode,
+          order: s.order,
           repeatOf: s.id,
           setId: s.setId,
         })
@@ -222,6 +244,8 @@ function HomeScreen({
     name: string;
     source: string;
     contextAppId: string;
+    mode?: PracticeMode;
+    order?: PracticeOrder;
     review?: boolean;
   }) => Promise<void>;
   onOpen: (s: PracticeSession) => void;
@@ -237,6 +261,8 @@ function HomeScreen({
   const [appFilter, setAppFilter] = useState("");
   const [topicFilter, setTopicFilter] = useState("");
   const [weakOnly, setWeakOnly] = useState(false);
+  const [mode, setMode] = useState<PracticeMode>("full");
+  const [order, setOrder] = useState<PracticeOrder>("inOrder");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -287,6 +313,8 @@ function HomeScreen({
         name: name.trim() || t("defaultName"),
         source,
         contextAppId,
+        mode,
+        order,
         review,
       });
     } catch (err) {
@@ -410,6 +438,27 @@ function HomeScreen({
               ))}
             </ul>
 
+            <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+              <Segmented
+                label={t("practiceMode")}
+                value={mode}
+                onChange={setMode}
+                options={[
+                  ["full", t("modeFull")],
+                  ["flashcards", t("modeCards")],
+                ]}
+              />
+              <Segmented
+                label={t("orderLabel")}
+                value={order}
+                onChange={setOrder}
+                options={[
+                  ["inOrder", t("orderInOrder")],
+                  ["shuffle", t("orderShuffle")],
+                ]}
+              />
+            </div>
+
             {error && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
             <div className="mt-3 flex gap-2">
               <button
@@ -451,6 +500,7 @@ function HomeScreen({
                     {new Date(s.createdAt).toLocaleDateString(locale)} · {s.entryIds.length}{" "}
                     {t("questionsWord")} ·{" "}
                     {s.status === "completed" ? t("completed") : t("inProgress")}
+                    {s.mode === "flashcards" ? ` · ${t("modeCards")}` : ""}
                     {s.repeatOf ? ` · ${t("isRepeat")}` : ""}
                   </p>
                 </div>
@@ -543,6 +593,41 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div>
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
       <div className="mt-0.5 whitespace-pre-wrap text-foreground/90">{children}</div>
+    </div>
+  );
+}
+
+function Segmented<T extends string>({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: T;
+  onChange: (v: T) => void;
+  options: [T, string][];
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-sm font-medium text-foreground/80">{label}</span>
+      <div className="inline-flex overflow-hidden rounded-md border border-input">
+        {options.map(([v, lbl]) => (
+          <button
+            key={v}
+            type="button"
+            aria-pressed={v === value}
+            onClick={() => onChange(v)}
+            className={`px-3 py-1.5 text-xs font-medium transition ${
+              v === value
+                ? "bg-brand-600 text-white"
+                : "bg-card text-muted-foreground hover:bg-accent"
+            }`}
+          >
+            {lbl}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -750,6 +835,193 @@ function RunScreen({
           </button>
         ) : (
           <button type="button" onClick={finish} className={buttonClass("primary")}>
+            {t("finish")}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---- Flash cards (flip + self-grade, no AI grading) ----
+const GRADE_STYLES: Record<PracticeSelfGrade, { active: string; idle: string }> = {
+  missed: {
+    active: "border-red-500 bg-red-500/15 text-red-700 dark:text-red-300",
+    idle: "border-input text-muted-foreground hover:border-red-300 hover:text-red-600 dark:hover:text-red-400",
+  },
+  almost: {
+    active: "border-amber-500 bg-amber-500/15 text-amber-700 dark:text-amber-300",
+    idle: "border-input text-muted-foreground hover:border-amber-300 hover:text-amber-600 dark:hover:text-amber-400",
+  },
+  gotIt: {
+    active: "border-emerald-500 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+    idle: "border-input text-muted-foreground hover:border-emerald-300 hover:text-emerald-600 dark:hover:text-emerald-400",
+  },
+};
+
+function FlashcardsScreen({
+  session,
+  entryById,
+  onSession,
+  onFinish,
+  onExit,
+}: {
+  session: PracticeSession;
+  entryById: Map<string, InterviewCoachEntry>;
+  onSession: (s: PracticeSession) => void;
+  onFinish: () => void;
+  onExit: () => void;
+}) {
+  const t = useTranslations("interviewCoach.practice");
+  const [i, setI] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Show the question side whenever we move to another card.
+  useEffect(() => {
+    setFlipped(false);
+    setError(null);
+  }, [i]);
+
+  const total = session.attempts.length;
+  const attempt = session.attempts[i];
+  const gradedCount = session.attempts.filter((a) => a.selfGrade).length;
+
+  async function finish() {
+    await fetch(`/api/interview-practice/${session.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "completed" }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((s) => {
+        if (s) onSession(s);
+      })
+      .catch(() => {});
+    onFinish();
+  }
+
+  async function grade(g: PracticeSelfGrade) {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/interview-practice/${session.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selfGrades: [{ entryId: attempt.entryId, selfGrade: g }] }),
+      });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error || t("requestFailed"));
+      onSession(await res.json());
+      // Grading advances to the next card; grading the last card ends the run.
+      if (i < total - 1) setI(i + 1);
+      else await finish();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("requestFailed"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (!attempt) return null;
+  const entry = entryById.get(attempt.entryId);
+
+  const gradeButtons: [PracticeSelfGrade, string][] = [
+    ["missed", t("gradeMissed")],
+    ["almost", t("gradeAlmost")],
+    ["gotIt", t("gradeGotIt")],
+  ];
+
+  return (
+    <div className="mx-auto max-w-2xl space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-medium text-muted-foreground">
+          {t("cardN", { n: i + 1, total })}
+          <span className="ml-2 text-xs">· {t("gradedCount", { n: gradedCount, total })}</span>
+        </p>
+        <button type="button" onClick={onExit} className="text-sm text-muted-foreground hover:text-foreground">
+          {t("exit")}
+        </button>
+      </div>
+
+      {/* The flip surface is a real button: click / Enter / Space all flip. */}
+      <button
+        type="button"
+        onClick={() => setFlipped((f) => !f)}
+        className="block w-full rounded-xl border border-border bg-card p-8 text-left shadow-sm transition hover:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:hover:border-brand-700"
+        style={{ minHeight: "16rem" }}
+      >
+        {!flipped ? (
+          <div className="flex h-full min-h-[12rem] flex-col items-center justify-center gap-3 text-center">
+            {entry?.category && (
+              <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
+                {entry.category}
+              </span>
+            )}
+            <p className="text-xl font-semibold text-foreground">{attempt.question}</p>
+            <p className="text-xs text-muted-foreground/70">{t("tapToReveal")}</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-muted-foreground">{attempt.question}</p>
+            {entry?.answer ? (
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{entry.answer}</p>
+            ) : (
+              <p className="text-sm italic text-muted-foreground">{t("noSavedAnswer")}</p>
+            )}
+            {entry && entry.evidenceUsed.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t("evidenceUsed")}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{entry.evidenceUsed.join("; ")}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </button>
+
+      {/* Self-grade: appears once the answer is revealed. Grading advances. */}
+      {flipped && (
+        <div className="flex justify-center gap-2">
+          {gradeButtons.map(([g, label]) => (
+            <button
+              key={g}
+              type="button"
+              disabled={busy}
+              onClick={() => grade(g)}
+              className={`rounded-md border px-4 py-2 text-sm font-medium transition disabled:opacity-50 ${
+                attempt.selfGrade === g ? GRADE_STYLES[g].active : GRADE_STYLES[g].idle
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {error && <p className="text-center text-sm text-red-600 dark:text-red-400">{error}</p>}
+
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => setI((v) => Math.max(0, v - 1))}
+          disabled={i === 0 || busy}
+          className={buttonClass("secondary")}
+        >
+          {t("prev")}
+        </button>
+        {i < total - 1 ? (
+          <button
+            type="button"
+            onClick={() => setI((v) => Math.min(total - 1, v + 1))}
+            disabled={busy}
+            className={buttonClass("secondary")}
+          >
+            {t("next")}
+          </button>
+        ) : (
+          <button type="button" onClick={finish} disabled={busy} className={buttonClass("primary")}>
             {t("finish")}
           </button>
         )}
@@ -1004,6 +1276,13 @@ function SummaryScreen({
   const prevOverall = previous?.overallScore ?? 0;
   const delta = previous ? Math.round((session.overallScore - prevOverall) * 10) / 10 : null;
 
+  const isCards = session.mode === "flashcards";
+  const tally = useMemo(() => {
+    const m: Record<PracticeSelfGrade, number> = { missed: 0, almost: 0, gotIt: 0 };
+    for (const a of session.attempts) if (a.selfGrade) m[a.selfGrade]++;
+    return m;
+  }, [session.attempts]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -1030,6 +1309,63 @@ function SummaryScreen({
         </div>
       </div>
 
+      {isCards ? (
+        <>
+          <Card>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              {(
+                [
+                  ["gotIt", t("gradeGotIt"), "text-emerald-600 dark:text-emerald-400"],
+                  ["almost", t("gradeAlmost"), "text-amber-600 dark:text-amber-400"],
+                  ["missed", t("gradeMissed"), "text-red-600 dark:text-red-400"],
+                ] as [PracticeSelfGrade, string, string][]
+              ).map(([g, label, cls]) => (
+                <div key={g}>
+                  <p className={`text-3xl font-bold ${cls}`}>{tally[g]}</p>
+                  <p className="text-xs text-muted-foreground">{label}</p>
+                </div>
+              ))}
+            </div>
+            {tally.missed + tally.almost + tally.gotIt < session.attempts.length && (
+              <p className="mt-3 text-center text-xs text-muted-foreground">
+                {t("ungradedCount", {
+                  n: session.attempts.length - tally.missed - tally.almost - tally.gotIt,
+                })}
+              </p>
+            )}
+          </Card>
+          <Card>
+            <p className="mb-3 font-semibold text-foreground">{t("perQuestion")}</p>
+            <ul className="space-y-2">
+              {session.attempts.map((a) => (
+                <li key={a.entryId} className="flex items-center gap-3 text-sm">
+                  <span className="min-w-0 flex-1 truncate text-foreground/90">{a.question}</span>
+                  {a.selfGrade ? (
+                    <span
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+                        a.selfGrade === "gotIt"
+                          ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                          : a.selfGrade === "almost"
+                            ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+                            : "bg-red-500/15 text-red-700 dark:text-red-300"
+                      }`}
+                    >
+                      {a.selfGrade === "gotIt"
+                        ? t("gradeGotIt")
+                        : a.selfGrade === "almost"
+                          ? t("gradeAlmost")
+                          : t("gradeMissed")}
+                    </span>
+                  ) : (
+                    <span className="shrink-0 text-xs text-muted-foreground">—</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </Card>
+        </>
+      ) : (
+        <>
       <Card>
         <div className="flex flex-wrap items-baseline gap-3">
           <span className="text-3xl font-bold text-foreground">{session.overallScore}/10</span>
@@ -1063,6 +1399,8 @@ function SummaryScreen({
             })}
           </ul>
         </Card>
+      )}
+        </>
       )}
     </div>
   );

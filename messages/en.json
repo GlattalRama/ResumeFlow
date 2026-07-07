@@ -701,7 +701,21 @@
       "dWordsShort": "words",
       "dLong": "{n} long",
       "dRepeated": "Often repeated",
-      "requestFailed": "Request failed"
+      "requestFailed": "Request failed",
+      "practiceMode": "Mode",
+      "modeFull": "Full practice",
+      "modeCards": "Flash cards",
+      "orderLabel": "Order",
+      "orderInOrder": "In order",
+      "orderShuffle": "Shuffle",
+      "cardN": "Card {n} of {total}",
+      "gradedCount": "{n} of {total} graded",
+      "tapToReveal": "Tap to reveal the answer",
+      "noSavedAnswer": "No saved answer yet — draft one in the Questions tab.",
+      "gradeMissed": "Missed",
+      "gradeAlmost": "Almost",
+      "gradeGotIt": "Got it",
+      "ungradedCount": "{n} not graded"
     },
     "topicBank": {
       "title": "Build a question bank from your résumé",

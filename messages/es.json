@@ -701,7 +701,21 @@
       "dWordsShort": "palabras",
       "dLong": "{n} largas",
       "dRepeated": "A menudo repetido",
-      "requestFailed": "La solicitud falló"
+      "requestFailed": "La solicitud falló",
+      "practiceMode": "Modo",
+      "modeFull": "Práctica completa",
+      "modeCards": "Tarjetas",
+      "orderLabel": "Orden",
+      "orderInOrder": "En orden",
+      "orderShuffle": "Aleatorio",
+      "cardN": "Tarjeta {n} de {total}",
+      "gradedCount": "{n} de {total} evaluadas",
+      "tapToReveal": "Toca para ver la respuesta",
+      "noSavedAnswer": "Aún no hay respuesta guardada; redacta una en la pestaña Preguntas.",
+      "gradeMissed": "Fallada",
+      "gradeAlmost": "Casi",
+      "gradeGotIt": "Acertada",
+      "ungradedCount": "{n} sin evaluar"
     },
     "topicBank": {
       "title": "Crea un banco de preguntas a partir de tu currículum",

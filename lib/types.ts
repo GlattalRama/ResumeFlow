@@ -683,9 +683,22 @@ export interface PracticeAttempt {
   practiceAnswer: string;
   feedback?: PracticeFeedback;
   answeredAt: string; // "" until first answered
+  // Flash-card self-assessment (flashcards mode only). Kept per attempt so a
+  // future "weakest first" order can prioritize missed cards.
+  selfGrade?: PracticeSelfGrade;
 }
 
+export type PracticeSelfGrade = "missed" | "almost" | "gotIt";
+
 export type PracticeSessionStatus = "in-progress" | "completed";
+
+// How a session is practiced: "full" = typed/voice answers with AI feedback;
+// "flashcards" = flip cards with self-grading (no AI grading).
+export type PracticeMode = "full" | "flashcards";
+
+// Question order at session creation. "shuffle" is applied server-side when the
+// session is created, so each repeat gets a fresh shuffle.
+export type PracticeOrder = "inOrder" | "shuffle";
 
 export interface PracticeSession {
   id: string;
@@ -696,6 +709,10 @@ export interface PracticeSession {
   entryIds: string[]; // questions, in order
   attempts: PracticeAttempt[];
   status: PracticeSessionStatus;
+  // Optional for backward compatibility with sessions stored before these
+  // existed; absent means "full" / "inOrder".
+  mode?: PracticeMode;
+  order?: PracticeOrder;
   overallScore: number; // average of graded attempts' overall (0 when none)
   repeatOf?: string; // previous session id this repeats, for comparison
   // Context for grounding feedback (mirrors the entries' selection).

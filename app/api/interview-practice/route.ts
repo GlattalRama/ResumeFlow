@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
 import { createItem, newId, readAll } from "@/lib/store";
-import type { PracticeAttempt, PracticeSession } from "@/lib/types";
+import type { PracticeAttempt, PracticeMode, PracticeOrder, PracticeSession } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 function str(v: unknown): string {
   return typeof v === "string" ? v : "";
+}
+
+// Fisher-Yates, in place. Shuffling happens here (not in the client) so a
+// repeat of a shuffled set gets a fresh order each time.
+function shuffle<T>(arr: T[]): void {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
 }
 
 export async function GET() {
@@ -37,6 +46,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "None of the selected questions were found." }, { status: 400 });
   }
 
+  const mode: PracticeMode = body.mode === "flashcards" ? "flashcards" : "full";
+  const order: PracticeOrder = body.order === "shuffle" ? "shuffle" : "inOrder";
+  if (order === "shuffle") shuffle(attempts);
+
   const now = new Date().toISOString();
   const created = await createItem("interviewPracticeSessions", {
     setId: str(body.setId) || newId(),
@@ -46,6 +59,8 @@ export async function POST(req: Request) {
     attempts,
     status: "in-progress",
     overallScore: 0,
+    mode,
+    order,
     repeatOf: str(body.repeatOf) || undefined,
     selectedApplicationId: str(body.selectedApplicationId),
     selectedResumeId: str(body.selectedResumeId),
