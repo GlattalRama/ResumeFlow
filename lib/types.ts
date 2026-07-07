@@ -696,9 +696,10 @@ export type PracticeSessionStatus = "in-progress" | "completed";
 // "flashcards" = flip cards with self-grading (no AI grading).
 export type PracticeMode = "full" | "flashcards";
 
-// Question order at session creation. "shuffle" is applied server-side when the
-// session is created, so each repeat gets a fresh shuffle.
-export type PracticeOrder = "inOrder" | "shuffle";
+// Question order at session creation. "shuffle" and "weakestFirst" are applied
+// server-side when the session is created, so each repeat gets a fresh shuffle
+// or a re-sort against the latest grades.
+export type PracticeOrder = "inOrder" | "shuffle" | "weakestFirst";
 
 export interface PracticeSession {
   id: string;

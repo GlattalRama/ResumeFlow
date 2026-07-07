@@ -17,6 +17,28 @@ function shuffle<T>(arr: T[]): void {
   }
 }
 
+// Numeric weakness signal per entry on a 0-10 scale, from the MOST RECENT of:
+// an AI feedback overall (gradedAt) or a flash-card self-grade (answeredAt,
+// mapped missed=0 / almost=4 / gotIt=8). Entries never practiced return 5, so
+// they sort after known-weak but before known-strong.
+const SELF_GRADE_VALUE: Record<string, number> = { missed: 0, almost: 4, gotIt: 8 };
+
+function latestSignals(sessions: PracticeSession[]): Map<string, { value: number; at: string }> {
+  const m = new Map<string, { value: number; at: string }>();
+  const consider = (entryId: string, value: number, at: string) => {
+    if (!at) return;
+    const prev = m.get(entryId);
+    if (!prev || at.localeCompare(prev.at) > 0) m.set(entryId, { value, at });
+  };
+  for (const s of sessions) {
+    for (const a of s.attempts) {
+      if (a.feedback) consider(a.entryId, a.feedback.overall, a.feedback.gradedAt);
+      if (a.selfGrade) consider(a.entryId, SELF_GRADE_VALUE[a.selfGrade] ?? 5, a.answeredAt);
+    }
+  }
+  return m;
+}
+
 export async function GET() {
   const sessions = await readAll("interviewPracticeSessions");
   sessions.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
@@ -47,8 +69,17 @@ export async function POST(req: Request) {
   }
 
   const mode: PracticeMode = body.mode === "flashcards" ? "flashcards" : "full";
-  const order: PracticeOrder = body.order === "shuffle" ? "shuffle" : "inOrder";
+  const order: PracticeOrder =
+    body.order === "shuffle" ? "shuffle" : body.order === "weakestFirst" ? "weakestFirst" : "inOrder";
   if (order === "shuffle") shuffle(attempts);
+  if (order === "weakestFirst") {
+    // Sort ascending by the latest weakness signal across ALL past sessions;
+    // ties keep the selection order (Array.prototype.sort is stable).
+    const signals = latestSignals(await readAll("interviewPracticeSessions"));
+    attempts.sort(
+      (a, b) => (signals.get(a.entryId)?.value ?? 5) - (signals.get(b.entryId)?.value ?? 5)
+    );
+  }
 
   const now = new Date().toISOString();
   const created = await createItem("interviewPracticeSessions", {

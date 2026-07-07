@@ -715,7 +715,8 @@
       "gradeMissed": "Fallada",
       "gradeAlmost": "Casi",
       "gradeGotIt": "Acertada",
-      "ungradedCount": "{n} sin evaluar"
+      "ungradedCount": "{n} sin evaluar",
+      "orderWeakest": "Más débiles primero"
     },
     "topicBank": {
       "title": "Crea un banco de preguntas a partir de tu currículum",

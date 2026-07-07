@@ -715,7 +715,8 @@
       "gradeMissed": "Missed",
       "gradeAlmost": "Almost",
       "gradeGotIt": "Got it",
-      "ungradedCount": "{n} not graded"
+      "ungradedCount": "{n} not graded",
+      "orderWeakest": "Weakest first"
     },
     "topicBank": {
       "title": "Build a question bank from your résumé",

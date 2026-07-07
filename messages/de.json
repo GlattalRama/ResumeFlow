@@ -715,7 +715,8 @@
       "gradeMissed": "Verfehlt",
       "gradeAlmost": "Fast",
       "gradeGotIt": "Gewusst",
-      "ungradedCount": "{n} nicht bewertet"
+      "ungradedCount": "{n} nicht bewertet",
+      "orderWeakest": "Schwächste zuerst"
     },
     "topicBank": {
       "title": "Erstelle einen Fragenkatalog aus deinem Lebenslauf",
