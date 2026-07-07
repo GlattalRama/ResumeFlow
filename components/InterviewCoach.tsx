@@ -235,9 +235,11 @@ export default function InterviewCoach({
         onCreated={(created) => setEntries((prev) => [...created, ...prev])}
       />
 
-      {/* Context selector */}
+      {/* Toolbar: context selector + manual question in one row (wraps on
+          small screens). The select is capped so long role names don't blow
+          the row apart; the manual input takes the remaining width. */}
       <Card className="mb-4">
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <label className="text-sm font-medium text-foreground/80">
             {t("preparingFor")}
           </label>
@@ -247,7 +249,7 @@ export default function InterviewCoach({
               setScope(e.target.value);
               setBanner(null);
             }}
-            className={`${inputClass} max-w-full`}
+            className={`${inputClass} max-w-60 truncate`}
           >
             <option value="all">{t("allQuestions")}</option>
             <option value="general">{t("generalPractice")}</option>
@@ -271,6 +273,23 @@ export default function InterviewCoach({
               {genBusy ? t("generating") : t("generateQuestions")}
             </button>
           )}
+          <input
+            value={manualQ}
+            onChange={(e) => setManualQ(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") addManual();
+            }}
+            placeholder={t("manualPlaceholder")}
+            className={`${inputClass} min-w-48 flex-1`}
+          />
+          <button
+            type="button"
+            onClick={addManual}
+            disabled={manualBusy || !manualQ.trim()}
+            className={buttonClass("secondary")}
+          >
+            {manualBusy ? t("adding") : t("addQuestion")}
+          </button>
         </div>
 
         {selectedApp && (
@@ -323,27 +342,6 @@ export default function InterviewCoach({
           </div>
         )}
 
-        {/* Manual question (Flow A) */}
-        <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
-          <input
-            value={manualQ}
-            onChange={(e) => setManualQ(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") addManual();
-            }}
-            placeholder={t("manualPlaceholder")}
-            className={`${inputClass} min-w-0 flex-1`}
-          />
-          <button
-            type="button"
-            onClick={addManual}
-            disabled={manualBusy || !manualQ.trim()}
-            className={buttonClass("secondary")}
-          >
-            {manualBusy ? t("adding") : t("addQuestion")}
-          </button>
-        </div>
-
         {banner && (
           <p
             className={`mt-3 text-sm ${
@@ -372,7 +370,8 @@ export default function InterviewCoach({
                 {t(`category.${category}` as never)}
                 <span className="ml-2 font-normal normal-case">({items.length})</span>
               </h2>
-              <div className="space-y-2">
+              {/* One bordered list per category; rows divided, not card-per-question. */}
+              <div className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-card">
                 {items.map((entry) => (
                   <EntryCard
                     key={entry.id}
@@ -511,39 +510,40 @@ function EntryCard({
   }
 
   return (
-    <Card className="!p-4">
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="min-w-0 flex-1 text-left"
+    <div>
+      {/* Row header: the whole row toggles; status chip + rotating chevron. */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-accent/50"
+      >
+        <span className="min-w-0 flex-1 text-sm font-medium text-foreground">
+          {entry.question}
+        </span>
+        <span
+          className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${statusClass}`}
         >
-          <p className="text-sm font-medium text-foreground">{entry.question}</p>
-        </button>
-        <div className="flex shrink-0 items-center gap-2">
-          <span
-            className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusClass}`}
-          >
-            {statusLabel}
-          </span>
-          <button
-            type="button"
-            onClick={() => setExpanded((v) => !v)}
-            aria-expanded={expanded}
-            className="rounded-md border border-input px-2 py-0.5 text-xs text-muted-foreground hover:bg-accent"
-          >
-            {expanded
-              ? t("entry.collapse")
-              : hasAnswer
-                ? t("entry.open")
-                : t("entry.answer")}
-          </button>
-        </div>
-      </div>
+          {statusLabel}
+        </span>
+        <svg
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+          className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${
+            expanded ? "rotate-90" : ""
+          }`}
+        >
+          <path d="M6 4l4 4-4 4" />
+        </svg>
+      </button>
 
       {expanded && (
-        <div className="mt-3 space-y-3 border-t border-border pt-3">
+        <div className="space-y-3 border-t border-border bg-muted/20 px-4 py-4">
           {/* Format + tone (used by generation/regeneration) */}
           <div className="flex flex-wrap items-center gap-2 text-sm">
             <select
@@ -791,6 +791,6 @@ function EntryCard({
           </div>
         </div>
       )}
-    </Card>
+    </div>
   );
 }
