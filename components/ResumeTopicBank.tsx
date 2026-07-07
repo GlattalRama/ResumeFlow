@@ -143,14 +143,25 @@ export default function ResumeTopicBank({
 
   return (
     <Card className="mb-4">
+      {/* Chevron sits next to the title (not lost at the far edge) and the
+          hint doubles as a collapsed subtitle, so the accordion reads as
+          expandable at a glance. */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-2 text-left"
+        aria-expanded={open}
+        className="flex w-full items-start gap-2 text-left"
       >
-        <span className="font-semibold text-foreground">{t("title")}</span>
-        <span className="text-muted-foreground" aria-hidden>
+        <span className="mt-0.5 text-muted-foreground" aria-hidden>
           {open ? "▾" : "▸"}
+        </span>
+        <span className="min-w-0">
+          <span className="block font-semibold text-foreground">{t("title")}</span>
+          {!open && (
+            <span className="mt-0.5 block text-xs text-muted-foreground">
+              {t("hint")}
+            </span>
+          )}
         </span>
       </button>
 

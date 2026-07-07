@@ -50,10 +50,10 @@ export default function Nav() {
   return (
     <header className="no-print sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex shrink-0 items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-mark.png" alt="" className="h-9 w-auto sm:h-10" />
-          <span className="text-lg font-extrabold tracking-tight text-[#0033a0] dark:text-brand-200 sm:text-xl">
+          <span className="whitespace-nowrap text-lg font-extrabold tracking-tight text-[#0033a0] dark:text-brand-200 sm:text-xl">
             Resumeflow-ATS
           </span>
         </Link>
@@ -65,7 +65,7 @@ export default function Nav() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition ${
                   isActive(link.href)
                     ? "bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-200"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"
