@@ -701,7 +701,21 @@
       "dWordsShort": "Wörter",
       "dLong": "{n} lange",
       "dRepeated": "Oft wiederholt",
-      "requestFailed": "Anfrage fehlgeschlagen"
+      "requestFailed": "Anfrage fehlgeschlagen",
+      "practiceMode": "Modus",
+      "modeFull": "Volles Training",
+      "modeCards": "Karteikarten",
+      "orderLabel": "Reihenfolge",
+      "orderInOrder": "Der Reihe nach",
+      "orderShuffle": "Zufällig",
+      "cardN": "Karte {n} von {total}",
+      "gradedCount": "{n} von {total} bewertet",
+      "tapToReveal": "Tippen, um die Antwort anzuzeigen",
+      "noSavedAnswer": "Noch keine gespeicherte Antwort — erstelle eine im Tab „Fragen“.",
+      "gradeMissed": "Verfehlt",
+      "gradeAlmost": "Fast",
+      "gradeGotIt": "Gewusst",
+      "ungradedCount": "{n} nicht bewertet"
     },
     "topicBank": {
       "title": "Erstelle einen Fragenkatalog aus deinem Lebenslauf",

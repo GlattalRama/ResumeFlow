@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server";
 import { deleteItem, getItem, updateItem } from "@/lib/store";
 import { computeOverall } from "@/lib/practice";
-import type { PracticeAttempt, PracticeSession, PracticeSessionStatus } from "@/lib/types";
+import type {
+  PracticeAttempt,
+  PracticeSelfGrade,
+  PracticeSession,
+  PracticeSessionStatus,
+} from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 const STATUSES: PracticeSessionStatus[] = ["in-progress", "completed"];
+const SELF_GRADES: PracticeSelfGrade[] = ["missed", "almost", "gotIt"];
 
 export async function GET(_req: Request, { params }: Ctx) {
   const { id } = await params;
@@ -41,6 +47,24 @@ export async function PATCH(req: Request, { params }: Ctx) {
     );
     patch.attempts = attempts;
     patch.overallScore = computeOverall(attempts);
+  }
+
+  // Flash-card self-grades, merged by entryId like answers. answeredAt is
+  // stamped so a graded card counts as answered even without a typed answer.
+  if (Array.isArray(body.selfGrades)) {
+    const now = new Date().toISOString();
+    const grades = new Map<string, PracticeSelfGrade>();
+    for (const g of body.selfGrades) {
+      if (g && typeof g.entryId === "string" && SELF_GRADES.includes(g.selfGrade)) {
+        grades.set(g.entryId, g.selfGrade);
+      }
+    }
+    const base = patch.attempts ?? session.attempts;
+    patch.attempts = base.map((att) =>
+      grades.has(att.entryId)
+        ? { ...att, selfGrade: grades.get(att.entryId)!, answeredAt: att.answeredAt || now }
+        : att
+    );
   }
 
   if (typeof body.name === "string" && body.name.trim()) patch.name = body.name.trim();

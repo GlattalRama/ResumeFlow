@@ -701,7 +701,21 @@
       "dWordsShort": "parole",
       "dLong": "{n} lunghe",
       "dRepeated": "Spesso ripetuto",
-      "requestFailed": "Richiesta non riuscita"
+      "requestFailed": "Richiesta non riuscita",
+      "practiceMode": "Modalità",
+      "modeFull": "Pratica completa",
+      "modeCards": "Flashcard",
+      "orderLabel": "Ordine",
+      "orderInOrder": "In ordine",
+      "orderShuffle": "Casuale",
+      "cardN": "Scheda {n} di {total}",
+      "gradedCount": "{n} di {total} valutate",
+      "tapToReveal": "Tocca per vedere la risposta",
+      "noSavedAnswer": "Nessuna risposta salvata: scrivine una nella scheda Domande.",
+      "gradeMissed": "Sbagliata",
+      "gradeAlmost": "Quasi",
+      "gradeGotIt": "Corretta",
+      "ungradedCount": "{n} non valutate"
     },
     "topicBank": {
       "title": "Crea un archivio di domande dal tuo curriculum",
