@@ -715,7 +715,8 @@
       "gradeMissed": "Raté",
       "gradeAlmost": "Presque",
       "gradeGotIt": "Acquise",
-      "ungradedCount": "{n} non évaluées"
+      "ungradedCount": "{n} non évaluées",
+      "orderWeakest": "Les plus faibles d'abord"
     },
     "topicBank": {
       "title": "Créez une banque de questions à partir de votre CV",

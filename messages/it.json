@@ -715,7 +715,8 @@
       "gradeMissed": "Sbagliata",
       "gradeAlmost": "Quasi",
       "gradeGotIt": "Corretta",
-      "ungradedCount": "{n} non valutate"
+      "ungradedCount": "{n} non valutate",
+      "orderWeakest": "Prima le più deboli"
     },
     "topicBank": {
       "title": "Crea un archivio di domande dal tuo curriculum",

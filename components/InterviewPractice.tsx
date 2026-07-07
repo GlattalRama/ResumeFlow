@@ -455,6 +455,7 @@ function HomeScreen({
                 options={[
                   ["inOrder", t("orderInOrder")],
                   ["shuffle", t("orderShuffle")],
+                  ["weakestFirst", t("orderWeakest")],
                 ]}
               />
             </div>
