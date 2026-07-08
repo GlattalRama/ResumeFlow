@@ -5,9 +5,12 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
 import Nav from "@/components/Nav";
+import NativeTabs from "@/components/native/NativeTabs";
+import NativeTopBar from "@/components/native/NativeTopBar";
 import Providers from "@/components/Providers";
 import { getAccessToken } from "@/lib/serverSession";
 import { hasGoogleCredentials } from "@/lib/googleConfig";
+import { isNativeAppRequest } from "@/lib/nativeApp";
 
 export const metadata: Metadata = {
   title: "Resumeflow-ATS",
@@ -52,15 +55,33 @@ export default async function RootLayout({
   const locale = await getLocale();
   const messages = await getMessages();
 
+  // Inside the Capacitor Android WebView the site wears an app-style shell:
+  // slim top bar + bottom tab bar instead of the website navbar. The web
+  // layout is untouched — "native" is detected per request (lib/nativeApp.ts).
+  const native = await isNativeAppRequest();
+
   return (
     // suppressHydrationWarning: next-themes sets the theme class on <html>
     // before hydration, which the server can't know about.
-    <html lang={locale} suppressHydrationWarning>
+    <html
+      lang={locale}
+      suppressHydrationWarning
+      className={native ? "native-app" : undefined}
+    >
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>
-            <Nav />
-            <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+            {native ? <NativeTopBar /> : <Nav />}
+            <main
+              className={
+                native
+                  ? "mx-auto max-w-6xl px-4 pb-28 pt-5"
+                  : "mx-auto max-w-6xl px-4 py-8"
+              }
+            >
+              {children}
+            </main>
+            {native && <NativeTabs />}
           </Providers>
         </NextIntlClientProvider>
       </body>

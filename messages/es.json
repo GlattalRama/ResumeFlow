@@ -1092,5 +1092,38 @@
     "addBullet": "Añadir viñeta",
     "untitledRole": "Rol sin título",
     "unknownCompany": "Empresa desconocida"
+  },
+  "appShell": {
+    "home": "Inicio",
+    "resumes": "Currículums",
+    "jobs": "Empleos",
+    "interview": "Entrevista",
+    "journal": "Diario",
+    "tabs": "Navegación de la app"
+  },
+  "appHome": {
+    "greeting": "Hola, {name} 👋",
+    "greetingAnon": "Hola 👋",
+    "tagline": "Tu búsqueda de empleo, en tu bolsillo.",
+    "statResumes": "Currículums",
+    "statActive": "Solicitudes activas",
+    "statPrep": "Preguntas de práctica",
+    "quickActions": "Acciones rápidas",
+    "qaNewResume": "Nuevo currículum",
+    "qaMyResumes": "Mis currículums",
+    "qaNewJob": "Nueva solicitud",
+    "qaJobs": "Solicitudes",
+    "qaInterview": "Entrevista",
+    "qaPrep": "Preguntas",
+    "qaJournal": "Diario",
+    "qaSettings": "Ajustes de IA",
+    "recentResumes": "Currículums recientes",
+    "recentApps": "Solicitudes recientes",
+    "viewAll": "Ver todo",
+    "emptyResumes": "Aún no hay currículums: toca «Nuevo currículum» para crear el primero.",
+    "emptyApps": "Aún no hay solicitudes: añade un empleo para empezar.",
+    "edit": "Editar",
+    "untitled": "Sin título",
+    "updatedOn": "Actualizado el {date}"
   }
 }

@@ -1092,5 +1092,38 @@
     "addBullet": "Aggiungi punto",
     "untitledRole": "Ruolo senza titolo",
     "unknownCompany": "Azienda sconosciuta"
+  },
+  "appShell": {
+    "home": "Home",
+    "resumes": "Curriculum",
+    "jobs": "Lavori",
+    "interview": "Colloquio",
+    "journal": "Diario",
+    "tabs": "Navigazione app"
+  },
+  "appHome": {
+    "greeting": "Ciao {name} 👋",
+    "greetingAnon": "Ciao 👋",
+    "tagline": "La tua ricerca di lavoro, in tasca.",
+    "statResumes": "Curriculum",
+    "statActive": "Candidature attive",
+    "statPrep": "Domande colloquio",
+    "quickActions": "Azioni rapide",
+    "qaNewResume": "Nuovo curriculum",
+    "qaMyResumes": "I miei curriculum",
+    "qaNewJob": "Nuova candidatura",
+    "qaJobs": "Candidature",
+    "qaInterview": "Colloquio",
+    "qaPrep": "Domande",
+    "qaJournal": "Diario",
+    "qaSettings": "Impostazioni IA",
+    "recentResumes": "Curriculum recenti",
+    "recentApps": "Candidature recenti",
+    "viewAll": "Vedi tutti",
+    "emptyResumes": "Nessun curriculum — tocca «Nuovo curriculum» per creare il primo.",
+    "emptyApps": "Nessuna candidatura — aggiungi un lavoro da monitorare.",
+    "edit": "Modifica",
+    "untitled": "Senza titolo",
+    "updatedOn": "Aggiornato il {date}"
   }
 }

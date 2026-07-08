@@ -8,6 +8,8 @@ import {
   normalizeTemplateId,
 } from "@/lib/constants";
 import { EmptyState, StatusBadge, buttonClass } from "@/components/ui";
+import AppHome from "@/components/native/AppHome";
+import { isNativeAppRequest } from "@/lib/nativeApp";
 import {
   ActivityDot,
   BoltIcon,
@@ -108,6 +110,24 @@ export default async function DashboardPage() {
 
   const recentApps = sortByUpdated(applications).slice(0, 5);
   const recentResumes = sortByUpdated(resumes).slice(0, 5);
+
+  // Inside the Android app, "/" is the app home screen (quick-actions grid,
+  // MyGate-style) instead of the desktop dashboard. Same data, different shell.
+  if (await isNativeAppRequest()) {
+    return (
+      <AppHome
+        firstName={firstName}
+        counts={{
+          resumes: resumes.length,
+          active: activeCount,
+          prep: qna.length,
+        }}
+        recentResumes={recentResumes.slice(0, 3)}
+        recentApps={recentApps.slice(0, 3)}
+        locale={locale}
+      />
+    );
+  }
 
   // ---- Recent activity (derived from timestamps + status history) ----
   const appById = new Map(applications.map((a) => [a.id, a]));

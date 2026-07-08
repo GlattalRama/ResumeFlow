@@ -1092,5 +1092,38 @@
     "addBullet": "Ajouter le point",
     "untitledRole": "Rôle sans titre",
     "unknownCompany": "Entreprise inconnue"
+  },
+  "appShell": {
+    "home": "Accueil",
+    "resumes": "CV",
+    "jobs": "Emplois",
+    "interview": "Entretien",
+    "journal": "Journal",
+    "tabs": "Navigation de l'appli"
+  },
+  "appHome": {
+    "greeting": "Bonjour {name} 👋",
+    "greetingAnon": "Bonjour 👋",
+    "tagline": "Votre recherche d'emploi, dans votre poche.",
+    "statResumes": "CV",
+    "statActive": "Candidatures actives",
+    "statPrep": "Questions prépa",
+    "quickActions": "Actions rapides",
+    "qaNewResume": "Nouveau CV",
+    "qaMyResumes": "Mes CV",
+    "qaNewJob": "Nouvelle candidature",
+    "qaJobs": "Candidatures",
+    "qaInterview": "Entretien",
+    "qaPrep": "Questions prépa",
+    "qaJournal": "Journal",
+    "qaSettings": "Paramètres IA",
+    "recentResumes": "CV récents",
+    "recentApps": "Candidatures récentes",
+    "viewAll": "Tout voir",
+    "emptyResumes": "Pas encore de CV — touchez « Nouveau CV » pour créer le premier.",
+    "emptyApps": "Pas encore de candidatures — ajoutez un emploi à suivre.",
+    "edit": "Modifier",
+    "untitled": "Sans titre",
+    "updatedOn": "Mis à jour le {date}"
   }
 }
