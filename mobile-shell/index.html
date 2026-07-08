@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Resumeflow ATS</title>
+    <style>
+      :root { color-scheme: light dark; }
+      html, body {
+        margin: 0;
+        height: 100%;
+        font-family: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+        background: #0b0f19;
+        color: #e5e7eb;
+      }
+      .wrap {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 2rem;
+        gap: 0.75rem;
+      }
+      h1 { font-size: 1.25rem; margin: 0; }
+      p { margin: 0; opacity: 0.7; max-width: 22rem; line-height: 1.5; }
+      button {
+        margin-top: 1rem;
+        padding: 0.6rem 1.4rem;
+        border: 0;
+        border-radius: 0.6rem;
+        background: #6366f1;
+        color: #fff;
+        font-size: 0.95rem;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>You're offline</h1>
+      <p>Resumeflow ATS needs a connection to load. Check your network and try again.</p>
+      <button onclick="location.reload()">Retry</button>
+    </div>
+  </body>
+</html>

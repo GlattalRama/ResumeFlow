@@ -11,3 +11,8 @@ next-env.d.ts
 # embedded photos). Never commit. Keep the folder out of version control.
 /data
 .vercel
+
+# Android release signing — NEVER commit these
+android/keystore.properties
+*.jks
+*.keystore
