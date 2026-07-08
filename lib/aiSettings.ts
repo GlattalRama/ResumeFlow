@@ -4,6 +4,10 @@
 // ever decrypted transiently, server-side, at call time.
 import { readAll, writeAll } from "./store";
 import { encrypt, decrypt } from "./crypto";
+import {
+  readTemplateVisibility,
+  writeTemplateVisibility,
+} from "./adminTemplates/store";
 import type { CareerInsights, PromotionReadiness, UserSettings, AiProvider } from "./types";
 
 const SINGLETON = "singleton";
@@ -39,7 +43,6 @@ async function patchSettings(
     apiKeyEnc: s?.apiKeyEnc ?? "",
     usage: s?.usage,
     baseResumeId: s?.baseResumeId,
-    templateVisibility: s?.templateVisibility,
     careerInsights: s?.careerInsights,
     promotionReadiness: s?.promotionReadiness,
     ...patch,
@@ -82,19 +85,23 @@ export async function setBaseResumeId(id: string | null): Promise<void> {
 }
 
 // Read the admin template-visibility overrides map (empty when none set).
+//
+// This is an APP-GLOBAL admin setting, so it is read from the shared store
+// (lib/adminTemplates/store.ts) — NOT the per-user settings singleton, which
+// lives in the caller's own Google Drive and would scope the override to a
+// single account.
 export async function loadTemplateVisibility(): Promise<
   Record<string, boolean>
 > {
-  const s = await loadSettings();
-  return s?.templateVisibility ?? {};
+  return readTemplateVisibility();
 }
 
-// Persist the admin template-visibility overrides map, preserving all other
-// settings. The map is keyed by TemplateId; true = visible, false = hidden.
+// Persist the admin template-visibility overrides map to the shared global
+// store. The map is keyed by TemplateId; true = visible, false = hidden.
 export async function setTemplateVisibility(
   overrides: Record<string, boolean>
 ): Promise<void> {
-  await patchSettings({ templateVisibility: overrides });
+  await writeTemplateVisibility(overrides);
 }
 
 // Enforce + increment the per-user daily limit on the shared key. Returns

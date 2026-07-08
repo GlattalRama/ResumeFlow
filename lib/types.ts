@@ -769,12 +769,10 @@ export interface UserSettings {
   // set) or dangling (points at a deleted version) — consumers resolve it via
   // lib/baseResume.resolveBaseResumeId, which treats a dangling pointer as none.
   baseResumeId?: string;
-  // Admin-controlled per-template visibility overrides, keyed by TemplateId.
-  // A present boolean overrides the template's hardcoded `hidden` default:
-  // true = show in the picker, false = hide. Absent ids fall back to the
-  // hardcoded default (see lib/constants.resolveVisibleTemplates). Lets an admin
-  // turn the otherwise-hidden templates on/off without a code change.
-  templateVisibility?: Record<string, boolean>;
+  // NOTE: admin template-visibility overrides used to live here, but this
+  // settings singleton is per-user (stored in the caller's own Google Drive), so
+  // an admin toggle never reached other users. They now live in an app-global
+  // shared store — see lib/adminTemplates/store.ts.
   // Cached Work Journal career insights (Phase 4). Regenerated on demand; the
   // UI flags it stale when the journal has changed since noteCount was captured.
   careerInsights?: CareerInsights;
