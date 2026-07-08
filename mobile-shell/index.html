@@ -41,7 +41,10 @@
     <div class="wrap">
       <h1>You're offline</h1>
       <p>Resumeflow ATS needs a connection to load. Check your network and try again.</p>
-      <button onclick="location.reload()">Retry</button>
+      <!-- Navigate to the live site, not location.reload(): once the WebView
+           has redirected to this local error page, reload would only reload
+           the error page itself. -->
+      <button onclick="location.href='https://resumeflow-ats.com/'">Retry</button>
     </div>
   </body>
 </html>

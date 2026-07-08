@@ -21,6 +21,9 @@ const config: CapacitorConfig = {
     url: 'https://resumeflow-ats.com',
     androidScheme: 'https',
     cleartext: false,
+    // On load failures (no network, DNS down) show the bundled offline page
+    // from mobile-shell/ instead of the raw WebView error screen.
+    errorPath: 'index.html',
   },
 };
 
