@@ -5,7 +5,7 @@ import { extractResumeFromText, htmlToInlineFormattedText } from "@/lib/aiImport
 import { emptyResumeData, normalizeResumeData } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB per file — resumes are small; reject blobs early.
 const MAX_FILES = 5; // cap how many documents one import can merge.
