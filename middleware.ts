@@ -27,6 +27,27 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
+  // Native-shell preview override: ?native=1 persists the rf_native cookie
+  // (read by lib/nativeApp.ts) and ?native=0 clears it, then reloads the page
+  // without the param. Lets the Android app layout be checked in a desktop
+  // browser without spoofing a WebView user agent.
+  const nativeParam = req.nextUrl.searchParams.get("native");
+  if (nativeParam === "1" || nativeParam === "0") {
+    const url = req.nextUrl.clone();
+    url.searchParams.delete("native");
+    const res = NextResponse.redirect(url);
+    if (nativeParam === "1") {
+      res.cookies.set("rf_native", "1", {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: "lax",
+      });
+    } else {
+      res.cookies.delete("rf_native");
+    }
+    return res;
+  }
+
   const id = process.env.GOOGLE_CLIENT_ID;
   const secret = process.env.GOOGLE_CLIENT_SECRET;
   const credsConfigured =

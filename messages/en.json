@@ -1092,5 +1092,38 @@
     "addBullet": "Add bullet",
     "untitledRole": "Untitled role",
     "unknownCompany": "Unknown company"
+  },
+  "appShell": {
+    "home": "Home",
+    "resumes": "Resumes",
+    "jobs": "Jobs",
+    "interview": "Interview",
+    "journal": "Journal",
+    "tabs": "App navigation"
+  },
+  "appHome": {
+    "greeting": "Hi {name} 👋",
+    "greetingAnon": "Hi there 👋",
+    "tagline": "Your job search, in your pocket.",
+    "statResumes": "Resumes",
+    "statActive": "Active jobs",
+    "statPrep": "Prep Q&A",
+    "quickActions": "Quick Actions",
+    "qaNewResume": "New Resume",
+    "qaMyResumes": "My Resumes",
+    "qaNewJob": "New Job",
+    "qaJobs": "Jobs",
+    "qaInterview": "Interview",
+    "qaPrep": "Prep Q&A",
+    "qaJournal": "Journal",
+    "qaSettings": "AI Settings",
+    "recentResumes": "Recent resumes",
+    "recentApps": "Recent applications",
+    "viewAll": "View all",
+    "emptyResumes": "No resumes yet — tap New Resume to create your first.",
+    "emptyApps": "No applications yet — add a job to start tracking.",
+    "edit": "Edit",
+    "untitled": "Untitled",
+    "updatedOn": "Updated {date}"
   }
 }

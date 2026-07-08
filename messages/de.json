@@ -1092,5 +1092,38 @@
     "addBullet": "Stichpunkt hinzufügen",
     "untitledRole": "Unbenannte Rolle",
     "unknownCompany": "Unbekanntes Unternehmen"
+  },
+  "appShell": {
+    "home": "Start",
+    "resumes": "Lebensläufe",
+    "jobs": "Jobs",
+    "interview": "Interview",
+    "journal": "Journal",
+    "tabs": "App-Navigation"
+  },
+  "appHome": {
+    "greeting": "Hallo {name} 👋",
+    "greetingAnon": "Hallo 👋",
+    "tagline": "Deine Jobsuche – immer griffbereit.",
+    "statResumes": "Lebensläufe",
+    "statActive": "Aktive Bewerbungen",
+    "statPrep": "Übungsfragen",
+    "quickActions": "Schnellzugriff",
+    "qaNewResume": "Neuer Lebenslauf",
+    "qaMyResumes": "Meine Lebensläufe",
+    "qaNewJob": "Neue Bewerbung",
+    "qaJobs": "Bewerbungen",
+    "qaInterview": "Interview",
+    "qaPrep": "Übungsfragen",
+    "qaJournal": "Journal",
+    "qaSettings": "KI-Einstellungen",
+    "recentResumes": "Neueste Lebensläufe",
+    "recentApps": "Neueste Bewerbungen",
+    "viewAll": "Alle anzeigen",
+    "emptyResumes": "Noch keine Lebensläufe – tippe auf „Neuer Lebenslauf“, um zu starten.",
+    "emptyApps": "Noch keine Bewerbungen – füge einen Job hinzu, um loszulegen.",
+    "edit": "Bearbeiten",
+    "untitled": "Ohne Titel",
+    "updatedOn": "Aktualisiert am {date}"
   }
 }
