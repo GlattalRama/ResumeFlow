@@ -7,7 +7,7 @@ import { generateInsights } from "@/lib/aiCareer";
 import type { CareerInsights } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // Generate collection-level career insights from the whole Work Journal and
 // cache them on the settings singleton. Regenerated on demand only — the cache

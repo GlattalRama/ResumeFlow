@@ -19,7 +19,7 @@ import {
 import type { Application, ResumeVersion } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const TEXT_ACTIONS = new Set([
   "tailor-resume",

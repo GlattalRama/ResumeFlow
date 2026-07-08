@@ -5,7 +5,7 @@ import { isCreditsError, notifyOwnerCreditsExhausted } from "@/lib/aiNotify";
 import { fetchStructuredJob, htmlToText } from "@/lib/jobBoards";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // Fetch a job posting URL and return the structured fields our "New application"
 // form needs. Known ATS platforms (Workday, Greenhouse, Lever) are read straight

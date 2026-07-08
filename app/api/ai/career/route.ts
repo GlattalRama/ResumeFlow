@@ -5,7 +5,7 @@ import { expandToStar, polishStar, type ExpandContext } from "@/lib/aiCareer";
 import type { Star } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 function str(v: unknown): string {
   return typeof v === "string" ? v : "";
