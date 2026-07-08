@@ -9,6 +9,10 @@ const config: CapacitorConfig = {
   appId: 'com.resumeflowats.app',
   appName: 'Resumeflow ATS',
   webDir: 'mobile-shell',
+  // Definitive marker for the app-shell layout: lib/nativeApp.ts matches this
+  // token in the User-Agent (with a generic Android-WebView fallback for APKs
+  // built before it existed).
+  appendUserAgent: 'ResumeflowApp',
   server: {
     // Production: the native shell loads the live HTTPS site. For local device
     // testing, temporarily switch url to 'http://10.0.2.2:3001' (emulator
