@@ -22,16 +22,14 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<!-- Google Sign-In callback: the REVERSED iOS OAuth client ID. Replace the
-	     placeholder once the iOS OAuth client exists in Google Cloud, e.g.
-	     client 917386024820-abc.apps.googleusercontent.com becomes
-	     com.googleusercontent.apps.917386024820-abc -->
+	<!-- Google Sign-In callback: the REVERSED iOS OAuth client ID
+	     ("Resumeflow iOS" client in the Family-Hub Google Cloud project). -->
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.REPLACE_WITH_IOS_CLIENT_ID</string>
+				<string>com.googleusercontent.apps.917386024820-mpmauoi2vlmpkddl236rl3jmc1l2embl</string>
 			</array>
 		</dict>
 	</array>
