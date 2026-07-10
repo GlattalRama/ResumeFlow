@@ -129,13 +129,17 @@ The `ios/` project was generated with `npx cap add ios --packagemanager SPM`
 npx cap sync ios   # after any capacitor.config.ts or plugin change
 cd ios/App && xcodebuild -project App.xcodeproj -scheme App \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+  -derivedDataPath build build
 xcrun simctl boot "iPhone 17 Pro"
 xcrun simctl install "iPhone 17 Pro" build/Build/Products/Debug-iphonesimulator/App.app
 xcrun simctl launch "iPhone 17 Pro" com.resumeflowats.app
 ```
 
 (Or `npx cap open ios` and hit Run in Xcode.)
+
+> Do NOT pass `CODE_SIGNING_ALLOWED=NO`: simulator builds default to ad-hoc
+> "Sign to Run Locally" signing, and a fully unsigned binary can't use the iOS
+> keychain — Google sign-in then fails with a "keychain error".
 
 ### Native Google sign-in on iOS
 
