@@ -1,11 +1,12 @@
-# Mobile app setup (Capacitor Android shell)
+# Mobile app setup (Capacitor Android + iOS shells)
 
-The Android app is a thin Capacitor shell that loads the live SSR site
+The mobile apps are thin Capacitor shells that load the live SSR site
 (`resumeflow-ats.com`) in a WebView. See the code that's already in place:
 
 - `capacitor.config.ts` — remote-URL config (appId `com.resumeflowats.app`).
 - `mobile-shell/index.html` — offline fallback (the `webDir`).
 - `android/` — generated native project.
+- `ios/` — generated native project (SPM, no CocoaPods).
 - `app/api/auth/mobile/google/route.ts` — mints a NextAuth session from a native
   Google server auth code.
 - `lib/nativeAuth.ts` + `components/SignInButton.tsx` — native sign-in bridge.
@@ -117,10 +118,59 @@ its SHA-1 above is stable.
 
 ---
 
+## 7. iOS
+
+The `ios/` project was generated with `npx cap add ios --packagemanager SPM`
+(plugins resolve through Swift Package Manager — CocoaPods is not needed).
+
+### Build & run in the simulator (no Apple Developer account needed)
+
+```bash
+npx cap sync ios   # after any capacitor.config.ts or plugin change
+cd ios/App && xcodebuild -project App.xcodeproj -scheme App \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+  -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+xcrun simctl boot "iPhone 17 Pro"
+xcrun simctl install "iPhone 17 Pro" build/Build/Products/Debug-iphonesimulator/App.app
+xcrun simctl launch "iPhone 17 Pro" com.resumeflowats.app
+```
+
+(Or `npx cap open ios` and hit Run in Xcode.)
+
+### Native Google sign-in on iOS
+
+Unlike Android (where the OAuth client just has to *exist* in the project),
+iOS needs the client ID wired into the app. Three places, one value:
+
+1. **Create an iOS OAuth client** in the same Google Cloud project as the
+   Android client (Family-Hub): APIs & Services → Credentials → OAuth client ID
+   → type **iOS**, bundle ID **`com.resumeflowats.app`**.
+2. **`NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID`** — set it in `.env.local` and in
+   Vercel (all environments), then redeploy. `lib/nativeAuth.ts` passes it as
+   `iOSClientId` (with the web client as `iOSServerClientId`, so the returned
+   server auth code is still redeemable by `/api/auth/mobile/google`).
+3. **`ios/App/App/Info.plist`** — replace the
+   `com.googleusercontent.apps.REPLACE_WITH_IOS_CLIENT_ID` URL scheme with the
+   REVERSED client ID (e.g. `917386024820-abc.apps.googleusercontent.com` →
+   `com.googleusercontent.apps.917386024820-abc`), then rebuild the app.
+
+### What needs the Apple Developer account ($99/yr)
+
+Running on a physical iPhone, push notifications (APNs), TestFlight, and App
+Store submission. Simulator builds and the Google sign-in wiring above work
+without it.
+
+---
+
 ## What still needs your input
 
-- **Firebase project** (same account) for push — `google-services.json`. Only
-  needed when we wire push notifications (next phase after sign-in works).
+- **Apple Developer enrollment** — in progress (issues being resolved with
+  Apple as of 2026-07-10).
+- **iOS OAuth client** — create it in Google Cloud (step 7.2 above); until
+  then native Google sign-in on iOS fails with a clear error, but the shell
+  itself runs fine in the simulator.
+- **Firebase project** (same account) for push — `google-services.json` /
+  `GoogleService-Info.plist`. Only needed when we wire push notifications
+  (next phase after sign-in works).
 - **Which events trigger a push** — interview reminders / application follow-ups
   / status changes.
-- **iOS** — needs an Apple Developer account ($99/yr); `npx cap add ios` later.

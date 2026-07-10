@@ -17,6 +17,7 @@
 
 type Capacitorish = {
   isNativePlatform?: () => boolean;
+  getPlatform?: () => string;
   Plugins?: Record<string, any>;
 };
 
@@ -42,15 +43,28 @@ let initialized = false;
 
 // Initialize @capgo/capacitor-social-login once, in `offline` mode so Google
 // returns a server auth code (redeemable by our web client's secret) plus a
-// refresh token. The webClientId is the public web OAuth client ID.
+// refresh token. The webClientId is the public web OAuth client ID. iOS also
+// needs its own iOS OAuth client ID (the GoogleSignIn SDK requires it) with
+// the web client as iOSServerClientId so the auth code stays redeemable by
+// our server — see docs/mobile-setup.md.
 async function ensureInitialized(plugin: any): Promise<void> {
   if (initialized) return;
   const webClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   if (!webClientId) {
     throw new Error("NEXT_PUBLIC_GOOGLE_CLIENT_ID is not set.");
   }
+  const iOSClientId = process.env.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+  if (cap()?.getPlatform?.() === "ios" && !iOSClientId) {
+    throw new Error("NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID is not set.");
+  }
   await plugin.initialize({
-    google: { webClientId, mode: "offline" },
+    google: {
+      webClientId,
+      mode: "offline",
+      ...(iOSClientId
+        ? { iOSClientId, iOSServerClientId: webClientId }
+        : {}),
+    },
   });
   initialized = true;
 }
