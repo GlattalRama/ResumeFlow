@@ -130,6 +130,10 @@ export default async function SignInPage({
               <Link href="/terms" className="hover:underline">
                 {t("terms")}
               </Link>
+              <span className="mx-1.5">·</span>
+              <Link href="/support" className="hover:underline">
+                {t("support")}
+              </Link>
             </p>
           </div>
         </div>

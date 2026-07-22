@@ -37,6 +37,10 @@ export function LegalPage({
         <Link href="/terms" className="hover:underline">
           Terms
         </Link>
+        <span className="mx-2">·</span>
+        <Link href="/support" className="hover:underline">
+          Support
+        </Link>
       </footer>
     </article>
   );

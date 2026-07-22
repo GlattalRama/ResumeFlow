@@ -108,6 +108,19 @@ export async function nativeGoogleSignIn(): Promise<void> {
     body: JSON.stringify({ serverAuthCode }),
   });
   if (!res.ok) {
+    let code: string | undefined;
+    try {
+      code = (await res.json())?.error;
+    } catch {
+      // Non-JSON error body — fall through to the generic message.
+    }
+    if (code === "drive_scope_missing") {
+      throw new Error(
+        "Google Drive access wasn't granted. Your resumes are stored in your " +
+          "own Google Drive, so the app can't work without it. Please sign in " +
+          "again and keep the Google Drive option checked."
+      );
+    }
     throw new Error(`Could not establish a session (${res.status}).`);
   }
 }

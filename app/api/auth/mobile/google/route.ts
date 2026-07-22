@@ -78,6 +78,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "token_exchange_failed" }, { status: 401 });
   }
 
+  // Google's consent screen presents drive.appdata as an optional checkbox; a
+  // user who unchecks it still completes sign-in, but every Drive call would
+  // then fail and dump them on the error page. Refuse to mint such a session so
+  // the client can explain and re-run consent instead.
+  const grantedScopes = (tokens.scope as string) ?? "";
+  if (!grantedScopes.includes("https://www.googleapis.com/auth/drive.appdata")) {
+    return NextResponse.json({ error: "drive_scope_missing" }, { status: 403 });
+  }
+
   // Identity comes from the id_token Google returned alongside the tokens.
   let claims: Record<string, unknown> = {};
   try {

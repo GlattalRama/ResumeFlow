@@ -10,6 +10,7 @@
 import { useEffect, useState } from "react";
 import { signIn, signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { isNativePlatform, nativeGoogleSignIn } from "@/lib/nativeAuth";
 
 export default function Error({
   error,
@@ -18,6 +19,7 @@ export default function Error({
 }) {
   const t = useTranslations("ai");
   const [reauthing, setReauthing] = useState(false);
+  const [reauthError, setReauthError] = useState<string | null>(null);
 
   useEffect(() => {
     // Surface the error in the server/console logs for debugging.
@@ -30,12 +32,30 @@ export default function Error({
   // Clearing the session first guarantees a clean re-authentication.
   async function reauthenticate() {
     setReauthing(true);
+    setReauthError(null);
     try {
       await signOut({ redirect: false });
     } catch {
       // Ignore — proceed to sign-in regardless of sign-out outcome.
     }
-    await signIn("google", { callbackUrl: "/" });
+    try {
+      // Inside the Capacitor shell Google blocks the WebView OAuth redirect,
+      // so the web signIn() below would hang forever — sign in natively and
+      // let the server mint the session cookie (same branch as SignInButton).
+      if (isNativePlatform()) {
+        await nativeGoogleSignIn();
+        window.location.assign("/");
+        return;
+      }
+      await signIn("google", { callbackUrl: "/" });
+    } catch (e) {
+      setReauthing(false);
+      // `Error` here is this component (it shadows the global), so check
+      // against globalThis.Error explicitly.
+      setReauthError(
+        e instanceof globalThis.Error ? e.message : "Sign-in failed. Try again."
+      );
+    }
   }
 
   return (
@@ -61,6 +81,11 @@ export default function Error({
           >
             {reauthing ? t("error.signingIn") : t("error.tryAgain")}
           </button>
+          {reauthError && (
+            <p className="text-center text-xs text-red-600 dark:text-red-400">
+              {reauthError}
+            </p>
+          )}
         </div>
 
         {error.digest ? (

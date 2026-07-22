@@ -152,7 +152,8 @@
     "localMode": "Continue in local mode",
     "scopeNote": "We request access only to Resumeflow-ATS's own app data folder in your Google Drive.",
     "privacy": "Privacy Policy",
-    "terms": "Terms of Service"
+    "terms": "Terms of Service",
+    "support": "Support"
   },
   "ai": {
     "tailor": {
