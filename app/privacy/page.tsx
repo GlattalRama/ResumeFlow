@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy" updated="June 11, 2026">
+    <LegalPage title="Privacy Policy" updated="July 24, 2026">
       <p>
         This Privacy Policy explains how <strong>Resumeflow-ATS</strong>{" "}
         (&ldquo;Resumeflow-ATS&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;)
@@ -34,10 +34,12 @@ export default function PrivacyPage() {
         <p>We collect only what is needed to run the Service:</p>
         <ul>
           <li>
-            <strong>Google account profile.</strong> When you sign in with
-            Google we receive your name, email address, and profile picture.
-            This is used to identify you, display your account in the app, and
-            secure your session.
+            <strong>Account profile.</strong> When you sign in with Google we
+            receive your name, email address, and profile picture. When you
+            sign in with Apple we receive only your name and email address
+            (which may be Apple&rsquo;s private relay address if you choose
+            &ldquo;Hide My Email&rdquo;). This is used to identify you, display
+            your account in the app, and secure your session.
           </li>
           <li>
             <strong>Content you create.</strong> Resumes, job applications,
@@ -60,7 +62,9 @@ export default function PrivacyPage() {
 
       <LegalSection title="3. Google Drive and the appdata folder">
         <p>
-          When you sign in, we request the{" "}
+          Resumeflow-ATS does not store your content on its own servers. When
+          you sign in with Google &mdash; or connect a Google Drive after
+          signing in with Apple &mdash; we request the{" "}
           <a
             href="https://developers.google.com/workspace/drive/api/guides/appdata"
             target="_blank"
@@ -104,10 +108,36 @@ export default function PrivacyPage() {
           description, importing an existing resume, or generating interview
           questions &mdash; the relevant text you provide (such as your resume
           content and the job description) is sent to a third-party AI provider
-          (OpenRouter and the underlying model providers it routes to) to
-          generate the result. We send only the text necessary for the requested
-          task. We do not use your content to train our own models.
+          (OpenRouter, Inc. and the underlying model providers it routes to,
+          such as OpenAI) to generate the result. We send only the text
+          necessary for the requested task. We do not use your content to train
+          our own models.
         </p>
+        <ul>
+          <li>
+            <strong>Nothing is sent without your permission.</strong> Before
+            the first AI request on your account, the app shows a consent
+            dialog explaining what will be sent and to whom, and AI features
+            stay disabled until you agree.
+          </li>
+          <li>
+            You can withdraw this permission at any time in{" "}
+            <strong>Settings &rarr; AI data sharing</strong>; AI features stop
+            sending data immediately.
+          </li>
+          <li>
+            OpenRouter processes requests as our service provider and is
+            contractually bound to equivalent data protections; see the{" "}
+            <a
+              href="https://openrouter.ai/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              OpenRouter privacy policy
+            </a>
+            .
+          </li>
+        </ul>
       </LegalSection>
 
       <LegalSection title="5. How we use your information">

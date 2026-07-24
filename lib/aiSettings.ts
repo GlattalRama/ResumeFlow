@@ -45,6 +45,7 @@ async function patchSettings(
     baseResumeId: s?.baseResumeId,
     careerInsights: s?.careerInsights,
     promotionReadiness: s?.promotionReadiness,
+    aiConsentAt: s?.aiConsentAt,
     ...patch,
     updatedAt: new Date().toISOString(),
   };
@@ -82,6 +83,14 @@ export async function saveSettings(input: {
 // to clear it (e.g. when the designated base resume is deleted).
 export async function setBaseResumeId(id: string | null): Promise<void> {
   await patchSettings({ baseResumeId: id ?? undefined });
+}
+
+// Record the user's consent to share resume/job text with the third-party AI
+// provider (or withdraw it with null). See UserSettings.aiConsentAt.
+export async function setAiConsent(consented: boolean): Promise<void> {
+  await patchSettings({
+    aiConsentAt: consented ? new Date().toISOString() : undefined,
+  });
 }
 
 // Read the admin template-visibility overrides map (empty when none set).

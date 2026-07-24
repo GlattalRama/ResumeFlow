@@ -14,6 +14,7 @@ import {
   type WorkJournalNote,
 } from "@/lib/types";
 import { Card, EmptyState, PageHeader, buttonClass } from "@/components/ui";
+import { aiFetch } from "@/lib/aiConsentClient";
 
 // Category slug → i18n key (workJournal.cat*). Keep in sync with
 // ACHIEVEMENT_CATEGORIES and messages/*.json.
@@ -600,7 +601,7 @@ function InsightsPanel({
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch("/api/ai/career-insights", { method: "POST" });
+      const res = await aiFetch("/api/ai/career-insights", { method: "POST" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || t("aiRequestFailed"));
       onInsights(data.insights);
@@ -705,7 +706,7 @@ function PromotionView({
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch("/api/ai/promotion-readiness", { method: "POST" });
+      const res = await aiFetch("/api/ai/promotion-readiness", { method: "POST" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || t("aiRequestFailed"));
       onReadiness(data.readiness);
@@ -899,7 +900,7 @@ function NoteForm({
   const hasStar = Boolean(values.situation || values.task || values.action || values.result);
 
   async function callAi(body: Record<string, unknown>) {
-    const res = await fetch("/api/ai/career", {
+    const res = await aiFetch("/api/ai/career", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -1422,7 +1423,7 @@ function NoteCard({
     setAiError(null);
     setPreview(null);
     try {
-      const res = await fetch("/api/ai/work-journal", {
+      const res = await aiFetch("/api/ai/work-journal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ noteId: note.id, action }),
@@ -1464,7 +1465,7 @@ function NoteCard({
     setAiBusy("outputs");
     setAiError(null);
     try {
-      const res = await fetch("/api/ai/work-journal", {
+      const res = await aiFetch("/api/ai/work-journal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ noteId: note.id, action: "outputs" }),

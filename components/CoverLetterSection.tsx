@@ -7,6 +7,7 @@ import { Document, Packer, Paragraph, TextRun } from "docx";
 import type { CoverLetterMeta } from "@/lib/types";
 import { COVER_LETTER_TONES } from "@/lib/aiCoverLetter";
 import { buttonClass } from "./ui";
+import { aiFetch } from "@/lib/aiConsentClient";
 
 type ResumeOption = { id: string; label: string };
 
@@ -55,7 +56,7 @@ export default function CoverLetterSection({
     setError("");
     setWarnings([]);
     try {
-      const res = await fetch("/api/ai/cover-letter", {
+      const res = await aiFetch("/api/ai/cover-letter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ applicationId, sourceResumeId: sourceId, tone }),

@@ -121,10 +121,15 @@ export async function POST(req: Request) {
 
   const access = await resolveAiAccess();
 
-  // The daily cap is a deliberate limit, not a failure — surface it to the user
-  // instead of silently degrading to the offline draft.
-  if (!access.ok && access.status === 429) {
-    return NextResponse.json({ error: access.message }, { status: 429 });
+  // The daily cap (429) and missing AI consent (403) are deliberate refusals,
+  // not failures — surface them to the user instead of silently degrading to
+  // the offline draft. Only "no key configured" (503) falls through to the
+  // placeholder, which calls no external API.
+  if (!access.ok && access.status !== 503) {
+    return NextResponse.json(
+      { error: access.message },
+      { status: access.status }
+    );
   }
 
   // Try real AI whenever we have a usable key; otherwise fall back to the

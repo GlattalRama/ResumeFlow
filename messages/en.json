@@ -129,7 +129,13 @@
     "savedOk": "Settings saved.",
     "saveError": "Could not save settings.",
     "connectionOk": "Connection OK — {model} responded.",
-    "connectionFailed": "Connection failed."
+    "connectionFailed": "Connection failed.",
+    "aiConsentHeading": "AI data sharing",
+    "aiConsentBody": "AI features send the relevant text (e.g. resume content, job description) to OpenRouter and its model providers to generate results. Nothing is sent without your permission.",
+    "aiConsentOn": "Allowed — AI features are available.",
+    "aiConsentOff": "Not allowed — AI features are off until you allow sharing.",
+    "aiConsentWithdraw": "Withdraw permission",
+    "aiConsentAllow": "Allow"
   },
   "signin": {
     "badge": "AI-powered resume builder & job tracker",
@@ -1126,5 +1132,31 @@
     "edit": "Edit",
     "untitled": "Untitled",
     "updatedOn": "Updated {date}"
+  },
+  "connectDrive": {
+    "title": "Connect your Google Drive",
+    "sub": "You're signed in. One step left: choose where your data lives. Resumeflow-ATS stores your resumes and applications in a private app folder in your own Google Drive — never on our servers.",
+    "privacyNote": "We only get access to the app's own hidden folder in your Drive (nothing else you store there), and we can't see the rest of your Drive. Disconnecting or deleting the app's data is always in your control.",
+    "connectButton": "Connect Google Drive",
+    "connecting": "Connecting…",
+    "signOut": "Sign out",
+    "signedInAs": "Signed in as {who}",
+    "genericError": "Something went wrong while connecting. Please try again.",
+    "errorDenied": "Google Drive access was declined. Your data can't be stored without it — please try again.",
+    "errorScope": "Google Drive access wasn't granted. Please try again and keep the Google Drive option checked.",
+    "privacy": "Privacy Policy",
+    "support": "Support"
+  },
+  "aiConsent": {
+    "title": "Allow AI features to use your content?",
+    "body1": "AI features (tailoring, improving, cover letters, interview prep and similar) send text to our AI provider to generate the result:",
+    "point1": "What is sent: only the text needed for the request — e.g. your resume content, the job description, or your notes.",
+    "point2": "Who receives it: OpenRouter, Inc. and the AI model provider it routes your request to (e.g. OpenAI).",
+    "point3": "Your content is not used to train our models, and you can withdraw consent anytime in AI Settings.",
+    "body2": "Details are described in our",
+    "privacyLink": "Privacy Policy",
+    "allow": "Allow",
+    "cancel": "Not now",
+    "declined": "Cancelled — nothing was sent. You can allow AI features anytime by trying again."
   }
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { aiFetch } from "@/lib/aiConsentClient";
 
 // Note: "Tailor Resume for this Job" is handled by the dedicated
 // TailorResumeFlow (it produces a full new resume version, not just text).
@@ -28,7 +29,7 @@ export default function AiActions({ applicationId }: { applicationId: string }) 
     setNote("");
     setError("");
     try {
-      const res = await fetch("/api/ai", {
+      const res = await aiFetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, applicationId }),

@@ -13,6 +13,7 @@ import type {
 import { Card, EmptyState, buttonClass } from "@/components/ui";
 import { useSpeechToText } from "@/components/useSpeechToText";
 import { analyzeDelivery } from "@/lib/deliveryCheck";
+import { aiFetch } from "@/lib/aiConsentClient";
 
 const SPEECH_LANG: Record<string, string> = {
   en: "en-US",
@@ -697,7 +698,7 @@ function RunScreen({
     setBusy("grade");
     setError(null);
     try {
-      const res = await fetch("/api/ai/interview-practice", {
+      const res = await aiFetch("/api/ai/interview-practice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId: session.id, entryId: attempt.entryId, practiceAnswer: draft }),

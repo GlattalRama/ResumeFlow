@@ -32,12 +32,13 @@ export async function middleware(req: NextRequest) {
   // without the param. Lets the Android app layout be checked in a desktop
   // browser without spoofing a WebView user agent.
   const nativeParam = req.nextUrl.searchParams.get("native");
-  if (nativeParam === "1" || nativeParam === "0") {
+  if (nativeParam === "1" || nativeParam === "ios" || nativeParam === "0") {
     const url = req.nextUrl.clone();
     url.searchParams.delete("native");
     const res = NextResponse.redirect(url);
-    if (nativeParam === "1") {
-      res.cookies.set("rf_native", "1", {
+    if (nativeParam === "1" || nativeParam === "ios") {
+      // "ios" additionally previews iOS-only behavior (e.g. hidden BYOK).
+      res.cookies.set("rf_native", nativeParam, {
         path: "/",
         maxAge: 60 * 60 * 24 * 365,
         sameSite: "lax",
@@ -64,11 +65,36 @@ export async function middleware(req: NextRequest) {
     secureCookie: useSecureCookies(),
   });
 
-  // Re-authenticate when there is no token, the refresh failed (expired
-  // session), or the token carries no usable access token. The last case must
-  // match lib/serverSession.getAccessToken — otherwise such a token slips past
-  // middleware and crashes server components with DriveAuthError.
-  if (!token || token.error || !token.accessToken) {
+  // Re-authenticate when there is no token or the refresh failed (expired
+  // session).
+  if (!token || token.error) {
+    const url = req.nextUrl.clone();
+    url.pathname = "/signin";
+    url.searchParams.set("callbackUrl", req.nextUrl.pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // A token with no usable access token cannot reach Google Drive storage.
+  // For an Apple login that simply means Drive isn't connected yet — send the
+  // user to the connect step (its page + API routes stay reachable, WITHOUT
+  // x-pathname so the layout's Drive-token guard stays out of the way). For a
+  // Google login it means a broken session (must match
+  // lib/serverSession.getAccessToken — otherwise such a token slips past
+  // middleware and crashes server components with DriveAuthError).
+  if (!token.accessToken) {
+    if (token.provider === "apple") {
+      const path = req.nextUrl.pathname;
+      const allowed =
+        path === "/connect-drive" ||
+        path === "/api/drive/connect" ||
+        path === "/api/drive/callback" ||
+        path === "/api/drive/mobile/connect";
+      if (allowed) return NextResponse.next();
+      const url = req.nextUrl.clone();
+      url.pathname = "/connect-drive";
+      url.searchParams.set("callbackUrl", req.nextUrl.pathname);
+      return NextResponse.redirect(url);
+    }
     const url = req.nextUrl.clone();
     url.pathname = "/signin";
     url.searchParams.set("callbackUrl", req.nextUrl.pathname);

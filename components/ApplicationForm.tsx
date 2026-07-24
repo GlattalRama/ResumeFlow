@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import type { Application, ApplicationStatus } from "@/lib/types";
 import { APPLICATION_STATUSES } from "@/lib/constants";
 import { buttonClass } from "./ui";
+import { aiFetch } from "@/lib/aiConsentClient";
 
 const inputClass =
   "w-full rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500";
@@ -65,7 +66,7 @@ export default function ApplicationForm({
     }
     setAutofilling(true);
     try {
-      const res = await fetch("/api/applications/autofill", {
+      const res = await aiFetch("/api/applications/autofill", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jobLink: link }),

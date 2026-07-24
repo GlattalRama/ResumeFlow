@@ -10,6 +10,7 @@ import { scoreResume } from "@/lib/atsScore";
 import { TailorChangeCard, ScoreDelta } from "./TailorReview";
 import TailorComparePane from "./TailorComparePane";
 import { buttonClass } from "./ui";
+import { aiFetch } from "@/lib/aiConsentClient";
 
 type ResumeOption = { id: string; label: string };
 
@@ -83,7 +84,7 @@ export default function TailorResumeFlow({
       // The source record is needed for diffing, the score baseline, and to
       // carry template/layout settings onto the saved variant.
       const [tailorRes, srcRes] = await Promise.all([
-        fetch("/api/ai/tailor", {
+        aiFetch("/api/ai/tailor", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ sourceResumeId: sourceId, applicationId }),

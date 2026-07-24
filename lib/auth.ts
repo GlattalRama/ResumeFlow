@@ -1,6 +1,9 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import AppleProvider from "next-auth/providers/apple";
 import { GOOGLE_SCOPES, authSecret, useSecureCookies } from "./googleConfig";
+import { appleClientId, hasAppleCredentials } from "./appleConfig";
+import { generateAppleClientSecret } from "./appleSecret";
 import { headers } from "next/headers";
 import { trackLogin } from "./analytics/track";
 import { isAdminEmail } from "./admin";
@@ -37,6 +40,23 @@ export async function refreshAccessToken(token: Record<string, unknown>) {
   }
 }
 
+// A malformed APPLE_PRIVATE_KEY must degrade to "Apple option not offered",
+// never crash this module at load time (which would take down ALL auth).
+function appleProviderIfConfigured() {
+  if (!hasAppleCredentials()) return [];
+  try {
+    return [
+      AppleProvider({
+        clientId: appleClientId(),
+        clientSecret: generateAppleClientSecret(),
+      }),
+    ];
+  } catch (err) {
+    console.error("Sign in with Apple disabled — client secret generation failed:", err);
+    return [];
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   secret: authSecret(),
   session: { strategy: "jwt" },
@@ -52,7 +72,61 @@ export const authOptions: NextAuthOptions = {
         },
       },
     }),
+    // Sign in with Apple (App Store guideline 4.8). Identity only — Apple has
+    // no Drive equivalent, so Apple-login users connect a Google Drive for
+    // storage in a separate step (see /connect-drive + /api/drive/*).
+    ...appleProviderIfConfigured(),
   ],
+  // Apple returns the authorization result via a cross-site POST
+  // (response_mode=form_post). Browsers only attach cookies to that request
+  // when they are SameSite=None, so the short-lived OAuth *flow* cookies must
+  // be None+Secure or the callback fails with "state/pkce cookie missing".
+  // Only applied on https (SameSite=None requires Secure); the session cookie
+  // itself keeps NextAuth's Lax default. Harmless for the Google flow.
+  ...(useSecureCookies()
+    ? {
+        cookies: {
+          state: {
+            name: "__Secure-next-auth.state",
+            options: {
+              httpOnly: true,
+              sameSite: "none" as const,
+              path: "/",
+              secure: true,
+              maxAge: 900,
+            },
+          },
+          nonce: {
+            name: "__Secure-next-auth.nonce",
+            options: {
+              httpOnly: true,
+              sameSite: "none" as const,
+              path: "/",
+              secure: true,
+              maxAge: 900,
+            },
+          },
+          pkceCodeVerifier: {
+            name: "__Secure-next-auth.pkce.code_verifier",
+            options: {
+              httpOnly: true,
+              sameSite: "none" as const,
+              path: "/",
+              secure: true,
+              maxAge: 900,
+            },
+          },
+          callbackUrl: {
+            name: "__Secure-next-auth.callback-url",
+            options: {
+              sameSite: "none" as const,
+              path: "/",
+              secure: true,
+            },
+          },
+        },
+      }
+    : {}),
   callbacks: {
     async signIn({ user }) {
       // Privacy-friendly login analytics: a login counter, a salted non-reversible
@@ -71,12 +145,26 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, account }) {
       // Initial sign-in: persist the OAuth tokens in the (encrypted) JWT only.
       if (account) {
+        // Apple sign-in carries identity only. Google Drive tokens are merged
+        // into this same JWT later by the /api/drive connect flow; until then
+        // the session has no accessToken and middleware routes the user to
+        // /connect-drive instead of the app.
+        if (account.provider === "apple") {
+          return { ...token, provider: "apple" };
+        }
         return {
           ...token,
+          provider: "google",
           accessToken: account.access_token,
           refreshToken: account.refresh_token,
           expiresAt: account.expires_at, // unix seconds, from Google
         };
+      }
+      // Apple session with no Drive connected yet: nothing to refresh. (Once
+      // Drive is connected the token carries Google expiresAt/refreshToken and
+      // takes the normal refresh path below.)
+      if (token.provider === "apple" && !token.accessToken) {
+        return token;
       }
       // Still valid (with a 60s safety margin), or expiry unknown — reuse it.
       const expiresAt = token.expiresAt as number | undefined;
@@ -106,6 +194,17 @@ export const authOptions: NextAuthOptions = {
       (session as { isAdmin?: boolean }).isAdmin = isAdminEmail(
         session.user?.email ?? null
       );
+      // Non-sensitive login/storage flags (no tokens): which provider signed
+      // in, whether a Google Drive is connected for storage, and (for Apple
+      // logins) which Google account the Drive belongs to.
+      const s = session as {
+        provider?: string;
+        driveConnected?: boolean;
+        driveEmail?: string;
+      };
+      s.provider = (token.provider as string) ?? "google";
+      s.driveConnected = !!token.accessToken;
+      if (token.driveEmail) s.driveEmail = token.driveEmail as string;
       return session;
     },
   },

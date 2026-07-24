@@ -11,6 +11,7 @@ import type {
 import { Card, EmptyState, PageHeader, buttonClass } from "@/components/ui";
 import InterviewPractice from "@/components/InterviewPractice";
 import ResumeTopicBank from "@/components/ResumeTopicBank";
+import { aiFetch } from "@/lib/aiConsentClient";
 
 export interface CoachAppOption {
   id: string;
@@ -165,7 +166,7 @@ export default function InterviewCoach({
     setGenBusy(true);
     setBanner(null);
     try {
-      const res = await fetch("/api/ai/interview-coach", {
+      const res = await aiFetch("/api/ai/interview-coach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -449,7 +450,7 @@ function EntryCard({
       return;
     }
     await run(async () => {
-      const res = await fetch("/api/ai/interview-coach", {
+      const res = await aiFetch("/api/ai/interview-coach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -467,7 +468,7 @@ function EntryCard({
 
   async function revise(action: string) {
     await run(async () => {
-      const res = await fetch("/api/ai/interview-coach", {
+      const res = await aiFetch("/api/ai/interview-coach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mode: "revise", entryId: entry.id, action }),

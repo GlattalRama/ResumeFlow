@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import SignInButton from "@/components/SignInButton";
 import { getSession, getAccessToken } from "@/lib/serverSession";
 import { hasGoogleCredentials } from "@/lib/googleConfig";
+import { hasAppleCredentials } from "@/lib/appleConfig";
 
 export const dynamic = "force-dynamic";
 
@@ -28,9 +29,23 @@ export default async function SignInPage({
   // reader the layout guard uses — otherwise a session that decodes here but
   // not in a page would ping-pong between /signin and the target page.
   if (credsConfigured) {
-    const session = (await getSession()) as { error?: string } | null;
+    const session = (await getSession()) as {
+      error?: string;
+      provider?: string;
+      driveConnected?: boolean;
+    } | null;
     const token = await getAccessToken();
     if (session && !session.error && token) redirect(target);
+    // Apple login without a connected Drive: signed in, but no storage yet —
+    // continue at the connect step instead of showing sign-in again.
+    if (
+      session &&
+      !session.error &&
+      session.provider === "apple" &&
+      !session.driveConnected
+    ) {
+      redirect(`/connect-drive?callbackUrl=${encodeURIComponent(target)}`);
+    }
   }
 
   return (
@@ -99,7 +114,10 @@ export default async function SignInPage({
             </div>
 
             {credsConfigured ? (
-              <SignInButton callbackUrl={target} />
+              <SignInButton
+                callbackUrl={target}
+                showApple={hasAppleCredentials()}
+              />
             ) : (
               <div className="space-y-4">
                 <div className="rounded-md border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/40 p-3 text-xs text-amber-800 dark:text-amber-200">

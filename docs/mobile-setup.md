@@ -166,6 +166,58 @@ without it.
 
 ---
 
+## 8. Sign in with Apple (App Store guideline 4.8)
+
+Apple login is identity-only: the account has no Google tokens, so after
+signing in the user is routed to `/connect-drive` to authorize the
+`drive.appdata` scope (storage stays in *their* cloud; we store nothing
+server-side — the Drive tokens are merged into the encrypted session JWT).
+
+### Apple Developer portal (one-time)
+
+1. **App ID capability** — Certificates, Identifiers & Profiles → Identifiers
+   → `com.resumeflowats.app` → enable **Sign in with Apple** → Save. Then
+   REGENERATE the App Store provisioning profile ("Resumeflow ATS App Store")
+   — profiles don't pick up new capabilities automatically — and install it.
+2. **Services ID** (the *web* client id) — Identifiers → + → Services ID,
+   e.g. `com.resumeflowats.app.web`. Enable Sign in with Apple, configure with
+   primary App ID `com.resumeflowats.app`, domain `resumeflow-ats.com`, return
+   URL `https://resumeflow-ats.com/api/auth/callback/apple`.
+3. **Key** — Keys → + → enable Sign in with Apple → download the `.p8`
+   (downloadable ONCE) and note the Key ID.
+
+### Env vars (Vercel prod + preview + `.env.local`)
+
+`APPLE_CLIENT_ID` (Services ID), `APPLE_TEAM_ID` (N4B829Q792),
+`APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` (.p8 contents; `\n`-escaped is fine),
+optional `APPLE_BUNDLE_ID` (defaults to com.resumeflowats.app). With any of
+them missing the Apple button simply isn't offered — nothing breaks.
+
+### How each platform signs in
+
+- **Web**: NextAuth Apple provider (`lib/auth.ts`); the client secret is an
+  ES256 JWT generated at runtime from the key (`lib/appleSecret.ts`). Apple's
+  `form_post` callback requires the SameSite=None flow cookies configured in
+  authOptions.
+- **iOS shell**: native ASAuthorization sheet via the same
+  `@capgo/capacitor-social-login` plugin (`apple` provider,
+  `lib/nativeAuth.ts:nativeAppleSignIn`) → POSTs the identity token to
+  `/api/auth/mobile/apple`, which verifies it against Apple's JWKS
+  (issuer/audience checks) and mints the session cookie. Requires the
+  `App.entitlements` (checked in) and the regenerated provisioning profile.
+- **Android shell**: Apple button hidden (no native Apple support wired).
+
+### Google Drive connect step
+
+`/connect-drive` (web) starts `/api/drive/connect` → Google consent
+(drive.appdata only) → `/api/drive/callback` merges tokens into the session.
+**Add the redirect URI** `https://resumeflow-ats.com/api/drive/callback`
+(plus `http://localhost:3000/api/drive/callback` and
+`http://localhost:3001/api/drive/callback` for dev) to the *web* OAuth client
+in Google Cloud console, or the connect step fails with redirect_uri_mismatch.
+In the native shells the same happens through the native Google sheet +
+`/api/drive/mobile/connect`.
+
 ## What still needs your input
 
 - **Apple Developer enrollment** — in progress (issues being resolved with
