@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { encode } from "next-auth/jwt";
+import { authSecret, hasGoogleCredentials } from "@/lib/googleConfig";
 import {
-  authSecret,
-  useSecureCookies,
-  hasGoogleCredentials,
-} from "@/lib/googleConfig";
+  SESSION_MAX_AGE,
+  setSessionCookie,
+  decodeIdToken,
+  exchangeGoogleAuthCode,
+  hasDriveScope,
+} from "@/lib/sessionCookie";
 import { trackLogin } from "@/lib/analytics/track";
 
 // Mobile sign-in bridge. Google refuses OAuth inside the Capacitor WebView
@@ -19,25 +22,6 @@ import { trackLogin } from "@/lib/analytics/track";
 // [...nextauth] catch-all, so Next routes here) and is exempt from the auth
 // guard via middleware's `api/auth` matcher exclusion.
 export const dynamic = "force-dynamic";
-
-// Match NextAuth's default session lifetime (30 days) so the minted cookie
-// behaves identically to a browser sign-in.
-const SESSION_MAX_AGE = 30 * 24 * 60 * 60;
-
-function sessionCookieName(): string {
-  return useSecureCookies()
-    ? "__Secure-next-auth.session-token"
-    : "next-auth.session-token";
-}
-
-// Decode a JWT payload without signature verification. Safe here: this id_token
-// came straight from Google's token endpoint over TLS, authenticated with our
-// own client secret — it was never handled by the untrusted client.
-function decodeIdToken(idToken: string): Record<string, unknown> {
-  const payload = idToken.split(".")[1] ?? "";
-  const json = Buffer.from(payload, "base64url").toString("utf8");
-  return JSON.parse(json) as Record<string, unknown>;
-}
 
 export async function POST(req: NextRequest) {
   if (!hasGoogleCredentials()) {
@@ -62,28 +46,15 @@ export async function POST(req: NextRequest) {
   // Exchange the one-time server auth code for tokens using the SAME web OAuth
   // client the browser flow uses. redirect_uri is empty for codes minted by the
   // native Google Sign-In SDKs (the "server auth code" offline flow).
-  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      code: serverAuthCode,
-      client_id: process.env.GOOGLE_CLIENT_ID ?? "",
-      client_secret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-      grant_type: "authorization_code",
-      redirect_uri: "",
-    }),
-  });
-  const tokens = await tokenRes.json();
-  if (!tokenRes.ok || !tokens.access_token) {
+  const { ok, tokens } = await exchangeGoogleAuthCode(serverAuthCode, "");
+  if (!ok) {
     return NextResponse.json({ error: "token_exchange_failed" }, { status: 401 });
   }
 
-  // Google's consent screen presents drive.appdata as an optional checkbox; a
-  // user who unchecks it still completes sign-in, but every Drive call would
-  // then fail and dump them on the error page. Refuse to mint such a session so
-  // the client can explain and re-run consent instead.
-  const grantedScopes = (tokens.scope as string) ?? "";
-  if (!grantedScopes.includes("https://www.googleapis.com/auth/drive.appdata")) {
+  // A user who unchecks the optional Drive checkbox still completes sign-in,
+  // but every Drive call would then fail and dump them on the error page.
+  // Refuse to mint such a session so the client can explain and re-run consent.
+  if (!hasDriveScope(tokens)) {
     return NextResponse.json({ error: "drive_scope_missing" }, { status: 403 });
   }
 
@@ -108,11 +79,10 @@ export async function POST(req: NextRequest) {
     email,
     picture: (claims.picture as string) ?? null,
     sub,
+    provider: "google",
     accessToken: tokens.access_token as string,
-    refreshToken: (tokens.refresh_token as string) ?? undefined,
-    expiresAt: tokens.expires_in
-      ? now + (tokens.expires_in as number)
-      : undefined,
+    refreshToken: tokens.refresh_token ?? undefined,
+    expiresAt: tokens.expires_in ? now + tokens.expires_in : undefined,
   };
 
   const encoded = await encode({ token: jwtToken, secret, maxAge: SESSION_MAX_AGE });
@@ -121,12 +91,6 @@ export async function POST(req: NextRequest) {
   await trackLogin({ userId: email, country: req.headers.get("x-vercel-ip-country") });
 
   const res = NextResponse.json({ ok: true });
-  res.cookies.set(sessionCookieName(), encoded, {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    secure: useSecureCookies(),
-    maxAge: SESSION_MAX_AGE,
-  });
+  setSessionCookie(res, encoded);
   return res;
 }

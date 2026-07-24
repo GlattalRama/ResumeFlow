@@ -129,7 +129,13 @@
     "savedOk": "Impostazioni salvate.",
     "saveError": "Impossibile salvare le impostazioni.",
     "connectionOk": "Connessione OK — {model} ha risposto.",
-    "connectionFailed": "Connessione non riuscita."
+    "connectionFailed": "Connessione non riuscita.",
+    "aiConsentHeading": "Condivisione dati con l'IA",
+    "aiConsentBody": "Le funzioni IA inviano il testo pertinente (ad es. curriculum, descrizione dell'offerta) a OpenRouter e ai suoi fornitori di modelli per generare i risultati. Nulla viene inviato senza il tuo permesso.",
+    "aiConsentOn": "Consentito — le funzioni IA sono disponibili.",
+    "aiConsentOff": "Non consentito — le funzioni IA sono disattivate finché non consenti la condivisione.",
+    "aiConsentWithdraw": "Revoca il permesso",
+    "aiConsentAllow": "Consenti"
   },
   "signin": {
     "badge": "Costruttore di curriculum e tracker di candidature con IA",
@@ -1126,5 +1132,31 @@
     "edit": "Modifica",
     "untitled": "Senza titolo",
     "updatedOn": "Aggiornato il {date}"
+  },
+  "connectDrive": {
+    "title": "Collega il tuo Google Drive",
+    "sub": "Hai effettuato l'accesso. Manca un passaggio: scegli dove vivono i tuoi dati. Resumeflow-ATS salva i tuoi curriculum e le tue candidature in una cartella privata dell'app nel tuo Google Drive — mai sui nostri server.",
+    "privacyNote": "Otteniamo accesso solo alla cartella nascosta dell'app nel tuo Drive (nient'altro di ciò che vi conservi) e non possiamo vedere il resto del tuo Drive. Scollegare o eliminare i dati dell'app è sempre sotto il tuo controllo.",
+    "connectButton": "Collega Google Drive",
+    "connecting": "Collegamento…",
+    "signOut": "Esci",
+    "signedInAs": "Accesso effettuato come {who}",
+    "genericError": "Qualcosa è andato storto durante il collegamento. Riprova.",
+    "errorDenied": "L'accesso a Google Drive è stato rifiutato. Senza di esso i tuoi dati non possono essere salvati — riprova.",
+    "errorScope": "L'accesso a Google Drive non è stato concesso. Riprova lasciando selezionata l'opzione Google Drive.",
+    "privacy": "Informativa sulla privacy",
+    "support": "Supporto"
+  },
+  "aiConsent": {
+    "title": "Consentire alle funzioni IA di usare i tuoi contenuti?",
+    "body1": "Le funzioni IA (adattamento, miglioramento, lettere di presentazione, preparazione ai colloqui e simili) inviano testo al nostro fornitore di IA per generare il risultato:",
+    "point1": "Cosa viene inviato: solo il testo necessario alla richiesta — ad es. il tuo curriculum, la descrizione dell'offerta o le tue note.",
+    "point2": "Chi lo riceve: OpenRouter, Inc. e il fornitore del modello IA a cui viene instradata la richiesta (ad es. OpenAI).",
+    "point3": "I tuoi contenuti non vengono usati per addestrare i nostri modelli e puoi revocare il consenso in qualsiasi momento nelle Impostazioni IA.",
+    "body2": "I dettagli sono descritti nella nostra",
+    "privacyLink": "Informativa sulla privacy",
+    "allow": "Consenti",
+    "cancel": "Non ora",
+    "declined": "Annullato — non è stato inviato nulla. Puoi consentire le funzioni IA in qualsiasi momento riprovando."
   }
 }

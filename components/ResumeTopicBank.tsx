@@ -8,6 +8,7 @@ import {
   type InterviewDifficulty,
 } from "@/lib/types";
 import { Card, buttonClass } from "@/components/ui";
+import { aiFetch } from "@/lib/aiConsentClient";
 
 const inputClass =
   "w-full rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500";
@@ -71,7 +72,7 @@ export default function ResumeTopicBank({
     setError(null);
     setNote(null);
     try {
-      const res = await fetch("/api/ai/interview-coach", {
+      const res = await aiFetch("/api/ai/interview-coach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mode: "topics", resumeId }),
@@ -114,7 +115,7 @@ export default function ResumeTopicBank({
     setError(null);
     setNote(null);
     try {
-      const res = await fetch("/api/ai/interview-coach", {
+      const res = await aiFetch("/api/ai/interview-coach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

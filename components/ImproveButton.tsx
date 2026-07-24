@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { aiFetch } from "@/lib/aiConsentClient";
 
 // Per-section "Improve with AI" control. Streams a suggestion from
 // /api/ai/improve and shows it as a preview the user can Accept or Discard —
@@ -36,7 +37,7 @@ export default function ImproveButton({
 
     setLoading(true);
     try {
-      const res = await fetch("/api/ai/improve", {
+      const res = await aiFetch("/api/ai/improve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sectionType, text }),

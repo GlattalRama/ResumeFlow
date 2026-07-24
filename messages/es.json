@@ -129,7 +129,13 @@
     "savedOk": "Ajustes guardados.",
     "saveError": "No se pudieron guardar los ajustes.",
     "connectionOk": "Conexión correcta — {model} respondió.",
-    "connectionFailed": "Falló la conexión."
+    "connectionFailed": "Falló la conexión.",
+    "aiConsentHeading": "Compartición de datos con IA",
+    "aiConsentBody": "Las funciones de IA envían el texto relevante (p. ej., currículum, descripción del puesto) a OpenRouter y sus proveedores de modelos para generar resultados. No se envía nada sin tu permiso.",
+    "aiConsentOn": "Permitido — las funciones de IA están disponibles.",
+    "aiConsentOff": "No permitido — las funciones de IA están desactivadas hasta que permitas el envío.",
+    "aiConsentWithdraw": "Retirar permiso",
+    "aiConsentAllow": "Permitir"
   },
   "signin": {
     "badge": "Creador de currículums y gestor de solicitudes con IA",
@@ -1126,5 +1132,31 @@
     "edit": "Editar",
     "untitled": "Sin título",
     "updatedOn": "Actualizado el {date}"
+  },
+  "connectDrive": {
+    "title": "Conecta tu Google Drive",
+    "sub": "Ya has iniciado sesión. Falta un paso: elige dónde viven tus datos. Resumeflow-ATS guarda tus currículums y candidaturas en una carpeta privada de la app en tu propio Google Drive — nunca en nuestros servidores.",
+    "privacyNote": "Solo obtenemos acceso a la carpeta oculta propia de la app en tu Drive (nada más de lo que guardes allí) y no podemos ver el resto de tu Drive. Desconectar o borrar los datos de la app está siempre bajo tu control.",
+    "connectButton": "Conectar Google Drive",
+    "connecting": "Conectando…",
+    "signOut": "Cerrar sesión",
+    "signedInAs": "Sesión iniciada como {who}",
+    "genericError": "Algo salió mal al conectar. Inténtalo de nuevo.",
+    "errorDenied": "Se rechazó el acceso a Google Drive. Tus datos no se pueden guardar sin él — inténtalo de nuevo.",
+    "errorScope": "No se concedió el acceso a Google Drive. Inténtalo de nuevo y mantén marcada la opción de Google Drive.",
+    "privacy": "Política de privacidad",
+    "support": "Soporte"
+  },
+  "aiConsent": {
+    "title": "¿Permitir que las funciones de IA usen tu contenido?",
+    "body1": "Las funciones de IA (adaptar, mejorar, cartas de presentación, preparación de entrevistas y similares) envían texto a nuestro proveedor de IA para generar el resultado:",
+    "point1": "Qué se envía: solo el texto necesario para la solicitud — p. ej., tu currículum, la descripción del puesto o tus notas.",
+    "point2": "Quién lo recibe: OpenRouter, Inc. y el proveedor del modelo de IA al que dirige tu solicitud (p. ej., OpenAI).",
+    "point3": "Tu contenido no se usa para entrenar nuestros modelos, y puedes retirar el consentimiento en cualquier momento en Ajustes de IA.",
+    "body2": "Los detalles están descritos en nuestra",
+    "privacyLink": "Política de privacidad",
+    "allow": "Permitir",
+    "cancel": "Ahora no",
+    "declined": "Cancelado — no se envió nada. Puedes permitir las funciones de IA en cualquier momento intentándolo de nuevo."
   }
 }

@@ -778,6 +778,11 @@ export interface UserSettings {
   careerInsights?: CareerInsights;
   // Cached promotion-readiness assessment (Phase 5).
   promotionReadiness?: PromotionReadiness;
+  // When the user agreed (ISO timestamp) to send resume/job text to the
+  // third-party AI provider (OpenRouter + its model providers). AI endpoints
+  // refuse to run until this is set — App Store guideline 5.1.2(i) requires
+  // explicit permission before personal data is shared with a third-party AI.
+  aiConsentAt?: string;
   updatedAt: string;
 }
 

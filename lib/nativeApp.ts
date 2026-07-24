@@ -18,7 +18,19 @@ const NATIVE_UA = /ResumeflowApp|; wv\)/;
 
 export async function isNativeAppRequest(): Promise<boolean> {
   const flag = (await cookies()).get("rf_native")?.value;
-  if (flag === "1") return true;
+  if (flag === "1" || flag === "ios") return true;
   const ua = (await headers()).get("user-agent") ?? "";
   return NATIVE_UA.test(ua);
+}
+
+// True only inside the iOS shell (App Store rules differ from Play's: e.g. the
+// BYOK "add your own OpenRouter key" option is hidden there — guideline 3.1.1
+// reads externally-billed services as out-of-app purchases). Detected via the
+// appended UA token + an Apple device marker, or the rf_native=ios preview
+// cookie (?native=ios in a desktop browser, cleared with ?native=0).
+export async function isNativeIOSRequest(): Promise<boolean> {
+  const flag = (await cookies()).get("rf_native")?.value;
+  if (flag === "ios") return true;
+  const ua = (await headers()).get("user-agent") ?? "";
+  return ua.includes("ResumeflowApp") && /iPhone|iPad|iPod/.test(ua);
 }

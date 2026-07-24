@@ -129,7 +129,13 @@
     "savedOk": "Einstellungen gespeichert.",
     "saveError": "Einstellungen konnten nicht gespeichert werden.",
     "connectionOk": "Verbindung OK — {model} hat geantwortet.",
-    "connectionFailed": "Verbindung fehlgeschlagen."
+    "connectionFailed": "Verbindung fehlgeschlagen.",
+    "aiConsentHeading": "KI-Datenweitergabe",
+    "aiConsentBody": "KI-Funktionen senden den relevanten Text (z. B. Lebenslauf, Stellenbeschreibung) an OpenRouter und dessen Modellanbieter, um Ergebnisse zu erzeugen. Ohne Ihre Einwilligung wird nichts gesendet.",
+    "aiConsentOn": "Erlaubt — KI-Funktionen sind verfügbar.",
+    "aiConsentOff": "Nicht erlaubt — KI-Funktionen sind aus, bis Sie die Weitergabe erlauben.",
+    "aiConsentWithdraw": "Einwilligung widerrufen",
+    "aiConsentAllow": "Erlauben"
   },
   "signin": {
     "badge": "KI-gestützter Lebenslauf-Builder & Bewerbungs-Tracker",
@@ -1126,5 +1132,31 @@
     "edit": "Bearbeiten",
     "untitled": "Ohne Titel",
     "updatedOn": "Aktualisiert am {date}"
+  },
+  "connectDrive": {
+    "title": "Google Drive verbinden",
+    "sub": "Sie sind angemeldet. Ein Schritt fehlt noch: Wählen Sie, wo Ihre Daten gespeichert werden. Resumeflow-ATS speichert Ihre Lebensläufe und Bewerbungen in einem privaten App-Ordner in Ihrem eigenen Google Drive — niemals auf unseren Servern.",
+    "privacyNote": "Wir erhalten nur Zugriff auf den verborgenen App-Ordner in Ihrem Drive (nichts anderes, was Sie dort speichern) und können den Rest Ihres Drive nicht sehen. Das Trennen der Verbindung oder Löschen der App-Daten liegt jederzeit in Ihrer Hand.",
+    "connectButton": "Google Drive verbinden",
+    "connecting": "Wird verbunden…",
+    "signOut": "Abmelden",
+    "signedInAs": "Angemeldet als {who}",
+    "genericError": "Beim Verbinden ist etwas schiefgelaufen. Bitte versuchen Sie es erneut.",
+    "errorDenied": "Der Google-Drive-Zugriff wurde abgelehnt. Ohne ihn können Ihre Daten nicht gespeichert werden — bitte versuchen Sie es erneut.",
+    "errorScope": "Der Google-Drive-Zugriff wurde nicht gewährt. Bitte versuchen Sie es erneut und lassen Sie die Google-Drive-Option aktiviert.",
+    "privacy": "Datenschutzerklärung",
+    "support": "Support"
+  },
+  "aiConsent": {
+    "title": "KI-Funktionen dürfen Ihre Inhalte verwenden?",
+    "body1": "KI-Funktionen (Anpassen, Verbessern, Anschreiben, Interview-Vorbereitung u. ä.) senden Text an unseren KI-Anbieter, um das Ergebnis zu erzeugen:",
+    "point1": "Was gesendet wird: nur der für die Anfrage nötige Text — z. B. Ihr Lebenslauf, die Stellenbeschreibung oder Ihre Notizen.",
+    "point2": "Wer ihn erhält: OpenRouter, Inc. und der KI-Modellanbieter, an den Ihre Anfrage weitergeleitet wird (z. B. OpenAI).",
+    "point3": "Ihre Inhalte werden nicht zum Trainieren unserer Modelle verwendet; die Einwilligung können Sie jederzeit in den KI-Einstellungen widerrufen.",
+    "body2": "Details finden Sie in unserer",
+    "privacyLink": "Datenschutzerklärung",
+    "allow": "Erlauben",
+    "cancel": "Jetzt nicht",
+    "declined": "Abgebrochen — es wurde nichts gesendet. Sie können KI-Funktionen jederzeit erlauben, indem Sie es erneut versuchen."
   }
 }

@@ -47,6 +47,7 @@ import { htmlToLines, linesToHtml } from "@/lib/richText";
 import { scoreResume } from "@/lib/atsScore";
 import AtsScorePanel, { ScoreRing, scoreBandClass } from "./AtsScorePanel";
 import { buttonClass } from "./ui";
+import { aiFetch } from "@/lib/aiConsentClient";
 
 const inputClass =
   "w-full rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500";
@@ -745,7 +746,7 @@ export default function ResumeBuilder({
     try {
       const form = new FormData();
       for (const file of files) form.append("file", file);
-      const res = await fetch("/api/resumes/import", {
+      const res = await aiFetch("/api/resumes/import", {
         method: "POST",
         body: form,
       });

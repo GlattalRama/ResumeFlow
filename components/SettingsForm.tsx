@@ -15,7 +15,13 @@ const MODEL_SUGGESTIONS = [
   "deepseek/deepseek-chat",
 ];
 
-export default function SettingsForm() {
+// hideByok: the iOS shell hides the bring-your-own-key option (App Store
+// guideline 3.1.1 — externally billed services read as out-of-app purchases).
+export default function SettingsForm({
+  hideByok = false,
+}: {
+  hideByok?: boolean;
+}) {
   const t = useTranslations("settings");
   const [model, setModel] = useState("openai/gpt-4o-mini");
   const [apiKey, setApiKey] = useState("");
@@ -25,6 +31,7 @@ export default function SettingsForm() {
   const [dailyLimit, setDailyLimit] = useState(30);
   const [usedToday, setUsedToday] = useState(0);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [aiConsent, setAiConsent] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<
     { kind: "idle" | "saving" | "testing" | "ok" | "error"; message?: string }
@@ -44,7 +51,24 @@ export default function SettingsForm() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+    fetch("/api/ai/consent")
+      .then((r) => r.json())
+      .then((c) => setAiConsent(!!c.consented))
+      .catch(() => {});
   }, []);
+
+  async function updateAiConsent(consented: boolean) {
+    setAiConsent(consented);
+    try {
+      await fetch("/api/ai/consent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ consented }),
+      });
+    } catch {
+      setAiConsent(!consented); // revert on failure
+    }
+  }
 
   async function save() {
     setStatus({ kind: "saving" });
@@ -114,6 +138,36 @@ export default function SettingsForm() {
         </div>
       )}
 
+      <div className="rounded-lg border border-border p-4">
+        <p className="text-sm font-medium text-foreground">
+          {t("aiConsentHeading")}
+        </p>
+        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+          {t("aiConsentBody")}
+        </p>
+        {aiConsent !== null && (
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <span
+              className={`text-xs font-medium ${
+                aiConsent
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-amber-600 dark:text-amber-400"
+              }`}
+            >
+              {aiConsent ? t("aiConsentOn") : t("aiConsentOff")}
+            </span>
+            <button
+              type="button"
+              onClick={() => updateAiConsent(!aiConsent)}
+              className="rounded-md border border-input bg-card px-3 py-1.5 text-xs font-medium text-foreground/80 hover:bg-muted/50"
+            >
+              {aiConsent ? t("aiConsentWithdraw") : t("aiConsentAllow")}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {hideByok ? null : (
       <div>
         <button
           type="button"
@@ -126,8 +180,9 @@ export default function SettingsForm() {
           {builtIn ? t("advancedHintBuiltIn") : t("advancedHintNoKey")}
         </p>
       </div>
+      )}
 
-      {!showAdvanced ? null : (
+      {!showAdvanced || hideByok ? null : (
       <div className="space-y-6 rounded-lg border border-border p-4">
       <div className="rounded-md border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/40 p-3 text-sm text-blue-900 dark:text-blue-200">
         {t.rich("byokBanner", {

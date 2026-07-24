@@ -129,7 +129,13 @@
     "savedOk": "Paramètres enregistrés.",
     "saveError": "Impossible d'enregistrer les paramètres.",
     "connectionOk": "Connexion OK — {model} a répondu.",
-    "connectionFailed": "Échec de la connexion."
+    "connectionFailed": "Échec de la connexion.",
+    "aiConsentHeading": "Partage de données avec l'IA",
+    "aiConsentBody": "Les fonctions IA envoient le texte pertinent (p. ex. CV, description du poste) à OpenRouter et à ses fournisseurs de modèles pour générer les résultats. Rien n'est envoyé sans votre autorisation.",
+    "aiConsentOn": "Autorisé — les fonctions IA sont disponibles.",
+    "aiConsentOff": "Non autorisé — les fonctions IA sont désactivées tant que vous n'autorisez pas le partage.",
+    "aiConsentWithdraw": "Retirer l'autorisation",
+    "aiConsentAllow": "Autoriser"
   },
   "signin": {
     "badge": "Créateur de CV et suivi de candidatures propulsés par l'IA",
@@ -1126,5 +1132,31 @@
     "edit": "Modifier",
     "untitled": "Sans titre",
     "updatedOn": "Mis à jour le {date}"
+  },
+  "connectDrive": {
+    "title": "Connectez votre Google Drive",
+    "sub": "Vous êtes connecté. Une dernière étape : choisissez où vivent vos données. Resumeflow-ATS enregistre vos CV et candidatures dans un dossier privé de l'application dans votre propre Google Drive — jamais sur nos serveurs.",
+    "privacyNote": "Nous n'accédons qu'au dossier caché propre à l'application dans votre Drive (rien d'autre de ce que vous y stockez) et nous ne voyons pas le reste de votre Drive. Déconnecter ou supprimer les données de l'application reste toujours sous votre contrôle.",
+    "connectButton": "Connecter Google Drive",
+    "connecting": "Connexion…",
+    "signOut": "Se déconnecter",
+    "signedInAs": "Connecté en tant que {who}",
+    "genericError": "Un problème est survenu lors de la connexion. Veuillez réessayer.",
+    "errorDenied": "L'accès à Google Drive a été refusé. Vos données ne peuvent pas être enregistrées sans lui — veuillez réessayer.",
+    "errorScope": "L'accès à Google Drive n'a pas été accordé. Veuillez réessayer en laissant l'option Google Drive cochée.",
+    "privacy": "Politique de confidentialité",
+    "support": "Assistance"
+  },
+  "aiConsent": {
+    "title": "Autoriser les fonctions IA à utiliser votre contenu ?",
+    "body1": "Les fonctions IA (adaptation, amélioration, lettres de motivation, préparation d'entretien, etc.) envoient du texte à notre fournisseur d'IA pour générer le résultat :",
+    "point1": "Ce qui est envoyé : uniquement le texte nécessaire à la demande — p. ex. votre CV, la description du poste ou vos notes.",
+    "point2": "Qui le reçoit : OpenRouter, Inc. et le fournisseur du modèle d'IA vers lequel votre demande est acheminée (p. ex. OpenAI).",
+    "point3": "Votre contenu n'est pas utilisé pour entraîner nos modèles, et vous pouvez retirer votre consentement à tout moment dans les Réglages IA.",
+    "body2": "Les détails sont décrits dans notre",
+    "privacyLink": "Politique de confidentialité",
+    "allow": "Autoriser",
+    "cancel": "Pas maintenant",
+    "declined": "Annulé — rien n'a été envoyé. Vous pouvez autoriser les fonctions IA à tout moment en réessayant."
   }
 }
