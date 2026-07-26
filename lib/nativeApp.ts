@@ -32,5 +32,10 @@ export async function isNativeIOSRequest(): Promise<boolean> {
   const flag = (await cookies()).get("rf_native")?.value;
   if (flag === "ios") return true;
   const ua = (await headers()).get("user-agent") ?? "";
-  return ua.includes("ResumeflowApp") && /iPhone|iPad|iPod/.test(ua);
+  // iPhone WKWebViews report an iPhone UA, but iPadOS WKWebViews default to a
+  // desktop-class "Macintosh" UA with no iPad marker — so requiring an Apple
+  // device token here left the BYOK UI visible on iPads (App Review tested on
+  // an iPad Air and re-rejected under 3.1.1). The Android shell always has
+  // "Android" in its UA, so: shell token present + not Android = the iOS app.
+  return ua.includes("ResumeflowApp") && !/Android/i.test(ua);
 }
