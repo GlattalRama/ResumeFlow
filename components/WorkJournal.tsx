@@ -10,10 +10,12 @@ import {
   type Evidence,
   type GeneratedOutputs,
   type Metric,
+  type ProjectExperience,
   type PromotionReadiness,
   type WorkJournalNote,
 } from "@/lib/types";
 import { Card, EmptyState, PageHeader, buttonClass } from "@/components/ui";
+import ProjectExperienceView from "@/components/ProjectExperienceView";
 import { aiFetch } from "@/lib/aiConsentClient";
 
 // Category slug → i18n key (workJournal.cat*). Keep in sync with
@@ -186,11 +188,13 @@ export default function WorkJournal({
   resumes,
   initialInsights = null,
   initialPromotion = null,
+  initialProjects = [],
 }: {
   initialNotes: WorkJournalNote[];
   resumes: ResumePickerOption[];
   initialInsights?: CareerInsights | null;
   initialPromotion?: PromotionReadiness | null;
+  initialProjects?: ProjectExperience[];
 }) {
   const t = useTranslations("workJournal");
   const locale = useLocale();
@@ -201,7 +205,9 @@ export default function WorkJournal({
   // null = no form; "new" = creating; otherwise the id being edited.
   const [formTarget, setFormTarget] = useState<"new" | string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [view, setView] = useState<"entries" | "dashboard" | "promotion">("entries");
+  const [view, setView] = useState<
+    "entries" | "dashboard" | "promotion" | "projects"
+  >("entries");
   const [insights, setInsights] = useState<CareerInsights | null>(initialInsights);
   const [promotion, setPromotion] = useState<PromotionReadiness | null>(initialPromotion);
 
@@ -313,9 +319,9 @@ export default function WorkJournal({
         }
       />
 
-      {/* View toggle: entries list vs. dashboard vs. promotion readiness */}
+      {/* View toggle: entries / projects / dashboard / promotion readiness */}
       <div className="mb-5 inline-flex rounded-lg border border-input p-0.5">
-        {(["entries", "dashboard", "promotion"] as const).map((v) => (
+        {(["entries", "projects", "dashboard", "promotion"] as const).map((v) => (
           <button
             key={v}
             type="button"
@@ -328,14 +334,18 @@ export default function WorkJournal({
           >
             {v === "entries"
               ? t("viewEntries")
-              : v === "dashboard"
-                ? t("viewDashboard")
-                : t("viewPromotion")}
+              : v === "projects"
+                ? t("viewProjects")
+                : v === "dashboard"
+                  ? t("viewDashboard")
+                  : t("viewPromotion")}
           </button>
         ))}
       </div>
 
-      {view === "dashboard" ? (
+      {view === "projects" ? (
+        <ProjectExperienceView initialProjects={initialProjects} />
+      ) : view === "dashboard" ? (
         <Dashboard
           notes={notes}
           insights={insights}

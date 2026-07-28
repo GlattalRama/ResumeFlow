@@ -16,3 +16,5 @@ next-env.d.ts
 android/keystore.properties
 *.jks
 *.keystore
+.idea/
+play-store-assets/

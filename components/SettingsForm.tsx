@@ -134,7 +134,7 @@ export default function SettingsForm({
         </div>
       ) : (
         <div className="rounded-md border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/40 p-4 text-sm text-amber-900 dark:text-amber-200">
-          {t("notConfigured")}
+          {t(hideByok ? "notConfiguredIos" : "notConfigured")}
         </div>
       )}
 

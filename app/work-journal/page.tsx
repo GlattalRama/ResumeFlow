@@ -9,12 +9,14 @@ export const dynamic = "force-dynamic";
 
 export default async function WorkJournalPage() {
   const t = await getTranslations("workJournal");
-  const [rawNotes, resumes, baseResumeId, settings] = await Promise.all([
-    readAll("workJournal"),
-    readAll("resumes"),
-    resolveBaseResumeId(),
-    loadSettings(),
-  ]);
+  const [rawNotes, resumes, baseResumeId, settings, projects] =
+    await Promise.all([
+      readAll("workJournal"),
+      readAll("resumes"),
+      resolveBaseResumeId(),
+      loadSettings(),
+      readAll("projectExperience"),
+    ]);
   // Lazily migrate legacy notes to the STAR-native shape for display/editing.
   // Non-destructive: stored data is only rewritten when the user next saves.
   const notes = rawNotes.map(toV2);
@@ -36,6 +38,9 @@ export default async function WorkJournalPage() {
       resumes={resumeOptions}
       initialInsights={settings?.careerInsights ?? null}
       initialPromotion={settings?.promotionReadiness ?? null}
+      initialProjects={[...projects].sort((a, b) =>
+        b.updatedAt.localeCompare(a.updatedAt)
+      )}
     />
   );
 }

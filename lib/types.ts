@@ -844,6 +844,34 @@ export interface ResumeSnapshot {
   resumeData: ResumeData;
 }
 
+// ---- Project & domain experience ----
+
+// A project the user worked on, as a first-class profile entity (separate from
+// day-to-day Work Journal notes). Usually AI-extracted from pasted text, an
+// uploaded document, or screenshots — then user-reviewed before saving.
+export interface ProjectExperience {
+  id: string;
+  name: string;
+  // Client / employer the project was delivered for ("" when not stated).
+  client: string;
+  // Business domain / industry, e.g. "Private banking", "Healthcare claims".
+  domain: string;
+  // What the project/product is — the elevator description.
+  description: string;
+  // Comma-separated tools & technologies used.
+  techStack: string;
+  // The user's role on the project, e.g. "Lead Mainframe Engineer".
+  role: string;
+  // Roles & responsibilities bullets — what the user actually did/owned.
+  responsibilities: string[];
+  // Notable outcomes/achievements bullets (may be empty).
+  achievements: string[];
+  // Free-form period, e.g. "Jan 2020 – Mar 2022".
+  period: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Collections {
   resumes: ResumeVersion;
   applications: Application;
@@ -856,6 +884,7 @@ export interface Collections {
   workJournal: WorkJournalNote;
   interviewCoach: InterviewCoachEntry;
   interviewPracticeSessions: PracticeSession;
+  projectExperience: ProjectExperience;
 }
 
 export type CollectionName = keyof Collections;
