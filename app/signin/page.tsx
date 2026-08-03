@@ -5,6 +5,7 @@ import SignInButton from "@/components/SignInButton";
 import { getSession, getAccessToken } from "@/lib/serverSession";
 import { hasGoogleCredentials } from "@/lib/googleConfig";
 import { hasAppleCredentials } from "@/lib/appleConfig";
+import { isNativeAppRequest } from "@/lib/nativeApp";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,10 @@ export default async function SignInPage({
   const { callbackUrl } = await searchParams;
   const target = callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : "/";
   const t = await getTranslations("signin");
+
+  // Inside the native shells a "download the app" link is pointless (and
+  // confusing in front of store reviewers), so it only renders on the web.
+  const native = await isNativeAppRequest();
 
   const credsConfigured = hasGoogleCredentials();
 
@@ -152,6 +157,14 @@ export default async function SignInPage({
               <Link href="/support" className="hover:underline">
                 {t("support")}
               </Link>
+              {!native && (
+                <>
+                  <span className="mx-1.5">·</span>
+                  <Link href="/download" className="hover:underline">
+                    {t("getApp")}
+                  </Link>
+                </>
+              )}
             </p>
           </div>
         </div>

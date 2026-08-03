@@ -11,7 +11,8 @@
     "templates": "Templates",
     "signOut": "Sign out",
     "signedIn": "Signed in",
-    "toggleMenu": "Toggle menu"
+    "toggleMenu": "Toggle menu",
+    "getApp": "Get the app"
   },
   "language": {
     "label": "Language"
@@ -161,7 +162,8 @@
     "scopeNote": "We request access only to Resumeflow-ATS's own app data folder in your Google Drive.",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
-    "support": "Support"
+    "support": "Support",
+    "getApp": "Get the app"
   },
   "ai": {
     "tailor": {

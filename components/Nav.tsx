@@ -80,6 +80,14 @@ export default function Nav() {
 
         {/* ---- Desktop account ---- */}
         <div className="hidden items-center gap-3 md:flex">
+          {!onSignIn && (
+            <Link
+              href="/download"
+              className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-foreground"
+            >
+              {t("getApp")}
+            </Link>
+          )}
           <LanguagePicker />
           <ThemeToggle />
           {user && (
@@ -167,6 +175,12 @@ export default function Nav() {
                 ))}
               </>
             )}
+            <Link
+              href="/download"
+              className="rounded-md px-3 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent"
+            >
+              {t("getApp")}
+            </Link>
             <div className="mt-2 px-3">
               <LanguagePicker />
             </div>

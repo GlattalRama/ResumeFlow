@@ -11,7 +11,8 @@
     "templates": "Plantillas",
     "signOut": "Cerrar sesión",
     "signedIn": "Sesión iniciada",
-    "toggleMenu": "Mostrar menú"
+    "toggleMenu": "Mostrar menú",
+    "getApp": "Descarga la app"
   },
   "language": {
     "label": "Idioma"
@@ -161,7 +162,8 @@
     "scopeNote": "Solo solicitamos acceso a la carpeta de datos de la app Resumeflow-ATS en tu Google Drive.",
     "privacy": "Política de privacidad",
     "terms": "Términos del servicio",
-    "support": "Soporte"
+    "support": "Soporte",
+    "getApp": "Descarga la app"
   },
   "ai": {
     "tailor": {
