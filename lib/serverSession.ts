@@ -54,3 +54,16 @@ export const getAccessToken = cache(async (): Promise<string | null> => {
 
   return (token.accessToken as string) ?? null;
 });
+
+// Stable per-user key for in-memory caches (e.g. Drive file ids). The email
+// survives token refreshes, unlike the access token itself.
+export const getUserCacheKey = cache(async (): Promise<string | null> => {
+  const cookieStore = await cookies();
+  const token = await getToken({
+    req: { cookies: cookieStore } as never,
+    secret: authSecret(),
+    secureCookie: useSecureCookies(),
+  });
+  if (!token) return null;
+  return (token.email as string) ?? (token.sub as string) ?? null;
+});

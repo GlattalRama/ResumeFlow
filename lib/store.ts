@@ -16,7 +16,7 @@ import {
   readJsonFile,
   writeJsonFile,
 } from "./googleDriveStore";
-import { getAccessToken } from "./serverSession";
+import { getAccessToken, getUserCacheKey } from "./serverSession";
 import * as local from "./jsonStore";
 
 class DriveAuthError extends Error {
@@ -35,15 +35,16 @@ function useDrive(): boolean {
 async function drive() {
   const token = await getAccessToken();
   if (!token) throw new DriveAuthError();
-  return driveClient(token);
+  // The per-user key lets the Drive layer cache file ids across requests.
+  return { client: driveClient(token), userKey: await getUserCacheKey() };
 }
 
 export async function readAll<N extends CollectionName>(
   name: N
 ): Promise<Collections[N][]> {
   if (!useDrive()) return local.readAll(name);
-  const d = await drive();
-  return readJsonFile<Collections[N]>(d, driveFileName(name));
+  const { client, userKey } = await drive();
+  return readJsonFile<Collections[N]>(client, driveFileName(name), userKey);
 }
 
 export async function writeAll<N extends CollectionName>(
@@ -51,8 +52,8 @@ export async function writeAll<N extends CollectionName>(
   items: Collections[N][]
 ): Promise<void> {
   if (!useDrive()) return local.writeAll(name, items);
-  const d = await drive();
-  await writeJsonFile<Collections[N]>(d, driveFileName(name), items);
+  const { client, userKey } = await drive();
+  await writeJsonFile<Collections[N]>(client, driveFileName(name), items, userKey);
 }
 
 // The remaining operations are backend-agnostic: they read the whole
