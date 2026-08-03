@@ -119,6 +119,6 @@ export async function middleware(req: NextRequest) {
 // /api/drive/* is intentionally covered so Drive routes require auth.
 export const config = {
   matcher: [
-    "/((?!api/auth|signin|privacy|terms|support|manifest.webmanifest|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico)$).*)",
+    "/((?!api/auth|signin|privacy|terms|support|download|manifest.webmanifest|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico)$).*)",
   ],
 };

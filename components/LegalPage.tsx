@@ -41,6 +41,10 @@ export function LegalPage({
         <Link href="/support" className="hover:underline">
           Support
         </Link>
+        <span className="mx-2">·</span>
+        <Link href="/download" className="hover:underline">
+          Get the app
+        </Link>
       </footer>
     </article>
   );
