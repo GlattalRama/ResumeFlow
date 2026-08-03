@@ -31,10 +31,37 @@ function isNotFound(err: unknown): boolean {
     (err as { code?: number; status?: number })?.status === 404;
 }
 
+// Google throttles Drive per user; when a burst trips the limit every call
+// fails instantly with 403 userRateLimitExceeded (or 429) for a short window.
+// gaxios does not retry by default, so without this a throttled window
+// surfaces as a hard error page instead of a briefly slower render.
 export function driveClient(accessToken: string): drive_v3.Drive {
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
-  return google.drive({ version: "v3", auth });
+  return google.drive({
+    version: "v3",
+    auth,
+    retryConfig: {
+      retry: 3,
+      // 403 is only retried when Google marks it a rate-limit (see below);
+      // plain permission 403s are rethrown immediately by shouldRetry.
+      statusCodesToRetry: [
+        [403, 403],
+        [429, 429],
+        [500, 599],
+      ],
+      shouldRetry: (err) => {
+        const status = err.response?.status ?? (err as { code?: number }).code;
+        if (status === 429 || (typeof status === "number" && status >= 500)) {
+          return true;
+        }
+        if (status !== 403) return false;
+        const reason = JSON.stringify(err.response?.data ?? "");
+        return /ratelimitexceeded|quotaexceeded/i.test(reason);
+      },
+      retryDelay: 500, // exponential from here: ~0.5s, 1s, 2s
+    },
+  });
 }
 
 // Find a file by exact name inside appDataFolder. Returns its id or null.
