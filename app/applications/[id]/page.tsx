@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getItem, readAll, readByApplication } from "@/lib/store";
-import { resolveBaseResumeId } from "@/lib/baseResume";
+import { baseResumeIdFrom } from "@/lib/baseResume";
+import { loadSettings } from "@/lib/aiSettings";
 import { Card, StatusBadge } from "@/components/ui";
 import StatusUpdater from "@/components/StatusUpdater";
 import NotesSection from "@/components/NotesSection";
@@ -25,17 +26,17 @@ export default async function ApplicationDetailPage({
     getTranslations("status"),
     getLocale(),
   ]);
-  const app = await getItem("applications", id);
-  if (!app) notFound();
-
-  const [notes, history, documents, resumes, baseResumeId] =
+  const [app, notes, history, documents, resumes, settings] =
     await Promise.all([
+      getItem("applications", id),
       readByApplication("notes", id),
       readByApplication("statusHistory", id),
       readByApplication("documents", id),
       readAll("resumes"),
-      resolveBaseResumeId(),
+      loadSettings(),
     ]);
+  if (!app) notFound();
+  const baseResumeId = baseResumeIdFrom(settings, resumes);
 
   const resumeOptions = resumes.map((r) => ({
     id: r.id,

@@ -21,14 +21,25 @@ export function isBaseResume(
   return !!baseResumeId && versionId === baseResumeId;
 }
 
+// Pure resolution from already-loaded inputs. Pages that read settings and
+// resumes anyway should use this instead of resolveBaseResumeId — the async
+// variant re-reads both from Drive (a serial settings→resumes chain) on top
+// of the page's own reads.
+export function baseResumeIdFrom(
+  settings: { baseResumeId?: string | null } | null,
+  resumes: ReadonlyArray<{ id: string }>
+): string | null {
+  const id = settings?.baseResumeId;
+  if (!id) return null;
+  return resumes.some((r) => r.id === id) ? id : null;
+}
+
 // Resolve the configured Base Resume id, or null if none is set or the pointer
 // is dangling (points at a deleted version).
 export async function resolveBaseResumeId(): Promise<string | null> {
   const s = await loadSettings();
-  const id = s?.baseResumeId;
-  if (!id) return null;
-  const resumes = await readAll("resumes");
-  return resumes.some((r) => r.id === id) ? id : null;
+  if (!s?.baseResumeId) return null;
+  return baseResumeIdFrom(s, await readAll("resumes"));
 }
 
 // Resolve and return the Base Resume version itself, or null if none/dangling.

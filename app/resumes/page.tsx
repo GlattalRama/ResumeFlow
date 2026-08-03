@@ -2,7 +2,8 @@ import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { readAll } from "@/lib/store";
 import { TEMPLATES, normalizeTemplateId } from "@/lib/constants";
-import { resolveBaseResumeId, isBaseResume } from "@/lib/baseResume";
+import { baseResumeIdFrom, isBaseResume } from "@/lib/baseResume";
+import { loadSettings } from "@/lib/aiSettings";
 import { Card, EmptyState, PageHeader, buttonClass } from "@/components/ui";
 import BaseResumeControl from "@/components/BaseResumeControl";
 
@@ -14,12 +15,13 @@ function templateName(id: string) {
 }
 
 export default async function ResumesPage() {
-  const [resumes, baseResumeId] = await Promise.all([
+  const [resumes, settings] = await Promise.all([
     readAll("resumes").then((rs) =>
       rs.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     ),
-    resolveBaseResumeId(),
+    loadSettings(),
   ]);
+  const baseResumeId = baseResumeIdFrom(settings, resumes);
   const t = await getTranslations("resumes");
   const locale = await getLocale();
 

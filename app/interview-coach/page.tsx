@@ -1,5 +1,6 @@
 import { readAll } from "@/lib/store";
-import { resolveBaseResumeId } from "@/lib/baseResume";
+import { baseResumeIdFrom } from "@/lib/baseResume";
+import { loadSettings } from "@/lib/aiSettings";
 import InterviewCoach from "@/components/InterviewCoach";
 
 export const dynamic = "force-dynamic";
@@ -10,13 +11,14 @@ export default async function InterviewCoachPage({
   searchParams: Promise<{ application?: string }>;
 }) {
   const { application } = await searchParams;
-  const [entries, apps, resumes, notes, baseResumeId] = await Promise.all([
+  const [entries, apps, resumes, notes, settings] = await Promise.all([
     readAll("interviewCoach"),
     readAll("applications"),
     readAll("resumes"),
     readAll("notes"),
-    resolveBaseResumeId(),
+    loadSettings(),
   ]);
+  const baseResumeId = baseResumeIdFrom(settings, resumes);
 
   const noteCount = new Map<string, number>();
   for (const n of notes) {

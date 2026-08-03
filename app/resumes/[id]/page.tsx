@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { getItem } from "@/lib/store";
+import { readAll } from "@/lib/store";
 import { TEMPLATES, normalizeTemplateId } from "@/lib/constants";
-import { resolveBaseResumeId, isBaseResume } from "@/lib/baseResume";
+import { baseResumeIdFrom, isBaseResume } from "@/lib/baseResume";
+import { loadSettings } from "@/lib/aiSettings";
 import { listSnapshots } from "@/lib/resumeHistory";
 import ResumePreviewPane from "@/components/ResumePreviewPane";
 import HistorySection from "@/components/HistorySection";
@@ -17,12 +18,14 @@ export default async function ResumePreviewPage({
 }) {
   const { id } = await params;
   const t = await getTranslations("resumeDetail");
-  const [resume, baseResumeId, snapshots] = await Promise.all([
-    getItem("resumes", id),
-    resolveBaseResumeId(),
+  const [resumes, settings, snapshots] = await Promise.all([
+    readAll("resumes"),
+    loadSettings(),
     listSnapshots(id),
   ]);
+  const resume = resumes.find((r) => r.id === id);
   if (!resume) notFound();
+  const baseResumeId = baseResumeIdFrom(settings, resumes);
   const isBase = isBaseResume(resume.id, baseResumeId);
 
   const normalizedTemplate = normalizeTemplateId(resume.selectedTemplate);
