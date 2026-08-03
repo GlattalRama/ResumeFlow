@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import {
   createItem,
-  deleteItem,
   getItem,
   readAll,
   updateItem,
+  writeAll,
 } from "@/lib/store";
 import {
   isTemplateId,
@@ -12,8 +12,9 @@ import {
   resolveSectionState,
   resolveTemplateStyle,
 } from "@/lib/constants";
-import { resolveBaseResumeId } from "@/lib/baseResume";
-import { captureSnapshot, purgeSnapshots } from "@/lib/resumeHistory";
+import { baseResumeIdFrom } from "@/lib/baseResume";
+import { loadSettings } from "@/lib/aiSettings";
+import { captureSnapshot } from "@/lib/resumeHistory";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -89,9 +90,17 @@ export async function DELETE(_req: Request, { params }: Ctx) {
   const { id } = await params;
   // Deletion requires a designated Base Resume to protect, and the Base Resume
   // itself can never be deleted. This guarantees the user always keeps a clean
-  // master copy. resolveBaseResumeId() returns null when none is set or the
+  // master copy. baseResumeIdFrom() returns null when none is set or the
   // pointer is dangling, so this also forces the user to (re)designate a base.
-  const baseResumeId = await resolveBaseResumeId();
+  // One parallel read round instead of the old serial chain — deletion used to
+  // fire ~8 Drive calls back-to-back, enough to poke Drive's per-user
+  // throttle right before the follow-up navigation rendered.
+  const [settings, resumes, snapshots] = await Promise.all([
+    loadSettings(),
+    readAll("resumes"),
+    readAll("resumeSnapshots"),
+  ]);
+  const baseResumeId = baseResumeIdFrom(settings, resumes);
   if (!baseResumeId)
     return NextResponse.json(
       {
@@ -109,13 +118,20 @@ export async function DELETE(_req: Request, { params }: Ctx) {
       { status: 409 }
     );
 
-  const ok = await deleteItem("resumes", id);
-  if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  // Best-effort: a deleted resume's history has nothing to restore onto.
-  try {
-    await purgeSnapshots(id);
-  } catch (err) {
-    console.error("resume snapshot purge failed:", err);
-  }
+  const remaining = resumes.filter((r) => r.id !== id);
+  if (remaining.length === resumes.length)
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const remainingSnapshots = snapshots.filter((s) => s.resumeId !== id);
+  // Best-effort snapshot purge: a deleted resume's history has nothing to
+  // restore onto, so its failure shouldn't fail the deletion.
+  const [resumesWrite, purge] = await Promise.allSettled([
+    writeAll("resumes", remaining),
+    remainingSnapshots.length !== snapshots.length
+      ? writeAll("resumeSnapshots", remainingSnapshots)
+      : Promise.resolve(),
+  ]);
+  if (resumesWrite.status === "rejected") throw resumesWrite.reason;
+  if (purge.status === "rejected")
+    console.error("resume snapshot purge failed:", purge.reason);
   return NextResponse.json({ ok: true });
 }
