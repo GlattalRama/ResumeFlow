@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Smartphone } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import LanguagePicker from "@/components/LanguagePicker";
 
@@ -81,11 +82,15 @@ export default function Nav() {
         {/* ---- Desktop account ---- */}
         <div className="hidden items-center gap-3 md:flex">
           {!onSignIn && (
+            // Icon-only on desktop — the header row is too dense for another
+            // text link (it pushed Sign out off-screen at common widths).
             <Link
               href="/download"
-              className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-foreground"
+              title={t("getApp")}
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition hover:bg-accent hover:text-foreground"
             >
-              {t("getApp")}
+              <Smartphone className="h-4 w-4" aria-hidden="true" />
+              <span className="sr-only">{t("getApp")}</span>
             </Link>
           )}
           <LanguagePicker />
