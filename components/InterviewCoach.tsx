@@ -15,6 +15,7 @@ import InterviewPrintDoc from "@/components/InterviewPrintDoc";
 import ResumeTopicBank from "@/components/ResumeTopicBank";
 import { aiFetch } from "@/lib/aiConsentClient";
 import { exportInterviewDocx } from "@/lib/interviewExport";
+import { maybeRequestAppReview } from "@/lib/nativeReview";
 
 export interface CoachAppOption {
   id: string;
@@ -204,6 +205,7 @@ export default function InterviewCoach({
         },
         noAnswerLabel: t("export.noAnswer"),
       });
+      maybeRequestAppReview();
     } finally {
       setDocxBusy(false);
     }
@@ -291,6 +293,7 @@ export default function InterviewCoach({
               })
             : t("bannerAdded", { count: data.created.length }),
       });
+      maybeRequestAppReview();
     } catch (err) {
       setBanner({
         ok: false,
@@ -722,6 +725,7 @@ function EntryCard({
       if (!res.ok) throw new Error(data?.error || t("errors.answerGeneration"));
       onReplace(data);
       setEditing(false);
+      maybeRequestAppReview();
     }, "answer");
   }
 

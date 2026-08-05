@@ -10,6 +10,7 @@ import type {
   TemplateStyleSettings,
 } from "@/lib/types";
 import { exportResumeDocx, exportResumePptx } from "@/lib/resumeExport";
+import { maybeRequestAppReview } from "@/lib/nativeReview";
 import { buttonClass } from "./ui";
 
 export default function ResumePreviewActions({
@@ -106,6 +107,7 @@ export default function ResumePreviewActions({
     try {
       await exportResumeDocx(resumeData, templateStyle, sectionState, atsSafe);
       reportExport("docx");
+      maybeRequestAppReview();
     } catch (e) {
       console.error(e);
       alert(t("docxExportFailed"));
@@ -119,6 +121,7 @@ export default function ResumePreviewActions({
     try {
       await exportResumePptx(resumeData, templateStyle, sectionState);
       reportExport("pptx");
+      maybeRequestAppReview();
     } catch (e) {
       console.error(e);
       alert(t("pptxExportFailed"));
@@ -133,6 +136,7 @@ export default function ResumePreviewActions({
         onClick={() => {
           reportExport("pdf");
           window.print();
+          maybeRequestAppReview();
         }}
         className={buttonClass("primary")}
         type="button"
