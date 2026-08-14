@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
@@ -84,6 +85,7 @@ export default async function RootLayout({
             {native && <NativeTabs />}
           </Providers>
         </NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   );

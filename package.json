@@ -16,6 +16,7 @@
     "@capacitor/ios": "^8.4.1",
     "@capgo/capacitor-social-login": "^8.3.32",
     "@openrouter/ai-sdk-provider": "^2.9.0",
+    "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.4.0",
     "ai": "^6.0.197",
     "class-variance-authority": "^0.7.1",
