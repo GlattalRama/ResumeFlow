@@ -897,6 +897,7 @@
     "deleteNeedsBaseTitle": "Wähle zuerst einen Basis-Lebenslauf, bevor du eine Version löschst.",
     "deleteBaseTitle": "Der Basis-Lebenslauf kann nicht gelöscht werden.",
     "docxExportFailed": "DOCX-Export fehlgeschlagen.",
+    "pdfExportFailed": "PDF-Export fehlgeschlagen.",
     "pptxExportFailed": "PPTX-Export fehlgeschlagen.",
     "atsSafeMode": "ATS-sicherer Modus",
     "atsSafeHint": "(einspaltig, ohne Foto — gilt für Vorschau, PDF & DOCX)",

@@ -10,6 +10,9 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Headless-Chromium PDF export (app/api/resumes/[id]/pdf) — load these at
+  // runtime from node_modules instead of bundling them.
+  serverExternalPackages: ["playwright-core", "@sparticuz/chromium"],
   // Pin the workspace root so Next.js doesn't infer it from the stray
   // ~/package-lock.json when multiple lockfiles are present.
   outputFileTracingRoot: __dirname,

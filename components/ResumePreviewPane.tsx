@@ -24,6 +24,7 @@ export default function ResumePreviewPane({
   sectionState,
   isBase = false,
   baseSet = false,
+  initialAtsSafe = false,
 }: {
   id: string;
   resumeData: ResumeData;
@@ -32,9 +33,11 @@ export default function ResumePreviewPane({
   sectionState?: ResumeSectionState[] | null;
   isBase?: boolean;
   baseSet?: boolean;
+  // Initial toggle state, driven by ?atsSafe=1 (see the PDF export route).
+  initialAtsSafe?: boolean;
 }) {
   const t = useTranslations("resumeDetail");
-  const [atsSafe, setAtsSafe] = useState(false);
+  const [atsSafe, setAtsSafe] = useState(initialAtsSafe);
   const margins = resolveTemplateStyle(templateStyle).pageMargins;
 
   return (

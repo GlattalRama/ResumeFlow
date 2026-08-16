@@ -897,6 +897,7 @@
     "deleteNeedsBaseTitle": "Seleziona prima un curriculum base prima di eliminare una versione.",
     "deleteBaseTitle": "Il curriculum base non può essere eliminato.",
     "docxExportFailed": "Esportazione DOCX non riuscita.",
+    "pdfExportFailed": "Esportazione PDF non riuscita.",
     "pptxExportFailed": "Esportazione PPTX non riuscita.",
     "atsSafeMode": "Modalità ATS-safe",
     "atsSafeHint": "(colonna singola, senza foto — vale per anteprima, PDF e DOCX)",

@@ -20,6 +20,7 @@ import type {
   ResumeSectionState,
   TemplateStyleSettings,
 } from "./types";
+import { saveAndShareNative } from "./nativeDownload";
 import {
   customSectionLabel,
   DEFAULT_FONT_SCALE,
@@ -64,12 +65,15 @@ function hex(color: string): string {
   return color.replace(/^#/, "");
 }
 
-function fileBaseName(data: ResumeData): string {
+export function fileBaseName(data: ResumeData): string {
   const name = data.basics.name?.trim() || "resume";
   return name.replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "") || "resume";
 }
 
-function triggerDownload(blob: Blob, filename: string) {
+async function triggerDownload(blob: Blob, filename: string) {
+  // Capacitor shells can't run the blob-anchor download below — hand the file
+  // to the OS share sheet instead (falls through on the web / old app builds).
+  if (await saveAndShareNative(blob, filename)) return;
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -510,7 +514,7 @@ export async function exportResumeDocx(
     sections: [{ properties: {}, children }],
   });
   const blob = await Packer.toBlob(doc);
-  triggerDownload(blob, `${fileBaseName(data)}.docx`);
+  await triggerDownload(blob, `${fileBaseName(data)}.docx`);
 }
 
 // ---- PPTX ----
@@ -1039,5 +1043,5 @@ export async function exportResumePptx(
   }
 
   const blob = (await pptx.write({ outputType: "blob" })) as Blob;
-  triggerDownload(blob, `${fileBaseName(data)}.pptx`);
+  await triggerDownload(blob, `${fileBaseName(data)}.pptx`);
 }

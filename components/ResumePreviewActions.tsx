@@ -9,8 +9,13 @@ import type {
   ResumeSectionState,
   TemplateStyleSettings,
 } from "@/lib/types";
-import { exportResumeDocx, exportResumePptx } from "@/lib/resumeExport";
+import {
+  exportResumeDocx,
+  exportResumePptx,
+  fileBaseName,
+} from "@/lib/resumeExport";
 import { maybeRequestAppReview } from "@/lib/nativeReview";
+import { isNativeShell, saveAndShareNative } from "@/lib/nativeDownload";
 import { buttonClass } from "./ui";
 
 export default function ResumePreviewActions({
@@ -38,7 +43,9 @@ export default function ResumePreviewActions({
   const t = useTranslations("resumeDetail");
   const router = useRouter();
   const [busy, setBusy] = useState(false);
-  const [exporting, setExporting] = useState<"docx" | "pptx" | null>(null);
+  const [exporting, setExporting] = useState<"pdf" | "docx" | "pptx" | null>(
+    null
+  );
 
   // Fire-and-forget aggregate export counter (no resume content sent).
   function reportExport(format: "pdf" | "docx" | "pptx") {
@@ -102,6 +109,39 @@ export default function ResumePreviewActions({
     }
   }
 
+  async function downloadPdf() {
+    reportExport("pdf");
+    // Web: the print dialog (instant, free) prints the rendered preview.
+    // Capacitor shells: window.print() is a silent no-op in Android WebView
+    // and WKWebView, so fetch the server-rendered PDF and hand it to the OS
+    // share sheet instead.
+    if (!isNativeShell()) {
+      window.print();
+      maybeRequestAppReview();
+      return;
+    }
+    setExporting("pdf");
+    try {
+      const res = await fetch(
+        `/api/resumes/${id}/pdf${atsSafe ? "?atsSafe=1" : ""}`
+      );
+      if (!res.ok) throw new Error(`PDF export failed (${res.status})`);
+      const blob = await res.blob();
+      const shared = await saveAndShareNative(
+        blob,
+        `${fileBaseName(resumeData)}.pdf`
+      );
+      // Old app build without the Filesystem/Share plugins — best effort.
+      if (!shared) window.print();
+      maybeRequestAppReview();
+    } catch (e) {
+      console.error(e);
+      alert(t("pdfExportFailed"));
+    } finally {
+      setExporting(null);
+    }
+  }
+
   async function downloadDocx() {
     setExporting("docx");
     try {
@@ -133,15 +173,12 @@ export default function ResumePreviewActions({
   return (
     <div className="no-print flex flex-wrap gap-2">
       <button
-        onClick={() => {
-          reportExport("pdf");
-          window.print();
-          maybeRequestAppReview();
-        }}
+        onClick={downloadPdf}
+        disabled={exporting !== null}
         className={buttonClass("primary")}
         type="button"
       >
-        {t("downloadPdf")}
+        {exporting === "pdf" ? t("preparing") : t("downloadPdf")}
       </button>
       <button
         onClick={downloadDocx}

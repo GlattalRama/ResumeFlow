@@ -897,6 +897,7 @@
     "deleteNeedsBaseTitle": "Sélectionnez d'abord un CV de base avant de supprimer une version.",
     "deleteBaseTitle": "Le CV de base ne peut pas être supprimé.",
     "docxExportFailed": "Échec de l'export DOCX.",
+    "pdfExportFailed": "Échec de l'export PDF.",
     "pptxExportFailed": "Échec de l'export PPTX.",
     "atsSafeMode": "Mode compatible ATS",
     "atsSafeHint": "(une seule colonne, sans photo — s'applique à l'aperçu, au PDF et au DOCX)",

@@ -13,10 +13,15 @@ export const dynamic = "force-dynamic";
 
 export default async function ResumePreviewPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ atsSafe?: string }>;
 }) {
   const { id } = await params;
+  // ?atsSafe=1 pre-checks the ATS-safe toggle — used by the server-side PDF
+  // route so headless Chromium renders the ATS-safe variant.
+  const initialAtsSafe = (await searchParams).atsSafe === "1";
   const t = await getTranslations("resumeDetail");
   const [resumes, settings, snapshots] = await Promise.all([
     readAll("resumes"),
@@ -56,6 +61,7 @@ export default async function ResumePreviewPage({
 
       <ResumePreviewPane
         id={resume.id}
+        initialAtsSafe={initialAtsSafe}
         resumeData={resume.resumeData}
         selectedTemplate={resume.selectedTemplate}
         templateStyle={resume.templateStyle}
