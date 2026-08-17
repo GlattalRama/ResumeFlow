@@ -10,8 +10,8 @@
 // order, as the live preview and PDF. The header (name/title/contact) is always
 // rendered first and is not a reorderable section.
 //
-// PDF export is handled separately via the browser print dialog (window.print)
-// so it uses the live, fully-styled HTML template.
+// PDF export is handled separately by /api/resumes/[id]/pdf (headless Chromium
+// prints the live, fully-styled preview page server-side).
 import type {
   CustomSection,
   ResumeBulletStyle,
@@ -70,7 +70,7 @@ export function fileBaseName(data: ResumeData): string {
   return name.replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "") || "resume";
 }
 
-async function triggerDownload(blob: Blob, filename: string) {
+export async function triggerDownload(blob: Blob, filename: string) {
   // Capacitor shells can't run the blob-anchor download below — hand the file
   // to the OS share sheet instead (falls through on the web / old app builds).
   if (await saveAndShareNative(blob, filename)) return;

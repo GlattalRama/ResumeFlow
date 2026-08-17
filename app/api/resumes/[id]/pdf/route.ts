@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { getItem } from "@/lib/store";
+import { resolveTemplateStyle } from "@/lib/constants";
 
-// Server-side PDF export. The Capacitor shells can't print (window.print() is
-// a silent no-op in both Android WebView and WKWebView), so native clients
-// fetch this route instead: headless Chromium loads the same /resumes/[id]
-// preview page — with the caller's cookies forwarded, so auth and the
-// Drive-backed store behave exactly as they do for the user — emulates print
-// media (which hides the .no-print chrome) and returns the rendered PDF.
+// Server-side PDF export, used by BOTH the web "Download PDF" button (direct
+// file download) and the Capacitor shells (which can't print — window.print()
+// is a silent no-op in Android WebView and WKWebView). Headless Chromium loads
+// the same /resumes/[id] preview page — with the caller's cookies forwarded,
+// so auth and the Drive-backed store behave exactly as they do for the user —
+// emulates print media (which hides the .no-print chrome) and returns the
+// rendered PDF.
 export const maxDuration = 60;
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -52,10 +54,20 @@ export async function GET(req: Request, { params }: Ctx) {
       timeout: 30_000,
     });
     await page.emulateMedia({ media: "print" });
+    // Use the resume's saved page margins so the PDF matches the on-screen
+    // preview exactly. The preview also injects a matching @page rule (which
+    // Chromium lets win over these values), so either path yields the same
+    // geometry.
+    const m = resolveTemplateStyle(resume.templateStyle).pageMargins;
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
-      margin: { top: "12mm", bottom: "12mm", left: "0mm", right: "0mm" },
+      margin: {
+        top: `${m.top}mm`,
+        right: `${m.right}mm`,
+        bottom: `${m.bottom}mm`,
+        left: `${m.left}mm`,
+      },
     });
 
     const name = resume.resumeData?.basics?.name?.trim() || "resume";

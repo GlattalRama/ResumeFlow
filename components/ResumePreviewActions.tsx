@@ -13,9 +13,9 @@ import {
   exportResumeDocx,
   exportResumePptx,
   fileBaseName,
+  triggerDownload,
 } from "@/lib/resumeExport";
 import { maybeRequestAppReview } from "@/lib/nativeReview";
-import { isNativeShell, saveAndShareNative } from "@/lib/nativeDownload";
 import { buttonClass } from "./ui";
 
 export default function ResumePreviewActions({
@@ -31,8 +31,8 @@ export default function ResumePreviewActions({
   resumeData: ResumeData;
   templateStyle?: TemplateStyleSettings;
   sectionState?: ResumeSectionState[] | null;
-  // When true, DOCX/PDF exports use the ATS-safe layout. The PDF (window.print)
-  // prints the currently-rendered preview, so it follows the same toggle.
+  // When true, DOCX/PDF exports use the ATS-safe layout (the PDF route is
+  // asked to render the preview page with ?atsSafe=1).
   atsSafe?: boolean;
   // Whether this version is the designated Base Resume.
   isBase?: boolean;
@@ -111,15 +111,10 @@ export default function ResumePreviewActions({
 
   async function downloadPdf() {
     reportExport("pdf");
-    // Web: the print dialog (instant, free) prints the rendered preview.
-    // Capacitor shells: window.print() is a silent no-op in Android WebView
-    // and WKWebView, so fetch the server-rendered PDF and hand it to the OS
-    // share sheet instead.
-    if (!isNativeShell()) {
-      window.print();
-      maybeRequestAppReview();
-      return;
-    }
+    // Fetch the server-rendered PDF (headless Chromium prints the same preview
+    // page with the resume's saved margins) and save it as a direct file
+    // download — the OS share sheet in the Capacitor shells, a blob-anchor
+    // download on the web. No browser print dialog involved.
     setExporting("pdf");
     try {
       const res = await fetch(
@@ -127,12 +122,7 @@ export default function ResumePreviewActions({
       );
       if (!res.ok) throw new Error(`PDF export failed (${res.status})`);
       const blob = await res.blob();
-      const shared = await saveAndShareNative(
-        blob,
-        `${fileBaseName(resumeData)}.pdf`
-      );
-      // Old app build without the Filesystem/Share plugins — best effort.
-      if (!shared) window.print();
+      await triggerDownload(blob, `${fileBaseName(resumeData)}.pdf`);
       maybeRequestAppReview();
     } catch (e) {
       console.error(e);
