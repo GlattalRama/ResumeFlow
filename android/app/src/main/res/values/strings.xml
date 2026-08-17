@@ -4,4 +4,6 @@
     <string name="title_activity_main">Resumeflow ATS</string>
     <string name="package_name">com.resumeflowats.app</string>
     <string name="custom_url_scheme">com.resumeflowats.app</string>
+    <string name="download_channel_name">Downloads</string>
+    <string name="download_complete">Saved to Downloads</string>
 </resources>

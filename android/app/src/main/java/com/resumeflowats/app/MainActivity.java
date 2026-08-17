@@ -1,6 +1,7 @@
 package com.resumeflowats.app;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.getcapacitor.BridgeActivity;
@@ -20,6 +21,13 @@ public class MainActivity extends BridgeActivity
     // Marker method required by the interface; intentionally empty.
     @Override
     public void IHaveModifiedTheMainActivityForTheUseWithSocialLoginPlugin() {}
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        // Local (in-app) plugins must be registered before the bridge starts.
+        registerPlugin(DownloadNotifierPlugin.class);
+        super.onCreate(savedInstanceState);
+    }
 
     // Required by @capgo/capacitor-social-login for Google "offline" mode
     // (server auth code). The Google sign-in Activity result must be routed back
