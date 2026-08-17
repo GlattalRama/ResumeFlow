@@ -13,6 +13,12 @@ const nextConfig = {
   // Headless-Chromium PDF export (app/api/resumes/[id]/pdf) — load these at
   // runtime from node_modules instead of bundling them.
   serverExternalPackages: ["playwright-core", "@sparticuz/chromium"],
+  // The tracer misses @sparticuz/chromium's bin/ assets (they're only reached
+  // via runtime fs calls), so the deployed function 500s with "input directory
+  // .../bin does not exist" — force-include them for the PDF route.
+  outputFileTracingIncludes: {
+    "/api/resumes/**": ["./node_modules/@sparticuz/chromium/bin/**"],
+  },
   // Pin the workspace root so Next.js doesn't infer it from the stray
   // ~/package-lock.json when multiple lockfiles are present.
   outputFileTracingRoot: __dirname,
