@@ -507,6 +507,7 @@
       "email": "Email",
       "phone": "Telefono",
       "location": "Località",
+      "showLocation": "Mostra nel curriculum",
       "website": "Sito web",
       "profilePhoto": "Foto profilo",
       "photoAlt": "Anteprima del profilo",

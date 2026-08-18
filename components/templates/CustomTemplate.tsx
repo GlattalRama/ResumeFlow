@@ -9,6 +9,7 @@ import {
   resolveSectionLabels,
   resolveSkillCategories,
   resolveTemplateStyle,
+  visibleLocation,
 } from "@/lib/constants";
 import CustomSectionContent, { CategoryValueRows } from "./CustomSectionContent";
 import RichText, { InlineRichText } from "../RichText";
@@ -157,7 +158,7 @@ export default function CustomTemplate({
           <div className="mt-6 space-y-1 text-xs">
             {basics.email && <p>{basics.email}</p>}
             {basics.phone && <p>{basics.phone}</p>}
-            {basics.location && <p>{basics.location}</p>}
+            {visibleLocation(basics) && <p>{visibleLocation(basics)}</p>}
             {basics.website && <p>{basics.website}</p>}
           </div>
         </div>

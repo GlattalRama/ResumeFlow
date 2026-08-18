@@ -26,6 +26,9 @@ export interface ResumeBasics {
   email: string;
   phone: string;
   location: string;
+  // When false, the location stays in the data but is left off the rendered
+  // resume and all exports. Undefined (older resumes) means shown.
+  showLocation?: boolean;
   website: string;
   summary: string;
 }

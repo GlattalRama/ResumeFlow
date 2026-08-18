@@ -1,4 +1,5 @@
 import type { ResumeData } from "./types";
+import { visibleLocation } from "./constants";
 import { htmlToLines } from "./richText";
 
 // Client-side ATS scoring: instant, free, and recomputed live as the user
@@ -247,7 +248,7 @@ function resumeCorpus(data: ResumeData): string {
   const parts: string[] = [
     data.basics.name,
     data.basics.title,
-    data.basics.location,
+    visibleLocation(data.basics),
     htmlToLines(data.basics.summary).join(" "),
     ...(data.areasOfExpertise ?? []),
     ...(data.skillCategories ?? []).flatMap((s) => [s.category, s.value]),

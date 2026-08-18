@@ -4,6 +4,7 @@ import type {
   CustomSectionItem,
   CustomSectionLayoutType,
   DocSectionEntry,
+  ResumeBasics,
   ResumeBulletStyle,
   ResumeData,
   ResumeFormCardState,
@@ -225,6 +226,7 @@ export function emptyResumeData(): ResumeData {
       email: "",
       phone: "",
       location: "",
+      showLocation: true,
       website: "",
       summary: "",
     },
@@ -241,6 +243,12 @@ export function emptyResumeData(): ResumeData {
     languages: [],
     customSections: [],
   };
+}
+
+// The location as it should appear on the rendered resume / exports: empty
+// when the user has toggled it off (undefined on older records means shown).
+export function visibleLocation(basics: ResumeBasics): string {
+  return basics.showLocation === false ? "" : basics.location;
 }
 
 // Backfill any missing arrays / basics on a (possibly legacy or partial)

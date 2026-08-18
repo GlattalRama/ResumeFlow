@@ -9,6 +9,7 @@ import {
   resolveSectionLabels,
   resolveSkillCategories,
   resolveTemplateStyle,
+  visibleLocation,
 } from "@/lib/constants";
 import CustomSectionContent, { CategoryValueRows } from "./CustomSectionContent";
 import RichText, { InlineRichText } from "../RichText";
@@ -145,7 +146,7 @@ export default function ModernTemplate({
           </p>
         )}
         <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500">
-          {[basics.email, basics.phone, basics.location, basics.website]
+          {[basics.email, basics.phone, visibleLocation(basics), basics.website]
             .filter(Boolean)
             .map((v, i) => (
               <span key={i}>{v}</span>

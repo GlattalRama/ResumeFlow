@@ -1153,7 +1153,18 @@ export default function ResumeBuilder({
             <Field label={t("basics.headline")} value={data.basics.title} onChange={(v) => patchBasics("title", v)} />
             <Field label={t("basics.email")} value={data.basics.email} onChange={(v) => patchBasics("email", v)} />
             <Field label={t("basics.phone")} value={data.basics.phone} onChange={(v) => patchBasics("phone", v)} />
-            <Field label={t("basics.location")} value={data.basics.location} onChange={(v) => patchBasics("location", v)} />
+            <div>
+              <Field label={t("basics.location")} value={data.basics.location} onChange={(v) => patchBasics("location", v)} />
+              <label className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={data.basics.showLocation !== false}
+                  onChange={(e) => patchBasics("showLocation", e.target.checked)}
+                  className="h-3.5 w-3.5"
+                />
+                {t("basics.showLocation")}
+              </label>
+            </div>
             <Field label={t("basics.website")} value={data.basics.website} onChange={(v) => patchBasics("website", v)} />
           </div>
 

@@ -32,6 +32,7 @@ import {
   resolveSkillCategories,
   resolveTemplateStyle,
   splitIntoBalancedColumns,
+  visibleLocation,
 } from "./constants";
 import {
   blocksToPlainText,
@@ -175,7 +176,7 @@ export async function exportResumeDocx(
     );
   }
   // Contact details
-  const contact = [basics.email, basics.phone, basics.location, basics.website]
+  const contact = [basics.email, basics.phone, visibleLocation(basics), basics.website]
     .filter(Boolean)
     .join("  |  ");
   if (contact) {
@@ -620,7 +621,7 @@ export async function exportResumePptx(
     });
     y += 0.5;
   }
-  const contact = [basics.email, basics.phone, basics.location, basics.website]
+  const contact = [basics.email, basics.phone, visibleLocation(basics), basics.website]
     .filter(Boolean)
     .join("   |   ");
   if (contact) {

@@ -12,6 +12,7 @@ import {
   resolveSkillCategories,
   resolveTemplateStyle,
   splitIntoBalancedColumns,
+  visibleLocation,
 } from "@/lib/constants";
 import CustomSectionContent, { CategoryValueRows } from "./CustomSectionContent";
 import RichText, { InlineRichText } from "../RichText";
@@ -34,6 +35,7 @@ export default function AtsCorporateTemplate({
 }) {
   const s = resolveTemplateStyle(style);
   const { basics } = data;
+  const location = visibleLocation(basics);
   // Resolved section headings (customTitle || defaultTitle) keyed by section id.
   const labels = resolveSectionLabels(sectionState);
   // Older resume records may predate these fields; default to empty.
@@ -194,9 +196,9 @@ export default function AtsCorporateTemplate({
               {basics.title}
             </p>
           )}
-          {(basics.email || basics.phone || basics.website) && (
+          {(basics.email || basics.phone || location || basics.website) && (
             <p className="mt-1.5 text-[0.92em]" style={{ color: s.mutedColor }}>
-              {[basics.email, basics.phone, basics.website]
+              {[basics.email, basics.phone, location, basics.website]
                 .filter(Boolean)
                 .join("  |  ")}
             </p>
@@ -233,7 +235,7 @@ export default function AtsCorporateTemplate({
               </p>
             )}
           </div>
-          {(basics.email || basics.phone || basics.website) && (
+          {(basics.email || basics.phone || location || basics.website) && (
             <div className="shrink-0 space-y-2 text-[0.92em]">
               {basics.email && (
                 <ContactRow icon={<MailIcon />} color={s.primaryColor}>
@@ -243,6 +245,11 @@ export default function AtsCorporateTemplate({
               {basics.phone && (
                 <ContactRow icon={<PhoneIcon />} color={s.primaryColor}>
                   {basics.phone}
+                </ContactRow>
+              )}
+              {location && (
+                <ContactRow icon={<MapPinIcon />} color={s.primaryColor}>
+                  {location}
                 </ContactRow>
               )}
               {basics.website && (
@@ -373,6 +380,15 @@ function LinkIcon() {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
       <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
+  );
+}
+
+function MapPinIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z" />
+      <circle cx="12" cy="10" r="3" />
     </svg>
   );
 }

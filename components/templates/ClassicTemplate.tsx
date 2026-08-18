@@ -9,6 +9,7 @@ import {
   resolveSectionLabels,
   resolveSkillCategories,
   resolveTemplateStyle,
+  visibleLocation,
 } from "@/lib/constants";
 import CustomSectionContent, { CategoryValueRows } from "./CustomSectionContent";
 import RichText, { InlineRichText } from "../RichText";
@@ -123,7 +124,7 @@ export default function ClassicTemplate({
         </h1>
         {basics.title && <p className="mt-1 italic">{basics.title}</p>}
         <p className="mt-2 text-xs text-gray-600">
-          {[basics.email, basics.phone, basics.location, basics.website]
+          {[basics.email, basics.phone, visibleLocation(basics), basics.website]
             .filter(Boolean)
             .join("  •  ")}
         </p>
