@@ -245,6 +245,9 @@ export function emptyResumeData(): ResumeData {
   };
 }
 
+// Permanent invite to the ResumeFlow community Discord server.
+export const DISCORD_INVITE_URL = "https://discord.gg/Uzz3HVybc";
+
 // The location as it should appear on the rendered resume / exports: empty
 // when the user has toggled it off (undefined on older records means shown).
 export function visibleLocation(basics: ResumeBasics): string {

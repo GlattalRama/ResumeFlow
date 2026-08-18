@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DISCORD_INVITE_URL } from "@/lib/constants";
 
 // Shared chrome for the public legal pages (/privacy, /terms). Renders a
 // centered, readable prose column styled to match the rest of the app.
@@ -45,6 +46,15 @@ export function LegalPage({
         <Link href="/download" className="hover:underline">
           Get the app
         </Link>
+        <span className="mx-2">·</span>
+        <a
+          href={DISCORD_INVITE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:underline"
+        >
+          Discord
+        </a>
       </footer>
     </article>
   );

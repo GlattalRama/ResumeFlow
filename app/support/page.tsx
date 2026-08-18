@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage, LegalSection } from "@/components/LegalPage";
+import { DISCORD_INVITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Support · Resumeflow-ATS",
@@ -77,6 +78,20 @@ export default function SupportPage() {
           <strong>Does Resumeflow-ATS cost anything?</strong> No. The website
           and the mobile apps are free, with no paid content, subscriptions, or
           in-app purchases.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="Community">
+        <p>
+          Join the{" "}
+          <a
+            href={DISCORD_INVITE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            ResumeFlow Discord server
+          </a>{" "}
+          to ask questions, share feedback, and hear about new features first.
         </p>
       </LegalSection>
 

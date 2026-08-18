@@ -6,6 +6,7 @@ import { getSession, getAccessToken } from "@/lib/serverSession";
 import { hasGoogleCredentials } from "@/lib/googleConfig";
 import { hasAppleCredentials } from "@/lib/appleConfig";
 import { isNativeAppRequest } from "@/lib/nativeApp";
+import { DISCORD_INVITE_URL } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -165,6 +166,15 @@ export default async function SignInPage({
                   </Link>
                 </>
               )}
+              <span className="mx-1.5">·</span>
+              <a
+                href={DISCORD_INVITE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+              >
+                Discord
+              </a>
             </p>
           </div>
         </div>
