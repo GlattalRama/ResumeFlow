@@ -82,7 +82,10 @@ interface Adapter {
   name: string;
   matches(url: URL): boolean;
   apiUrl(url: URL): string | null;
-  parse(json: unknown, url: URL): StructuredJob | null;
+  // "json" (default): the response body is parsed and passed as an object.
+  // "html": the raw response text is passed as a string.
+  responseType?: "json" | "html";
+  parse(payload: unknown, url: URL): StructuredJob | null;
 }
 
 // ---- Workday (*.myworkdayjobs.com) -----------------------------------------
@@ -204,7 +207,96 @@ const lever: Adapter = {
   },
 };
 
-const ADAPTERS: Adapter[] = [workday, greenhouse, lever];
+// ---- BrassRing / Talent Gateway (TGnewUI) ------------------------------------
+// Used by UBS, IBM and many other large employers, often on their own domain
+// (e.g. jobs.ubs.com), so we match on the distinctive /TGnewUI/ path instead of
+// the hostname. The page is an Angular shell — the visible DOM has no job text —
+// but the server embeds the full posting as escaped JSON in a hidden
+// <input id="preLoadJSON"> element, so we fetch the page itself and read that.
+// Page: https://{host}/TGnewUI/Search/home/HomeWithPreLoad?PageType=JobDetails
+//         &partnerid={p}&siteid={s}&jobId={id}   (sometimes only in the
+//         #jobDetails={id}_{siteid} fragment, which never reaches the server)
+interface BrassRingQuestion {
+  QuestionName?: string;
+  AnswerValue?: unknown;
+  VerityZone?: string;
+  QuestionType?: string;
+}
+
+const brassring: Adapter = {
+  name: "brassring",
+  responseType: "html",
+  matches: (url) =>
+    url.hostname.endsWith(".brassring.com") ||
+    /\/tgnewui\//i.test(url.pathname),
+  apiUrl: (url) => {
+    const api = new URL(url.toString());
+    // The job can be addressed only by the fragment; promote it to query
+    // params so the server preloads the right posting.
+    if (!api.searchParams.get("jobId")) {
+      const frag = url.hash.match(/jobDetails=(\d+)(?:_(\d+))?/i);
+      if (!frag) return null;
+      api.searchParams.set("jobId", frag[1]);
+      if (frag[2] && !api.searchParams.get("siteid")) {
+        api.searchParams.set("siteid", frag[2]);
+      }
+      api.searchParams.set("PageType", "JobDetails");
+    }
+    // Only the HomeWithPreLoad endpoint embeds the preLoadJSON payload; the
+    // plain Home page loads job details client-side.
+    api.pathname = api.pathname.replace(/\/Home$/i, "/HomeWithPreLoad");
+    api.hash = "";
+    return api.toString();
+  },
+  parse: (payload) => {
+    const html = typeof payload === "string" ? payload : "";
+    // The value is entity-escaped JSON, so it contains no raw double quotes.
+    // Lazy-match up to the first `value=` preceded by whitespace: the tag also
+    // carries a `capture-escaped-parsed-value` attribute that a greedy match
+    // would latch onto instead.
+    const m = html.match(/<input[^>]*id="preLoadJSON"[^>]*?\svalue="([^"]*)"/i);
+    if (!m) return null;
+    let questions: BrassRingQuestion[];
+    let fallbackTitle = "";
+    try {
+      const data = JSON.parse(decodeEntities(m[1])) as {
+        Jobdetails?: { JobDetailQuestions?: BrassRingQuestion[]; Title?: string };
+      };
+      questions = data.Jobdetails?.JobDetailQuestions ?? [];
+      fallbackTitle = str(data.Jobdetails?.Title);
+    } catch {
+      return null;
+    }
+    const answer = (zone: string) =>
+      str(questions.find((q) => q.VerityZone === zone)?.AnswerValue);
+    // The posting is split into sections ("Your role", "Your team", …): the
+    // jobdescription zone plus the site's textarea custom fields, in page
+    // order. Reassemble them under their headings.
+    const parts: string[] = [];
+    for (const q of questions) {
+      if (q.VerityZone !== "jobdescription" && q.QuestionType !== "textarea") {
+        continue;
+      }
+      const body = htmlToText(str(q.AnswerValue));
+      if (!body) continue;
+      const heading = str(q.QuestionName);
+      parts.push(heading ? `${heading}\n${body}` : body);
+    }
+    const description = parts.join("\n\n");
+    if (!description) return null;
+    return {
+      company: "", // BrassRing's payload carries no clean company name
+      jobTitle: answer("jobtitle") || fallbackTitle,
+      // Prefer the posting's visible "Job Reference #" (autoreq) over the
+      // internal reqid the URL uses.
+      jobId: cleanJobId(answer("autoreq")) || cleanJobId(answer("reqid")),
+      jobDescription: description,
+      source: "brassring",
+    };
+  },
+};
+
+const ADAPTERS: Adapter[] = [workday, greenhouse, lever, brassring];
 
 // Return the API URL + adapter for a posting URL, or null if none matches.
 export function matchJobBoard(url: URL): Adapter | null {
@@ -226,18 +318,21 @@ export async function fetchStructuredJob(
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15_000);
   try {
+    const wantsHtml = adapter.responseType === "html";
     const res = await fetch(apiUrl, {
       redirect: "follow",
       signal: controller.signal,
       headers: {
-        Accept: "application/json",
+        Accept: wantsHtml
+          ? "text/html,application/xhtml+xml"
+          : "application/json",
         "User-Agent":
           "Mozilla/5.0 (compatible; ResumeFlowBot/1.0; +https://resumeflow-ats.com)",
       },
     });
     if (!res.ok) return null;
-    const json = await res.json();
-    return adapter.parse(json, url);
+    const payload = wantsHtml ? await res.text() : await res.json();
+    return adapter.parse(payload, url);
   } catch {
     return null;
   } finally {

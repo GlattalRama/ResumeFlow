@@ -46,7 +46,10 @@ export default function ApplicationForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [autofilling, setAutofilling] = useState(false);
-  const [autofillNote, setAutofillNote] = useState("");
+  const [autofillNote, setAutofillNote] = useState<{
+    text: string;
+    ok: boolean;
+  } | null>(null);
 
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -58,7 +61,7 @@ export default function ApplicationForm({
   // is always replaced since that's the field the user is autofilling for.
   async function autofill() {
     const link = form.jobLink.trim();
-    setAutofillNote("");
+    setAutofillNote(null);
     setError("");
     if (!link) {
       setError(t("form.autofillNoLink"));
@@ -80,7 +83,14 @@ export default function ApplicationForm({
         jobId: f.jobId.trim() || data.jobId || f.jobId,
         jobDescription: data.jobDescription || f.jobDescription,
       }));
-      setAutofillNote(t("form.autofillDone"));
+      // A success without a description (LinkedIn auth-walls bots, some sites
+      // render client-side) is what the user autofills for — don't claim
+      // success, tell them to paste it manually.
+      setAutofillNote(
+        data.jobDescription
+          ? { text: t("form.autofillDone"), ok: true }
+          : { text: t("form.autofillNoDescription"), ok: false }
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : t("form.autofillFailed"));
     } finally {
@@ -148,7 +158,16 @@ export default function ApplicationForm({
             </div>
             <p className="mt-1 text-xs text-muted-foreground">{t("form.autofillHint")}</p>
             {autofillNote && (
-              <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">{autofillNote}</p>
+              <p
+                className={
+                  "mt-1 text-xs " +
+                  (autofillNote.ok
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-amber-600 dark:text-amber-400")
+                }
+              >
+                {autofillNote.text}
+              </p>
             )}
           </div>
           <div>
@@ -218,6 +237,15 @@ export default function ApplicationForm({
           {t("form.cancel")}
         </button>
       </div>
+      {saving && (
+        <p
+          className="text-xs text-muted-foreground"
+          role="status"
+          aria-live="polite"
+        >
+          {t("form.savingHint")}
+        </p>
+      )}
     </div>
   );
 }
