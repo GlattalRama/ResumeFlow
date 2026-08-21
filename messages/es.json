@@ -572,8 +572,9 @@
       "filesLabel": "Archivos de certificados",
       "uploadFile": "Subir archivo",
       "uploadingFile": "Subiendo…",
-      "filesHint": "Adjunta copias en PDF o imagen de tus certificados para tus registros. Se guardan de forma privada con este currículum y no aparecen en el documento.",
+      "filesHint": "Adjunta copias en PDF o imagen de tus certificados para tus registros. Los PDF se renombran automáticamente según la certificación que contienen cuando es posible. Se guardan de forma privada con este currículum y no aparecen en el documento.",
       "removeFile": "Eliminar archivo",
+      "renameFile": "Renombrar archivo",
       "uploadError": "No se pudo subir el archivo."
     },
     "languages": {

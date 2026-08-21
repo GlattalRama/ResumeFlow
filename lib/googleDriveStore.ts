@@ -197,6 +197,15 @@ export async function getImage(
   };
 }
 
+// Rename a Drive file (metadata only; the bytes are untouched).
+export async function renameFile(
+  drive: drive_v3.Drive,
+  fileId: string,
+  name: string
+): Promise<void> {
+  await drive.files.update({ fileId, requestBody: { name } });
+}
+
 export async function deleteFile(
   drive: drive_v3.Drive,
   fileId: string

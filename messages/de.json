@@ -572,8 +572,9 @@
       "filesLabel": "Zertifikatsdateien",
       "uploadFile": "Datei hochladen",
       "uploadingFile": "Wird hochgeladen…",
-      "filesHint": "Hängen Sie PDF- oder Bildkopien Ihrer Zertifikate für Ihre Unterlagen an. Sie werden privat mit diesem Lebenslauf gespeichert und erscheinen nicht auf dem Lebenslaufdokument.",
+      "filesHint": "Hängen Sie PDF- oder Bildkopien Ihrer Zertifikate für Ihre Unterlagen an. PDF-Uploads werden nach Möglichkeit automatisch nach der enthaltenen Zertifizierung benannt. Sie werden privat mit diesem Lebenslauf gespeichert und erscheinen nicht auf dem Lebenslaufdokument.",
       "removeFile": "Datei entfernen",
+      "renameFile": "Datei umbenennen",
       "uploadError": "Die Datei konnte nicht hochgeladen werden."
     },
     "languages": {

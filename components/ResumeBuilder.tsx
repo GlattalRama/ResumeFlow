@@ -253,6 +253,9 @@ export default function ResumeBuilder({
   // Certificate file attachments (PDF/image) on the Certifications card.
   const [uploadingCertFile, setUploadingCertFile] = useState(false);
   const [certFilesError, setCertFilesError] = useState("");
+  // Inline rename: id of the file being renamed + the draft name.
+  const [renamingCertFile, setRenamingCertFile] = useState<string | null>(null);
+  const [certRenameDraft, setCertRenameDraft] = useState("");
   // Live-preview-only: render the ATS-safe layout (single column, no photo).
   const [atsView, setAtsView] = useState(false);
   // Mobile-only: which pane is showing. On large screens both are always
@@ -553,6 +556,28 @@ export default function ResumeBuilder({
     } finally {
       setUploadingCertFile(false);
     }
+  }
+  function commitCertFileRename(id: string) {
+    const name = certRenameDraft.trim();
+    setRenamingCertFile(null);
+    if (!name) return;
+    const f = (data.certificationFiles ?? []).find((x) => x.id === id);
+    if (!f || name === f.name) return;
+    // Keep the Drive file's name in sync (best-effort; the metadata in
+    // resumeData is the display source of truth and rides the normal save).
+    if (f.driveFileId) {
+      fetch(`/api/certificates/${f.driveFileId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      }).catch(() => {});
+    }
+    setData((d) => ({
+      ...d,
+      certificationFiles: (d.certificationFiles ?? []).map((x) =>
+        x.id === id ? { ...x, name } : x
+      ),
+    }));
   }
   function removeCertFile(id: string) {
     // Best-effort delete of the Drive file; the metadata is removed regardless.
@@ -1678,23 +1703,49 @@ export default function ResumeBuilder({
                     key={f.id}
                     className="flex items-center gap-2 rounded-md border border-input px-2 py-1.5 text-xs"
                   >
-                    <a
-                      href={
-                        f.driveFileId
-                          ? `/api/drive/photos/${f.driveFileId}`
-                          : f.dataUrl
-                      }
-                      target="_blank"
-                      rel="noreferrer"
-                      className="min-w-0 flex-1 truncate font-medium text-brand-600 hover:underline dark:text-brand-300"
-                    >
-                      {f.name}
-                    </a>
+                    {renamingCertFile === f.id ? (
+                      <input
+                        autoFocus
+                        className="min-w-0 flex-1 rounded border border-input bg-transparent px-1 py-0.5 text-xs"
+                        value={certRenameDraft}
+                        onChange={(e) => setCertRenameDraft(e.target.value)}
+                        onBlur={() => commitCertFileRename(f.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") commitCertFileRename(f.id);
+                          if (e.key === "Escape") setRenamingCertFile(null);
+                        }}
+                      />
+                    ) : (
+                      <a
+                        href={
+                          f.driveFileId
+                            ? `/api/drive/photos/${f.driveFileId}`
+                            : f.dataUrl
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                        className="min-w-0 flex-1 truncate font-medium text-brand-600 hover:underline dark:text-brand-300"
+                      >
+                        {f.name}
+                      </a>
+                    )}
                     <span className="shrink-0 text-muted-foreground/70">
                       {f.size >= 1024 * 1024
                         ? `${(f.size / (1024 * 1024)).toFixed(1)} MB`
                         : `${Math.max(1, Math.round(f.size / 1024))} KB`}
                     </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCertRenameDraft(f.name);
+                        setRenamingCertFile(f.id);
+                      }}
+                      aria-label={t("certifications.renameFile")}
+                      title={t("certifications.renameFile")}
+                      className="shrink-0 text-muted-foreground/70 hover:text-brand-600 dark:hover:text-brand-300"
+                    >
+                      ✎
+                    </button>
                     <button
                       type="button"
                       onClick={() => removeCertFile(f.id)}

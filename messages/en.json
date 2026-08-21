@@ -572,8 +572,9 @@
       "filesLabel": "Certificate files",
       "uploadFile": "Upload file",
       "uploadingFile": "Uploading…",
-      "filesHint": "Attach PDF or image copies of your certificates for your records. Stored privately with this resume — not shown on the resume document.",
+      "filesHint": "Attach PDF or image copies of your certificates for your records. PDF uploads are automatically named after the certification they contain when possible. Stored privately with this resume — not shown on the resume document.",
       "removeFile": "Remove file",
+      "renameFile": "Rename file",
       "uploadError": "Couldn't upload that file."
     },
     "languages": {

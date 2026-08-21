@@ -572,8 +572,9 @@
       "filesLabel": "File dei certificati",
       "uploadFile": "Carica file",
       "uploadingFile": "Caricamento…",
-      "filesHint": "Allega copie PDF o immagine dei tuoi certificati per i tuoi archivi. Sono salvate privatamente con questo curriculum e non compaiono sul documento.",
+      "filesHint": "Allega copie PDF o immagine dei tuoi certificati per i tuoi archivi. I PDF vengono rinominati automaticamente in base alla certificazione che contengono quando possibile. Sono salvate privatamente con questo curriculum e non compaiono sul documento.",
       "removeFile": "Rimuovi file",
+      "renameFile": "Rinomina file",
       "uploadError": "Impossibile caricare il file."
     },
     "languages": {

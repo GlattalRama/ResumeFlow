@@ -572,8 +572,9 @@
       "filesLabel": "Fichiers de certificats",
       "uploadFile": "Téléverser un fichier",
       "uploadingFile": "Téléversement…",
-      "filesHint": "Joignez des copies PDF ou image de vos certificats pour vos dossiers. Elles sont stockées en privé avec ce CV et n'apparaissent pas sur le document.",
+      "filesHint": "Joignez des copies PDF ou image de vos certificats pour vos dossiers. Les PDF sont automatiquement nommés d'après la certification qu'ils contiennent lorsque c'est possible. Elles sont stockées en privé avec ce CV et n'apparaissent pas sur le document.",
       "removeFile": "Supprimer le fichier",
+      "renameFile": "Renommer le fichier",
       "uploadError": "Impossible de téléverser ce fichier."
     },
     "languages": {

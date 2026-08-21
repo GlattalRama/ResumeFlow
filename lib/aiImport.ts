@@ -265,6 +265,42 @@ export async function extractCertificationsFromText(
   return object.certifications.map(stripAllTags).filter(Boolean);
 }
 
+const certificateNameSchema = jsonSchema<{ title: string; year: string }>({
+  type: "object",
+  properties: {
+    title: { type: "string" },
+    year: { type: "string" },
+  },
+  required: ["title", "year"],
+  additionalProperties: false,
+});
+
+// Suggest a clean display name for an uploaded certificate document from its
+// extracted text, e.g. "AWS Certified Solutions Architect – 2023". Returns
+// null when the text doesn't clearly identify a certification (the caller
+// keeps the original filename). Best-effort: callers must swallow throws.
+export async function suggestCertificateFileName(
+  text: string,
+  model: LanguageModel
+): Promise<string | null> {
+  const { object } = await generateObject({
+    model,
+    schema: certificateNameSchema,
+    system: [
+      "You are given the text extracted from a document a user uploaded as a professional certificate.",
+      "Return the certification's official title (including the issuer when it is part of the common name, e.g. 'AWS Certified Solutions Architect – Professional') and the issue year if stated.",
+      "EXTRACT ONLY — never guess. If the text does not clearly identify a certification, return empty strings for both fields.",
+      "Plain text only, no HTML or markdown.",
+    ].join("\n"),
+    prompt: `Document text:\n\n${text.slice(0, 8000)}`,
+    maxOutputTokens: 200,
+  });
+  const title = stripAllTags(object.title);
+  if (!title) return null;
+  const year = stripAllTags(object.year).slice(0, 12);
+  return year ? `${title} – ${year}` : title;
+}
+
 // ── formatting helpers ──────────────────────────────────────────────────────
 
 // Decode the handful of HTML entities mammoth / the model may emit.
