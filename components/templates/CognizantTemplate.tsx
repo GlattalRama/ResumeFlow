@@ -321,6 +321,19 @@ export default function CognizantTemplate({
         </div>
       )}
 
+      {/* ---- Certifications ---- */}
+      {show("certifications") && (
+        <section data-rf-section="certifications">
+          <Heading style={s}>{labels.certifications}</Heading>
+          <BulletColumns
+            items={data.certifications.filter(Boolean)}
+            marker={areasMarker}
+            markerColor={s.bodyColor}
+            single={atsSafe}
+          />
+        </section>
+      )}
+
       <PageFooter style={s} page={1} total={show("projects") ? 2 : 1} />
 
       {/* ---- Page 2: Selected relevant project experience ---- */}

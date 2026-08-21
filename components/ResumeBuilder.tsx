@@ -244,6 +244,11 @@ export default function ResumeBuilder({
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState("");
   const [importNote, setImportNote] = useState("");
+  // Certifications "Refresh from resume": AI scan of the other sections for
+  // certifications mentioned there; merges new ones into the list.
+  const [certsRefreshing, setCertsRefreshing] = useState(false);
+  const [certsRefreshError, setCertsRefreshError] = useState("");
+  const [certsRefreshNote, setCertsRefreshNote] = useState("");
   // Live-preview-only: render the ATS-safe layout (single column, no photo).
   const [atsView, setAtsView] = useState(false);
   // Mobile-only: which pane is showing. On large screens both are always
@@ -775,6 +780,62 @@ export default function ResumeBuilder({
       setImportError(e instanceof Error ? e.message : t("errors.import"));
     } finally {
       setImporting(false);
+    }
+  }
+
+  // Re-scan the rest of the resume (summary, experience, education, projects,
+  // skills, custom sections) for certifications mentioned there and append any
+  // that aren't already listed. Merge-only — never removes or rewrites the
+  // user's existing entries.
+  async function refreshCertifications() {
+    setCertsRefreshing(true);
+    setCertsRefreshError("");
+    setCertsRefreshNote("");
+    try {
+      const res = await aiFetch("/api/resumes/certifications/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resumeData: data }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(json?.error || t("certifications.refreshError"));
+      }
+      const found: string[] = Array.isArray(json.certifications)
+        ? json.certifications.filter((c: unknown) => typeof c === "string")
+        : [];
+      // Dedupe loosely: case/punctuation-insensitive, and treat containment as
+      // a duplicate so a scanned "PMP" doesn't stack under an existing
+      // "PMP – Project Management Institute" (or vice versa).
+      const norm = (s: string) =>
+        s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+      let addedCount = 0;
+      setData((d) => {
+        const have = d.certifications.map(norm).filter(Boolean);
+        const isDup = (key: string) =>
+          have.some((e) => e.includes(key) || key.includes(e));
+        const fresh = found.filter((c) => {
+          const key = norm(c);
+          if (!key || isDup(key)) return false;
+          have.push(key);
+          return true;
+        });
+        addedCount = fresh.length;
+        return fresh.length
+          ? { ...d, certifications: [...d.certifications, ...fresh] }
+          : d;
+      });
+      setCertsRefreshNote(
+        addedCount > 0
+          ? t("certifications.refreshAdded", { count: addedCount })
+          : t("certifications.refreshNoneFound")
+      );
+    } catch (e) {
+      setCertsRefreshError(
+        e instanceof Error ? e.message : t("certifications.refreshError")
+      );
+    } finally {
+      setCertsRefreshing(false);
     }
   }
 
@@ -1495,6 +1556,18 @@ export default function ResumeBuilder({
     },
     certifications: {
       count: data.certifications.length,
+      headerRight: (
+        <button
+          type="button"
+          onClick={refreshCertifications}
+          disabled={certsRefreshing}
+          className="text-xs text-muted-foreground/70 hover:text-brand-600 disabled:opacity-50 dark:hover:text-brand-300"
+        >
+          {certsRefreshing
+            ? t("certifications.refreshing")
+            : t("certifications.refresh")}
+        </button>
+      ),
       body: (
         <div>
           <label className={labelClass}>{t("certifications.label")}</label>
@@ -1509,6 +1582,19 @@ export default function ResumeBuilder({
               }))
             }
           />
+          <p className="mt-1.5 text-xs text-muted-foreground/70">
+            {t("certifications.refreshHint")}
+          </p>
+          {certsRefreshNote && !certsRefreshError && (
+            <p className="mt-1.5 text-xs text-green-700 dark:text-green-300">
+              {certsRefreshNote}
+            </p>
+          )}
+          {certsRefreshError && (
+            <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
+              {certsRefreshError}
+            </p>
+          )}
         </div>
       ),
     },

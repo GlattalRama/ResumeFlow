@@ -562,7 +562,13 @@
       "valuePlaceholder": "p. ex. COBOL, PL/I, JCL"
     },
     "certifications": {
-      "label": "Certifications (une par ligne)"
+      "label": "Certifications (une par ligne)",
+      "refresh": "Actualiser depuis le CV",
+      "refreshing": "Analyse…",
+      "refreshHint": "« Actualiser » analyse le reste de ce CV (résumé, expérience, projets, sections personnalisées) et ajoute les certifications qui y sont mentionnées.",
+      "refreshAdded": "{count, plural, one {# nouvelle certification ajoutée.} other {# nouvelles certifications ajoutées.}}",
+      "refreshNoneFound": "Aucune nouvelle certification trouvée dans le contenu du CV.",
+      "refreshError": "Impossible d'analyser le CV à la recherche de certifications."
     },
     "languages": {
       "label": "Langues (une par ligne)"

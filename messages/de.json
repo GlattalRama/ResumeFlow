@@ -562,7 +562,13 @@
       "valuePlaceholder": "z. B. COBOL, PL/I, JCL"
     },
     "certifications": {
-      "label": "Zertifizierungen (eine pro Zeile)"
+      "label": "Zertifizierungen (eine pro Zeile)",
+      "refresh": "Aus Lebenslauf aktualisieren",
+      "refreshing": "Wird durchsucht…",
+      "refreshHint": "„Aktualisieren“ durchsucht den restlichen Lebenslauf (Zusammenfassung, Berufserfahrung, Projekte, eigene Abschnitte) und ergänzt dort erwähnte Zertifizierungen.",
+      "refreshAdded": "{count, plural, one {# neue Zertifizierung hinzugefügt.} other {# neue Zertifizierungen hinzugefügt.}}",
+      "refreshNoneFound": "Keine neuen Zertifizierungen im Lebenslauf gefunden.",
+      "refreshError": "Der Lebenslauf konnte nicht nach Zertifizierungen durchsucht werden."
     },
     "languages": {
       "label": "Sprachen (eine pro Zeile)"

@@ -193,6 +193,78 @@ export async function extractResumeFromText(
   return sanitizeImportFormatting(object, formatted);
 }
 
+// ── certification refresh ───────────────────────────────────────────────────
+
+const certificationsSchema = jsonSchema<{ certifications: string[] }>({
+  type: "object",
+  properties: {
+    certifications: { type: "array", items: { type: "string" } },
+  },
+  required: ["certifications"],
+  additionalProperties: false,
+});
+
+// Plain-text corpus of everything the user has typed into the OTHER sections of
+// the resume, fed to the certification scan. The certifications field itself is
+// deliberately left out — the caller merges the scan result into it and dedupes.
+export function buildCertificationScanText(data: ResumeData): string {
+  const lines: string[] = [];
+  const push = (s?: string) => {
+    const clean = stripAllTags(s ?? "");
+    if (clean) lines.push(clean);
+  };
+  push(data.basics.title);
+  push(data.basics.summary);
+  for (const a of data.areasOfExpertise ?? []) push(a);
+  for (const e of data.experience ?? []) {
+    push([e.role, e.company].filter(Boolean).join(" at "));
+    for (const h of e.highlights ?? []) push(h);
+  }
+  for (const ed of data.education ?? []) {
+    push([ed.degree, ed.field, ed.school].filter(Boolean).join(", "));
+  }
+  for (const c of data.skillCategories ?? []) {
+    push([c.category, c.value].filter(Boolean).join(": "));
+  }
+  for (const p of data.projects ?? []) {
+    push([p.name, p.description].filter(Boolean).join(": "));
+  }
+  for (const sec of data.customSections ?? []) {
+    push(sec.title);
+    for (const it of sec.items ?? []) {
+      push([it.category, it.value].filter(Boolean).join(": "));
+    }
+  }
+  return lines.join("\n");
+}
+
+// Scan resume content for professional certifications/licenses mentioned in it.
+// Pure extraction — returns each certification as one plain-text line, or an
+// empty array when the content mentions none. Throws on model/transport errors.
+export async function extractCertificationsFromText(
+  text: string,
+  model: LanguageModel
+): Promise<string[]> {
+  const { object } = await generateObject({
+    model,
+    schema: certificationsSchema,
+    system: [
+      "You extract professional certifications from a candidate's resume content.",
+      "",
+      "Strict rules:",
+      "- EXTRACT ONLY. List certifications, licenses, and formal credentials that are explicitly mentioned in the text (e.g. 'AWS Certified Solutions Architect', 'PMP', 'CISSP', 'Salesforce Administrator Certification'). Never invent, infer, or suggest certifications the text does not state the candidate holds.",
+      "- One certification per array entry, written as it appears in the text; keep the issuer and year when they are written next to it.",
+      "- Do NOT include university degrees, diplomas, uncompleted or merely planned certifications, plain skills, tools, or job titles.",
+      "- Deduplicate: if the same certification is mentioned more than once, output it once with the most complete wording.",
+      "- Return an empty array when the content mentions no certifications.",
+      "- Plain text only in every entry (no HTML, no markdown).",
+    ].join("\n"),
+    prompt: `Resume content:\n\n${text.slice(0, 24000)}`,
+    maxOutputTokens: 1000,
+  });
+  return object.certifications.map(stripAllTags).filter(Boolean);
+}
+
 // ── formatting helpers ──────────────────────────────────────────────────────
 
 // Decode the handful of HTML entities mammoth / the model may emit.

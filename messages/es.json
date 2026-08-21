@@ -562,7 +562,13 @@
       "valuePlaceholder": "p. ej. COBOL, PL/I, JCL"
     },
     "certifications": {
-      "label": "Certificaciones (una por línea)"
+      "label": "Certificaciones (una por línea)",
+      "refresh": "Actualizar desde el currículum",
+      "refreshing": "Analizando…",
+      "refreshHint": "«Actualizar» analiza el resto de este currículum (resumen, experiencia, proyectos, secciones personalizadas) y añade las certificaciones mencionadas allí.",
+      "refreshAdded": "{count, plural, one {Se añadió # certificación nueva.} other {Se añadieron # certificaciones nuevas.}}",
+      "refreshNoneFound": "No se encontraron certificaciones nuevas en el contenido del currículum.",
+      "refreshError": "No se pudo analizar el currículum en busca de certificaciones."
     },
     "languages": {
       "label": "Idiomas (uno por línea)"

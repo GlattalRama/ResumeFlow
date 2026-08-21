@@ -562,7 +562,13 @@
       "valuePlaceholder": "e.g. COBOL, PL/I, JCL"
     },
     "certifications": {
-      "label": "Certifications (one per line)"
+      "label": "Certifications (one per line)",
+      "refresh": "Refresh from resume",
+      "refreshing": "Scanning…",
+      "refreshHint": "Refresh scans the rest of this resume (summary, experience, projects, custom sections) and adds any certifications mentioned there.",
+      "refreshAdded": "{count, plural, one {Added # new certification.} other {Added # new certifications.}}",
+      "refreshNoneFound": "No new certifications found in the resume content.",
+      "refreshError": "Couldn't scan the resume for certifications."
     },
     "languages": {
       "label": "Languages (one per line)"
