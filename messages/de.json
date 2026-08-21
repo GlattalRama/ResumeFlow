@@ -568,7 +568,13 @@
       "refreshHint": "„Aktualisieren“ durchsucht den restlichen Lebenslauf (Zusammenfassung, Berufserfahrung, Projekte, eigene Abschnitte) und ergänzt dort erwähnte Zertifizierungen.",
       "refreshAdded": "{count, plural, one {# neue Zertifizierung hinzugefügt.} other {# neue Zertifizierungen hinzugefügt.}}",
       "refreshNoneFound": "Keine neuen Zertifizierungen im Lebenslauf gefunden.",
-      "refreshError": "Der Lebenslauf konnte nicht nach Zertifizierungen durchsucht werden."
+      "refreshError": "Der Lebenslauf konnte nicht nach Zertifizierungen durchsucht werden.",
+      "filesLabel": "Zertifikatsdateien",
+      "uploadFile": "Datei hochladen",
+      "uploadingFile": "Wird hochgeladen…",
+      "filesHint": "Hängen Sie PDF- oder Bildkopien Ihrer Zertifikate für Ihre Unterlagen an. Sie werden privat mit diesem Lebenslauf gespeichert und erscheinen nicht auf dem Lebenslaufdokument.",
+      "removeFile": "Datei entfernen",
+      "uploadError": "Die Datei konnte nicht hochgeladen werden."
     },
     "languages": {
       "label": "Sprachen (eine pro Zeile)"

@@ -568,7 +568,13 @@
       "refreshHint": "« Actualiser » analyse le reste de ce CV (résumé, expérience, projets, sections personnalisées) et ajoute les certifications qui y sont mentionnées.",
       "refreshAdded": "{count, plural, one {# nouvelle certification ajoutée.} other {# nouvelles certifications ajoutées.}}",
       "refreshNoneFound": "Aucune nouvelle certification trouvée dans le contenu du CV.",
-      "refreshError": "Impossible d'analyser le CV à la recherche de certifications."
+      "refreshError": "Impossible d'analyser le CV à la recherche de certifications.",
+      "filesLabel": "Fichiers de certificats",
+      "uploadFile": "Téléverser un fichier",
+      "uploadingFile": "Téléversement…",
+      "filesHint": "Joignez des copies PDF ou image de vos certificats pour vos dossiers. Elles sont stockées en privé avec ce CV et n'apparaissent pas sur le document.",
+      "removeFile": "Supprimer le fichier",
+      "uploadError": "Impossible de téléverser ce fichier."
     },
     "languages": {
       "label": "Langues (une par ligne)"

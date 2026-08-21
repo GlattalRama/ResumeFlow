@@ -568,7 +568,13 @@
       "refreshHint": "«Actualizar» analiza el resto de este currículum (resumen, experiencia, proyectos, secciones personalizadas) y añade las certificaciones mencionadas allí.",
       "refreshAdded": "{count, plural, one {Se añadió # certificación nueva.} other {Se añadieron # certificaciones nuevas.}}",
       "refreshNoneFound": "No se encontraron certificaciones nuevas en el contenido del currículum.",
-      "refreshError": "No se pudo analizar el currículum en busca de certificaciones."
+      "refreshError": "No se pudo analizar el currículum en busca de certificaciones.",
+      "filesLabel": "Archivos de certificados",
+      "uploadFile": "Subir archivo",
+      "uploadingFile": "Subiendo…",
+      "filesHint": "Adjunta copias en PDF o imagen de tus certificados para tus registros. Se guardan de forma privada con este currículum y no aparecen en el documento.",
+      "removeFile": "Eliminar archivo",
+      "uploadError": "No se pudo subir el archivo."
     },
     "languages": {
       "label": "Idiomas (uno por línea)"

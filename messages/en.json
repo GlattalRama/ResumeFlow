@@ -568,7 +568,13 @@
       "refreshHint": "Refresh scans the rest of this resume (summary, experience, projects, custom sections) and adds any certifications mentioned there.",
       "refreshAdded": "{count, plural, one {Added # new certification.} other {Added # new certifications.}}",
       "refreshNoneFound": "No new certifications found in the resume content.",
-      "refreshError": "Couldn't scan the resume for certifications."
+      "refreshError": "Couldn't scan the resume for certifications.",
+      "filesLabel": "Certificate files",
+      "uploadFile": "Upload file",
+      "uploadingFile": "Uploading…",
+      "filesHint": "Attach PDF or image copies of your certificates for your records. Stored privately with this resume — not shown on the resume document.",
+      "removeFile": "Remove file",
+      "uploadError": "Couldn't upload that file."
     },
     "languages": {
       "label": "Languages (one per line)"

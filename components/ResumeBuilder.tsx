@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type {
+  CertificationFile,
   CustomSection,
   CustomSectionItem,
   CustomSectionLayoutType,
@@ -249,6 +250,9 @@ export default function ResumeBuilder({
   const [certsRefreshing, setCertsRefreshing] = useState(false);
   const [certsRefreshError, setCertsRefreshError] = useState("");
   const [certsRefreshNote, setCertsRefreshNote] = useState("");
+  // Certificate file attachments (PDF/image) on the Certifications card.
+  const [uploadingCertFile, setUploadingCertFile] = useState(false);
+  const [certFilesError, setCertFilesError] = useState("");
   // Live-preview-only: render the ATS-safe layout (single column, no photo).
   const [atsView, setAtsView] = useState(false);
   // Mobile-only: which pane is showing. On large screens both are always
@@ -511,6 +515,59 @@ export default function ResumeBuilder({
       fetch(`/api/drive/photos/${fileId}`, { method: "DELETE" }).catch(() => {});
     }
     setData((d) => ({ ...d, profilePhoto: "", profilePhotoMeta: null }));
+  }
+
+  // ----- Certificate files (Certifications card attachments) -----
+  // Same storage model as the profile photo: Drive appDataFolder in Drive mode
+  // (bytes streamed via /api/drive/photos/[fileId]), Base64 dataUrl in local
+  // dev. Only the metadata lives in resumeData and rides the normal save path.
+  async function onCertFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    // Allow re-selecting the same file later by clearing the input value.
+    e.target.value = "";
+    if (files.length === 0) return;
+    setUploadingCertFile(true);
+    setCertFilesError("");
+    try {
+      for (const file of files) {
+        const form = new FormData();
+        form.append("file", file);
+        const res = await fetch("/api/certificates/upload", {
+          method: "POST",
+          body: form,
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(json?.error || t("certifications.uploadError"));
+        }
+        const uploaded = json.certificationFile as CertificationFile;
+        setData((d) => ({
+          ...d,
+          certificationFiles: [...(d.certificationFiles ?? []), uploaded],
+        }));
+      }
+    } catch (err) {
+      setCertFilesError(
+        err instanceof Error ? err.message : t("certifications.uploadError")
+      );
+    } finally {
+      setUploadingCertFile(false);
+    }
+  }
+  function removeCertFile(id: string) {
+    // Best-effort delete of the Drive file; the metadata is removed regardless.
+    const f = (data.certificationFiles ?? []).find((x) => x.id === id);
+    if (f?.driveFileId) {
+      fetch(`/api/drive/photos/${f.driveFileId}`, { method: "DELETE" }).catch(
+        () => {}
+      );
+    }
+    setData((d) => ({
+      ...d,
+      certificationFiles: (d.certificationFiles ?? []).filter(
+        (x) => x.id !== id
+      ),
+    }));
   }
 
   // ----- Areas of Expertise (item-by-item editor) -----
@@ -1595,6 +1652,71 @@ export default function ResumeBuilder({
               {certsRefreshError}
             </p>
           )}
+          <div className="mt-4">
+            <div className="flex items-center justify-between gap-2">
+              <label className={labelClass}>
+                {t("certifications.filesLabel")}
+              </label>
+              <label className="cursor-pointer rounded-md border border-input px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/50">
+                {uploadingCertFile
+                  ? t("certifications.uploadingFile")
+                  : t("certifications.uploadFile")}
+                <input
+                  type="file"
+                  accept="application/pdf,image/png,image/jpeg,image/webp,image/gif"
+                  multiple
+                  className="hidden"
+                  disabled={uploadingCertFile}
+                  onChange={onCertFilesSelected}
+                />
+              </label>
+            </div>
+            {(data.certificationFiles ?? []).length > 0 && (
+              <ul className="mt-2 space-y-1.5">
+                {(data.certificationFiles ?? []).map((f) => (
+                  <li
+                    key={f.id}
+                    className="flex items-center gap-2 rounded-md border border-input px-2 py-1.5 text-xs"
+                  >
+                    <a
+                      href={
+                        f.driveFileId
+                          ? `/api/drive/photos/${f.driveFileId}`
+                          : f.dataUrl
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                      className="min-w-0 flex-1 truncate font-medium text-brand-600 hover:underline dark:text-brand-300"
+                    >
+                      {f.name}
+                    </a>
+                    <span className="shrink-0 text-muted-foreground/70">
+                      {f.size >= 1024 * 1024
+                        ? `${(f.size / (1024 * 1024)).toFixed(1)} MB`
+                        : `${Math.max(1, Math.round(f.size / 1024))} KB`}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeCertFile(f.id)}
+                      aria-label={t("certifications.removeFile")}
+                      title={t("certifications.removeFile")}
+                      className="shrink-0 text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
+                    >
+                      ✕
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p className="mt-1.5 text-xs text-muted-foreground/70">
+              {t("certifications.filesHint")}
+            </p>
+            {certFilesError && (
+              <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
+                {certFilesError}
+              </p>
+            )}
+          </div>
         </div>
       ),
     },

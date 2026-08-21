@@ -568,7 +568,13 @@
       "refreshHint": "«Aggiorna» analizza il resto del curriculum (sommario, esperienza, progetti, sezioni personalizzate) e aggiunge le certificazioni menzionate lì.",
       "refreshAdded": "{count, plural, one {Aggiunta # nuova certificazione.} other {Aggiunte # nuove certificazioni.}}",
       "refreshNoneFound": "Nessuna nuova certificazione trovata nel contenuto del curriculum.",
-      "refreshError": "Impossibile analizzare il curriculum alla ricerca di certificazioni."
+      "refreshError": "Impossibile analizzare il curriculum alla ricerca di certificazioni.",
+      "filesLabel": "File dei certificati",
+      "uploadFile": "Carica file",
+      "uploadingFile": "Caricamento…",
+      "filesHint": "Allega copie PDF o immagine dei tuoi certificati per i tuoi archivi. Sono salvate privatamente con questo curriculum e non compaiono sul documento.",
+      "removeFile": "Rimuovi file",
+      "uploadError": "Impossibile caricare il file."
     },
     "languages": {
       "label": "Lingue (una per riga)"

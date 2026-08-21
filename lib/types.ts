@@ -65,6 +65,22 @@ export interface ProfilePhotoMeta {
   createdAt: string;
 }
 
+// One uploaded certificate document (PDF or image) attached to the resume's
+// Certifications section. Like the profile photo, the bytes are NOT stored in
+// the resume JSON: in Drive mode they live as a separate file in the Google
+// Drive appDataFolder (driveFileId, streamed via /api/drive/photos/[fileId]);
+// in local dev mode they're kept inline as a Base64 dataUrl. Attachments are
+// for the user's records — they are not rendered on the resume document.
+export interface CertificationFile {
+  id: string;
+  name: string;
+  mimeType: string;
+  size: number;
+  uploadedAt: string;
+  driveFileId?: string;
+  dataUrl?: string;
+}
+
 // How the profile photo is masked in templates that render it (currently ATS Corporate Style):
 // "square" = rounded rectangle, "circle" = circular (square frame).
 export type ProfilePhotoShape = "square" | "circle";
@@ -158,6 +174,9 @@ export interface ResumeData {
   skillCategories: CustomSectionItem[];
   projects: ResumeProject[];
   certifications: string[];
+  // Uploaded certificate documents (PDF/image) attached to the Certifications
+  // section. Optional: older records don't have it; consumers default to [].
+  certificationFiles?: CertificationFile[];
   languages: string[];
   // User-defined sections, ordered among the default sections via each
   // section's `order`. Older records may not have this; consumers default to [].

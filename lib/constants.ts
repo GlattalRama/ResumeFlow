@@ -240,6 +240,7 @@ export function emptyResumeData(): ResumeData {
     skillCategories: [],
     projects: [],
     certifications: [],
+    certificationFiles: [],
     languages: [],
     customSections: [],
   };
@@ -274,6 +275,7 @@ export function normalizeResumeData(data: ResumeData): ResumeData {
     skillCategories: data.skillCategories ?? d.skillCategories,
     projects: data.projects ?? d.projects,
     certifications: data.certifications ?? d.certifications,
+    certificationFiles: data.certificationFiles ?? d.certificationFiles,
     languages: data.languages ?? d.languages,
     customSections: data.customSections ?? d.customSections,
   };
