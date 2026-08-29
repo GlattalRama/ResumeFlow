@@ -5,6 +5,7 @@ import type {
   TemplateStyleSettings,
 } from "@/lib/types";
 import {
+  extraContactEntries,
   orderedVisibleDocSections,
   resolveSectionLabels,
   resolveSkillCategories,
@@ -155,11 +156,14 @@ export default function CustomTemplate({
           {basics.title && (
             <p className="mt-1 text-sm text-white/80">{basics.title}</p>
           )}
-          <div className="mt-6 space-y-1 text-xs">
+          <div className="mt-6 space-y-0.5 text-xs">
             {basics.email && <p>{basics.email}</p>}
             {basics.phone && <p>{basics.phone}</p>}
             {visibleLocation(basics) && <p>{visibleLocation(basics)}</p>}
             {basics.website && <p>{basics.website}</p>}
+            {extraContactEntries(basics).map((entry) => (
+              <p key={entry}>{entry}</p>
+            ))}
           </div>
         </div>
 

@@ -5,6 +5,7 @@ import type {
   TemplateStyleSettings,
 } from "@/lib/types";
 import {
+  extraContactEntries,
   orderedVisibleDocSections,
   resolveSectionLabels,
   resolveSkillCategories,
@@ -146,7 +147,7 @@ export default function ModernTemplate({
           </p>
         )}
         <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500">
-          {[basics.email, basics.phone, visibleLocation(basics), basics.website]
+          {[basics.email, basics.phone, visibleLocation(basics), basics.website, ...extraContactEntries(basics)]
             .filter(Boolean)
             .map((v, i) => (
               <span key={i}>{v}</span>

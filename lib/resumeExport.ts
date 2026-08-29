@@ -24,6 +24,7 @@ import { saveAndShareNative } from "./nativeDownload";
 import {
   customSectionLabel,
   DEFAULT_FONT_SCALE,
+  extraContactEntries,
   fontExportName,
   getBulletSymbol,
   normalizeResumeData,
@@ -176,7 +177,7 @@ export async function exportResumeDocx(
     );
   }
   // Contact details
-  const contact = [basics.email, basics.phone, visibleLocation(basics), basics.website]
+  const contact = [basics.email, basics.phone, visibleLocation(basics), basics.website, ...extraContactEntries(basics)]
     .filter(Boolean)
     .join("  |  ");
   if (contact) {
@@ -621,7 +622,7 @@ export async function exportResumePptx(
     });
     y += 0.5;
   }
-  const contact = [basics.email, basics.phone, visibleLocation(basics), basics.website]
+  const contact = [basics.email, basics.phone, visibleLocation(basics), basics.website, ...extraContactEntries(basics)]
     .filter(Boolean)
     .join("   |   ");
   if (contact) {

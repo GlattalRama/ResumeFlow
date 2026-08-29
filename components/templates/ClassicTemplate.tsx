@@ -5,6 +5,7 @@ import type {
   TemplateStyleSettings,
 } from "@/lib/types";
 import {
+  extraContactEntries,
   orderedVisibleDocSections,
   resolveSectionLabels,
   resolveSkillCategories,
@@ -124,7 +125,7 @@ export default function ClassicTemplate({
         </h1>
         {basics.title && <p className="mt-1 italic">{basics.title}</p>}
         <p className="mt-2 text-xs text-gray-600">
-          {[basics.email, basics.phone, visibleLocation(basics), basics.website]
+          {[basics.email, basics.phone, visibleLocation(basics), basics.website, ...extraContactEntries(basics)]
             .filter(Boolean)
             .join("  •  ")}
         </p>

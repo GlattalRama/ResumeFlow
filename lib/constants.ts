@@ -228,6 +228,8 @@ export function emptyResumeData(): ResumeData {
       location: "",
       showLocation: true,
       website: "",
+      nationality: "",
+      residencePermit: "",
       summary: "",
     },
     profilePhoto: "",
@@ -253,6 +255,20 @@ export const DISCORD_INVITE_URL = "https://discord.gg/Uzz3HVybc";
 // when the user has toggled it off (undefined on older records means shown).
 export function visibleLocation(basics: ResumeBasics): string {
   return basics.showLocation === false ? "" : basics.location;
+}
+
+// Optional labeled facts (nationality / residence permit) appended after the
+// core contact details on rendered resumes and exports. Empty fields are
+// simply left off.
+export function extraContactEntries(basics: ResumeBasics): string[] {
+  const entries: string[] = [];
+  if (basics.nationality?.trim()) {
+    entries.push(`Nationality: ${basics.nationality.trim()}`);
+  }
+  if (basics.residencePermit?.trim()) {
+    entries.push(`Residence permit: ${basics.residencePermit.trim()}`);
+  }
+  return entries;
 }
 
 // Backfill any missing arrays / basics on a (possibly legacy or partial)

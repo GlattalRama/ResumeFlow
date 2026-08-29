@@ -30,6 +30,10 @@ export interface ResumeBasics {
   // resume and all exports. Undefined (older resumes) means shown.
   showLocation?: boolean;
   website: string;
+  // Optional extras shown alongside the contact details when filled in
+  // (useful for markets like Switzerland where work-permit status matters).
+  nationality?: string;
+  residencePermit?: string;
   summary: string;
 }
 

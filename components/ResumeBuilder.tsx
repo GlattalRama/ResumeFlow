@@ -1309,6 +1309,8 @@ export default function ResumeBuilder({
               </label>
             </div>
             <Field label={t("basics.website")} value={data.basics.website} onChange={(v) => patchBasics("website", v)} />
+            <Field label={t("basics.nationality")} value={data.basics.nationality ?? ""} onChange={(v) => patchBasics("nationality", v)} />
+            <Field label={t("basics.residencePermit")} value={data.basics.residencePermit ?? ""} onChange={(v) => patchBasics("residencePermit", v)} />
           </div>
 
           {/* Profile photo */}

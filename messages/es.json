@@ -511,6 +511,8 @@
       "location": "Ubicación",
       "showLocation": "Mostrar en el currículum",
       "website": "Sitio web",
+      "nationality": "Nacionalidad (opcional)",
+      "residencePermit": "Permiso de residencia (opcional)",
       "profilePhoto": "Foto de perfil",
       "photoAlt": "Vista previa del perfil",
       "noPhoto": "Sin foto",

@@ -511,6 +511,8 @@
       "location": "Ort",
       "showLocation": "Im Lebenslauf anzeigen",
       "website": "Website",
+      "nationality": "Staatsangehörigkeit (optional)",
+      "residencePermit": "Aufenthaltsbewilligung (optional)",
       "profilePhoto": "Profilfoto",
       "photoAlt": "Profilvorschau",
       "noPhoto": "Kein Foto",

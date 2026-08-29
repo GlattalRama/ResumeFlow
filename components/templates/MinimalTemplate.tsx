@@ -5,6 +5,7 @@ import type {
   TemplateStyleSettings,
 } from "@/lib/types";
 import {
+  extraContactEntries,
   orderedVisibleDocSections,
   resolveSectionLabels,
   resolveSkillCategories,
@@ -124,7 +125,7 @@ export default function MinimalTemplate({
           <p className="mt-0.5 text-sm text-gray-500">{basics.title}</p>
         )}
         <p className="mt-3 text-xs text-gray-400">
-          {[basics.email, basics.phone, visibleLocation(basics), basics.website]
+          {[basics.email, basics.phone, visibleLocation(basics), basics.website, ...extraContactEntries(basics)]
             .filter(Boolean)
             .join("   /   ")}
         </p>

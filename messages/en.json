@@ -511,6 +511,8 @@
       "location": "Location",
       "showLocation": "Show on resume",
       "website": "Website",
+      "nationality": "Nationality (optional)",
+      "residencePermit": "Residence permit (optional)",
       "profilePhoto": "Profile photo",
       "photoAlt": "Profile preview",
       "noPhoto": "No photo",

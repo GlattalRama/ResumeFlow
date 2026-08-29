@@ -6,6 +6,7 @@ import type {
 } from "@/lib/types";
 import { DEFAULT_PROFILE_PHOTO_POSITION } from "@/lib/types";
 import {
+  extraContactEntries,
   getBulletSymbol,
   orderedVisibleDocSections,
   resolveSectionLabels,
@@ -196,9 +197,9 @@ export default function AtsCorporateTemplate({
               {basics.title}
             </p>
           )}
-          {(basics.email || basics.phone || location || basics.website) && (
+          {(basics.email || basics.phone || location || basics.website || basics.nationality || basics.residencePermit) && (
             <p className="mt-1.5 text-[0.92em]" style={{ color: s.mutedColor }}>
-              {[basics.email, basics.phone, location, basics.website]
+              {[basics.email, basics.phone, location, basics.website, ...extraContactEntries(basics)]
                 .filter(Boolean)
                 .join("  |  ")}
             </p>
@@ -235,8 +236,13 @@ export default function AtsCorporateTemplate({
               </p>
             )}
           </div>
-          {(basics.email || basics.phone || location || basics.website) && (
-            <div className="shrink-0 space-y-2 text-[0.92em]">
+          {(basics.email ||
+            basics.phone ||
+            location ||
+            basics.website ||
+            basics.nationality ||
+            basics.residencePermit) && (
+            <div className="shrink-0 space-y-1 text-[0.92em]">
               {basics.email && (
                 <ContactRow icon={<MailIcon />} color={s.primaryColor}>
                   {basics.email}
@@ -255,6 +261,16 @@ export default function AtsCorporateTemplate({
               {basics.website && (
                 <ContactRow icon={<LinkIcon />} color={s.primaryColor}>
                   {basics.website}
+                </ContactRow>
+              )}
+              {basics.nationality && (
+                <ContactRow icon={<GlobeIcon />} color={s.primaryColor}>
+                  {basics.nationality}
+                </ContactRow>
+              )}
+              {basics.residencePermit && (
+                <ContactRow icon={<IdCardIcon />} color={s.primaryColor}>
+                  {basics.residencePermit}
                 </ContactRow>
               )}
             </div>
@@ -389,6 +405,28 @@ function MapPinIcon() {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z" />
       <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
+function GlobeIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M2 12h20" />
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+    </svg>
+  );
+}
+
+function IdCardIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="5" width="20" height="14" rx="2" />
+      <circle cx="8" cy="11" r="2" />
+      <path d="M5 17c.6-1.4 1.8-2 3-2s2.4.6 3 2" />
+      <path d="M15 9h4" />
+      <path d="M15 13h4" />
     </svg>
   );
 }
