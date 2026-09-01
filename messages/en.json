@@ -229,10 +229,13 @@
       "copy": "Copy",
       "copied": "Copied ✓",
       "download": "Download .docx",
+      "downloadPdf": "Download PDF",
+      "preparingPdf": "Preparing…",
       "save": "Save",
       "saved": "Saved ✓",
       "saving": "Saving…",
       "fileName": "Cover Letter - {company}.docx",
+      "fileNamePdf": "Cover Letter - {company}.pdf",
       "fileNameFallback": "application",
       "unverifiedWarning": "Double-check these figures — they weren't found in your resume or the job description:",
       "tone": {
@@ -245,7 +248,8 @@
         "network": "Network error. Please try again.",
         "save": "Could not save the cover letter.",
         "networkSave": "Network error while saving.",
-        "clipboard": "Couldn't access the clipboard — select and copy manually."
+        "clipboard": "Couldn't access the clipboard — select and copy manually.",
+        "pdf": "PDF export failed. Please try again."
       }
     },
     "actions": {

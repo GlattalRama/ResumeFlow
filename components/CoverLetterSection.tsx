@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import type { CoverLetterMeta } from "@/lib/types";
 import { COVER_LETTER_TONES } from "@/lib/aiCoverLetter";
+import { triggerDownload } from "@/lib/resumeExport";
 import { buttonClass } from "./ui";
 import { aiFetch } from "@/lib/aiConsentClient";
 
@@ -40,6 +41,7 @@ export default function CoverLetterSection({
   const [sourceId, setSourceId] = useState(defaultSourceId);
   const [tone, setTone] = useState("professional");
   const [busy, setBusy] = useState<"" | "generating" | "saving">("");
+  const [exportingPdf, setExportingPdf] = useState(false);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
@@ -128,14 +130,42 @@ export default function CoverLetterSection({
       );
     const doc = new Document({ sections: [{ children: paragraphs }] });
     const blob = await Packer.toBlob(doc);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = t("coverLetter.fileName", {
-      company: company || t("coverLetter.fileNameFallback"),
-    });
-    a.click();
-    URL.revokeObjectURL(url);
+    await triggerDownload(
+      blob,
+      t("coverLetter.fileName", {
+        company: company || t("coverLetter.fileNameFallback"),
+      })
+    );
+  }
+
+  async function downloadPdf() {
+    // Server-rendered PDF (headless Chromium), same pipeline as the resume PDF
+    // export — window.print() is a no-op in the Capacitor shells. The current
+    // editor text is sent so unsaved edits export as-is.
+    setExportingPdf(true);
+    setError("");
+    try {
+      const res = await fetch(
+        `/api/applications/${applicationId}/cover-letter/pdf`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ letter }),
+        }
+      );
+      if (!res.ok) throw new Error(`PDF export failed (${res.status})`);
+      const blob = await res.blob();
+      await triggerDownload(
+        blob,
+        t("coverLetter.fileNamePdf", {
+          company: company || t("coverLetter.fileNameFallback"),
+        })
+      );
+    } catch {
+      setError(t("coverLetter.errors.pdf"));
+    } finally {
+      setExportingPdf(false);
+    }
   }
 
   const generatorRow = (
@@ -224,6 +254,16 @@ export default function CoverLetterSection({
                 className={buttonClass("secondary")}
               >
                 {t("coverLetter.download")}
+              </button>
+              <button
+                type="button"
+                onClick={downloadPdf}
+                disabled={exportingPdf}
+                className={buttonClass("secondary")}
+              >
+                {exportingPdf
+                  ? t("coverLetter.preparingPdf")
+                  : t("coverLetter.downloadPdf")}
               </button>
               <button
                 type="button"

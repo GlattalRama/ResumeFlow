@@ -229,10 +229,13 @@
       "copy": "Copier",
       "copied": "Copié ✓",
       "download": "Télécharger en .docx",
+      "downloadPdf": "Télécharger en PDF",
+      "preparingPdf": "Préparation…",
       "save": "Enregistrer",
       "saved": "Enregistré ✓",
       "saving": "Enregistrement…",
       "fileName": "Lettre de motivation - {company}.docx",
+      "fileNamePdf": "Lettre de motivation - {company}.pdf",
       "fileNameFallback": "candidature",
       "unverifiedWarning": "Vérifiez ces chiffres — ils n'ont été trouvés ni dans votre CV ni dans la description du poste :",
       "tone": {
@@ -245,7 +248,8 @@
         "network": "Erreur réseau. Veuillez réessayer.",
         "save": "Impossible d'enregistrer la lettre de motivation.",
         "networkSave": "Erreur réseau lors de l'enregistrement.",
-        "clipboard": "Impossible d'accéder au presse-papiers — sélectionnez et copiez manuellement."
+        "clipboard": "Impossible d'accéder au presse-papiers — sélectionnez et copiez manuellement.",
+        "pdf": "Échec de l'export PDF. Veuillez réessayer."
       }
     },
     "actions": {

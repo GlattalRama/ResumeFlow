@@ -7,7 +7,7 @@
 // warnings for the user to fix while editing — a letter (unlike a tailored
 // section) has no verbatim source to fall back to.
 import { generateObject, jsonSchema, type LanguageModel } from "ai";
-import type { ResumeData } from "./types";
+import type { ResumeBasics, ResumeData } from "./types";
 import { numberTokens, type TailorJob } from "./aiTailor";
 import { htmlToLines } from "./richText";
 
@@ -82,6 +82,42 @@ function resumeDigest(d: ResumeData): string {
   return lines.join("\n");
 }
 
+// Despite the prompt's hard rules, models occasionally emit a template-style
+// header block of bracket placeholders ("[Your Name]", "[City, State, Zip]",
+// "[Date]"). Deterministic cleanup, same philosophy as the figure check below:
+// fill placeholders whose real value the resume knows, drop lines that are
+// nothing but unresolved placeholders, keep everything else untouched.
+export function fillLetterPlaceholders(
+  letter: string,
+  basics: ResumeBasics,
+  today: string
+): string {
+  const location = basics.showLocation === false ? "" : basics.location?.trim() ?? "";
+  const substitutions: Array<[RegExp, string]> = [
+    [/\[\s*(your\s+)?(full\s+)?name\s*\]/gi, basics.name?.trim() ?? ""],
+    [/\[\s*(your\s+)?e-?mail(\s+address)?\s*\]/gi, basics.email?.trim() ?? ""],
+    [/\[\s*(your\s+)?(tele)?phone(\s+number)?\s*\]/gi, basics.phone?.trim() ?? ""],
+    [/\[\s*(today'?s\s+)?date\s*\]/gi, today],
+    [/\[\s*(your\s+)?(street\s+|home\s+|mailing\s+)?address\s*\]/gi, ""],
+    [/\[\s*city[^\]\n]*\]/gi, location],
+    [/\[\s*(hiring\s+manager|recipient)[^\]\n]*\]/gi, "Hiring Manager"],
+  ];
+
+  const lines = letter.split("\n").map((rawLine) => {
+    let line = rawLine;
+    for (const [pattern, value] of substitutions) line = line.replace(pattern, value);
+    // Anything still bracketed is a placeholder we can't fill.
+    const withoutPlaceholders = line.replace(/\[[^\]\n]*\]/g, "");
+    // A line that carried only placeholders (plus punctuation) is dropped
+    // entirely; a line with real content keeps it, minus the leftovers.
+    return /[a-z0-9]/i.test(withoutPlaceholders)
+      ? withoutPlaceholders.trimEnd()
+      : "";
+  });
+
+  return lines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
 export async function generateCoverLetter(
   source: ResumeData,
   job: TailorJob,
@@ -99,7 +135,7 @@ export async function generateCoverLetter(
       "You are an expert cover letter writer.",
       "Write a complete, ready-to-send cover letter for the candidate and job below.",
       "Structure: greeting (\"Dear Hiring Manager,\" unless a name is in the job description); an opening that names the role and company with a specific hook; 1–2 body paragraphs mapping the candidate's strongest RELEVANT achievements to the job's top requirements; a brief close with a call to action; sign-off with the candidate's name.",
-      "Hard rules: 250–350 words. Use ONLY facts, achievements, and figures present in the candidate's resume digest — never invent employers, metrics, tools, or qualifications. Do not restate the resume bullet-by-bullet; synthesize. No clichés like 'I am writing to express my interest'. No placeholders or brackets. Plain text only.",
+      "Hard rules: 250–350 words. Use ONLY facts, achievements, and figures present in the candidate's resume digest — never invent employers, metrics, tools, or qualifications. Do not restate the resume bullet-by-bullet; synthesize. No clichés like 'I am writing to express my interest'. Never emit bracket placeholders such as \"[Your Name]\" or \"[Date]\", and no sender contact/address header — the letter starts directly with the greeting. Plain text only.",
       toneInstruction,
     ].join("\n"),
     prompt: [
@@ -114,11 +150,27 @@ export async function generateCoverLetter(
     maxOutputTokens: 900,
   });
 
-  const letter = object.letter.trim();
+  const today = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const letter = fillLetterPlaceholders(object.letter.trim(), source.basics, today);
 
   // Verify figures: anything numeric in the letter must appear in the resume
-  // or the JD (years like "2018" in dates count via the digest text).
-  const known = numberTokens(`${resumeDigest(source)} ${job.jobDescription || ""}`);
+  // or the JD (years like "2018" in dates count via the digest text). Contact
+  // details and today's date may have been substituted in above, so they count
+  // as known too.
+  const known = numberTokens(
+    [
+      resumeDigest(source),
+      job.jobDescription || "",
+      source.basics.email,
+      source.basics.phone,
+      source.basics.location,
+      today,
+    ].join(" ")
+  );
   const unverifiedFigures = [...numberTokens(letter)].filter((n) => !known.has(n));
 
   return { letter, unverifiedFigures };

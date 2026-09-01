@@ -18,3 +18,8 @@ android/keystore.properties
 *.keystore
 .idea/
 play-store-assets/
+
+.logs
+.evfevent
+.itest
+.env

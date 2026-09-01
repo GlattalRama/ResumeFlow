@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getItem } from "@/lib/store";
 import { resolveTemplateStyle } from "@/lib/constants";
+import { launchPdfBrowser } from "@/lib/pdfBrowser";
 
 // Server-side PDF export, used by BOTH the web "Download PDF" button (direct
 // file download) and the Capacitor shells (which can't print — window.print()
@@ -13,23 +14,6 @@ export const maxDuration = 60;
 
 type Ctx = { params: Promise<{ id: string }> };
 
-async function launchBrowser() {
-  const { chromium } = await import("playwright-core");
-  if (process.env.VERCEL) {
-    const sparticuz = (await import("@sparticuz/chromium")).default;
-    return chromium.launch({
-      args: sparticuz.args,
-      executablePath: await sparticuz.executablePath(),
-    });
-  }
-  // Local dev: @sparticuz/chromium only ships a Linux binary. Use an explicit
-  // executable when provided, otherwise the machine's installed Chrome.
-  const executablePath = process.env.PDF_CHROMIUM_PATH;
-  return chromium.launch(
-    executablePath ? { executablePath } : { channel: "chrome" }
-  );
-}
-
 export async function GET(req: Request, { params }: Ctx) {
   const { id } = await params;
   const resume = await getItem("resumes", id);
@@ -41,7 +25,7 @@ export async function GET(req: Request, { params }: Ctx) {
   if (url.searchParams.get("atsSafe") === "1")
     target.searchParams.set("atsSafe", "1");
 
-  const browser = await launchBrowser();
+  const browser = await launchPdfBrowser();
   try {
     const context = await browser.newContext();
     // Forward the caller's cookies so the page render (and its subrequests,

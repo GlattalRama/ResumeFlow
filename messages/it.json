@@ -229,10 +229,13 @@
       "copy": "Copia",
       "copied": "Copiato ✓",
       "download": "Scarica .docx",
+      "downloadPdf": "Scarica PDF",
+      "preparingPdf": "Preparazione…",
       "save": "Salva",
       "saved": "Salvato ✓",
       "saving": "Salvataggio…",
       "fileName": "Lettera di presentazione - {company}.docx",
+      "fileNamePdf": "Lettera di presentazione - {company}.pdf",
       "fileNameFallback": "candidatura",
       "unverifiedWarning": "Ricontrolla queste cifre — non sono state trovate né nel tuo curriculum né nella descrizione del lavoro:",
       "tone": {
@@ -245,7 +248,8 @@
         "network": "Errore di rete. Riprova.",
         "save": "Impossibile salvare la lettera di presentazione.",
         "networkSave": "Errore di rete durante il salvataggio.",
-        "clipboard": "Impossibile accedere agli appunti — seleziona e copia manualmente."
+        "clipboard": "Impossibile accedere agli appunti — seleziona e copia manualmente.",
+        "pdf": "Esportazione PDF non riuscita. Riprova."
       }
     },
     "actions": {

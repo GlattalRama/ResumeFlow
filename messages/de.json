@@ -229,10 +229,13 @@
       "copy": "Kopieren",
       "copied": "Kopiert ✓",
       "download": ".docx herunterladen",
+      "downloadPdf": "PDF herunterladen",
+      "preparingPdf": "Wird vorbereitet…",
       "save": "Speichern",
       "saved": "Gespeichert ✓",
       "saving": "Wird gespeichert…",
       "fileName": "Anschreiben - {company}.docx",
+      "fileNamePdf": "Anschreiben - {company}.pdf",
       "fileNameFallback": "Bewerbung",
       "unverifiedWarning": "Überprüfe diese Zahlen — sie wurden weder in deinem Lebenslauf noch in der Stellenbeschreibung gefunden:",
       "tone": {
@@ -245,7 +248,8 @@
         "network": "Netzwerkfehler. Bitte versuche es erneut.",
         "save": "Das Anschreiben konnte nicht gespeichert werden.",
         "networkSave": "Netzwerkfehler beim Speichern.",
-        "clipboard": "Zugriff auf die Zwischenablage nicht möglich — bitte manuell markieren und kopieren."
+        "clipboard": "Zugriff auf die Zwischenablage nicht möglich — bitte manuell markieren und kopieren.",
+        "pdf": "PDF-Export fehlgeschlagen. Bitte erneut versuchen."
       }
     },
     "actions": {

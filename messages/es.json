@@ -229,10 +229,13 @@
       "copy": "Copiar",
       "copied": "Copiado ✓",
       "download": "Descargar .docx",
+      "downloadPdf": "Descargar PDF",
+      "preparingPdf": "Preparando…",
       "save": "Guardar",
       "saved": "Guardado ✓",
       "saving": "Guardando…",
       "fileName": "Carta de presentación - {company}.docx",
+      "fileNamePdf": "Carta de presentación - {company}.pdf",
       "fileNameFallback": "candidatura",
       "unverifiedWarning": "Comprueba estas cifras — no se encontraron ni en tu currículum ni en la descripción del puesto:",
       "tone": {
@@ -245,7 +248,8 @@
         "network": "Error de red. Inténtalo de nuevo.",
         "save": "No se pudo guardar la carta de presentación.",
         "networkSave": "Error de red al guardar.",
-        "clipboard": "No se pudo acceder al portapapeles — selecciona y copia manualmente."
+        "clipboard": "No se pudo acceder al portapapeles — selecciona y copia manualmente.",
+        "pdf": "Error al exportar el PDF. Inténtalo de nuevo."
       }
     },
     "actions": {
