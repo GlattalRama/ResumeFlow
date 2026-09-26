@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { ResumeData, ResumeVersion, TailoredResumeMetadata } from "@/lib/types";
 import type { TailorReasons } from "@/lib/aiTailor";
-import { buildTailorChanges, applyTailorChoices } from "@/lib/tailorDiff";
+import {
+  buildTailorChanges,
+  applyTailorChoices,
+  isExperienceCardKey,
+} from "@/lib/tailorDiff";
 import { scoreResume } from "@/lib/atsScore";
 import { TailorChangeCard, ScoreDelta } from "./TailorReview";
 import TailorComparePane from "./TailorComparePane";
@@ -72,6 +76,12 @@ export default function TailorResumeFlow({
       const next = new Set(prev);
       if (next.has(key)) next.delete(key);
       else next.add(key);
+      // Toggling a whole experience card resets its per-bullet choices, so
+      // "Accept" on the card means every bullet and "Keep original" the
+      // entire entry.
+      if (isExperienceCardKey(key)) {
+        for (const k of next) if (k.startsWith(`${key}:`)) next.delete(k);
+      }
       return next;
     });
   }
@@ -141,7 +151,7 @@ export default function TailorResumeFlow({
   // failed a fact check) — surfaced so the user knows why something is absent.
   const guardrailNotes =
     result?.sectionChanges.filter((c) => c.changeType === "rejected") ?? [];
-  const acceptedCount = changes.length - rejected.size;
+  const acceptedCount = changes.filter((c) => !rejected.has(c.key)).length;
 
   async function accept() {
     if (!result || !sourceRecord || !finalData) return;
@@ -357,8 +367,8 @@ export default function TailorResumeFlow({
                         <TailorChangeCard
                           key={change.key}
                           change={change}
-                          rejected={rejected.has(change.key)}
-                          onToggle={() => toggleRejected(change.key)}
+                          rejectedKeys={rejected}
+                          onToggle={toggleRejected}
                         />
                       ))}
                     </div>

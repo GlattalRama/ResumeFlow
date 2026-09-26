@@ -193,6 +193,7 @@
       "saveWithCount": "Enregistrer comme nouvelle version ({accepted} sur {total})",
       "accept": "Accepter",
       "keepOriginal": "Conserver l'original",
+      "bulletsAccepted": "{kept} puces réécrites sur {total} acceptées",
       "dropped": "Écartés car moins pertinents :",
       "atsScore": "Score ATS",
       "keywords": "Mots-clés",

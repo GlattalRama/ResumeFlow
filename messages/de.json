@@ -193,6 +193,7 @@
       "saveWithCount": "Als neue Version speichern ({accepted} von {total})",
       "accept": "Übernehmen",
       "keepOriginal": "Original behalten",
+      "bulletsAccepted": "{kept} von {total} umformulierten Punkten übernommen",
       "dropped": "Als weniger relevant entfernt:",
       "atsScore": "ATS-Score",
       "keywords": "Schlüsselwörter",

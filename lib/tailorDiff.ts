@@ -182,8 +182,22 @@ export function buildTailorChanges(
   return changes;
 }
 
+// Choice key for one rewritten bullet: the experience card key plus the
+// bullet's index, e.g. "exp:0:2". Rejecting it keeps just that bullet's
+// original wording while the rest of the entry's rewrite is accepted.
+export function bulletKey(expIndex: number, bulletIndex: number): string {
+  return `exp:${expIndex}:${bulletIndex}`;
+}
+
+// True for a whole-experience-card key ("exp:0"), false for a bullet key.
+export function isExperienceCardKey(key: string): boolean {
+  return /^exp:\d+$/.test(key);
+}
+
 // Assemble the final ResumeData from the user's choices: start from the
-// tailored draft and revert every rejected change back to the source.
+// tailored draft and revert every rejected change back to the source. A
+// rejected experience card reverts the whole entry; a rejected bullet key
+// reverts only that bullet (by index, which the tailoring preserves).
 export function applyTailorChoices(
   source: ResumeData,
   tailored: ResumeData,
@@ -193,9 +207,19 @@ export function applyTailorChoices(
   if (rejected.has("summary")) {
     out.basics = { ...tailored.basics, summary: source.basics.summary };
   }
-  out.experience = (tailored.experience || []).map((exp, i) =>
-    rejected.has(`exp:${i}`) && source.experience?.[i] ? source.experience[i] : exp
-  );
+  out.experience = (tailored.experience || []).map((exp, i) => {
+    const src = source.experience?.[i];
+    if (!src) return exp;
+    if (rejected.has(`exp:${i}`)) return src;
+    const before = src.highlights || [];
+    const after = exp.highlights || [];
+    const merged: string[] = [];
+    for (let k = 0; k < Math.max(before.length, after.length); k++) {
+      const keep = rejected.has(bulletKey(i, k)) ? before[k] : after[k];
+      if (keep != null) merged.push(keep);
+    }
+    return { ...exp, highlights: merged };
+  });
   if (rejected.has("areas")) out.areasOfExpertise = source.areasOfExpertise;
   if (rejected.has("skills")) out.skills = source.skills;
   if (rejected.has("skillCategories")) out.skillCategories = source.skillCategories;
