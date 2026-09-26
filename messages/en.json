@@ -193,6 +193,7 @@
       "saveWithCount": "Save as new version ({accepted} of {total})",
       "accept": "Accept",
       "keepOriginal": "Keep original",
+      "bulletsAccepted": "{kept} of {total} rewritten bullets accepted",
       "dropped": "Dropped as less relevant:",
       "atsScore": "ATS score",
       "keywords": "Keywords",

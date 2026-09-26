@@ -193,6 +193,7 @@
       "saveWithCount": "Salva come nuova versione ({accepted} di {total})",
       "accept": "Accetta",
       "keepOriginal": "Mantieni l'originale",
+      "bulletsAccepted": "{kept} di {total} punti riscritti accettati",
       "dropped": "Esclusi perché meno rilevanti:",
       "atsScore": "Punteggio ATS",
       "keywords": "Parole chiave",

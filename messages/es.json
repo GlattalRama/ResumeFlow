@@ -193,6 +193,7 @@
       "saveWithCount": "Guardar como nueva versión ({accepted} de {total})",
       "accept": "Aceptar",
       "keepOriginal": "Mantener original",
+      "bulletsAccepted": "{kept} de {total} viñetas reescritas aceptadas",
       "dropped": "Descartados por ser menos relevantes:",
       "atsScore": "Puntuación ATS",
       "keywords": "Palabras clave",
