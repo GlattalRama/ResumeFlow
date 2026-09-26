@@ -20,6 +20,7 @@ import type {
   ResumeSectionState,
   TemplateStyleSettings,
 } from "./types";
+import { DEFAULT_PROFILE_PHOTO_POSITION } from "./types";
 import { saveAndShareNative } from "./nativeDownload";
 import {
   customSectionLabel,
@@ -91,14 +92,92 @@ function dateRange(start: string, end: string): string {
   return [start, end].filter(Boolean).join(" - ");
 }
 
+// CSS reference pixel → twips (1in = 96px = 1440 twips).
+const TWIPS_PER_PX = 15;
+const TWIPS_PER_MM = 1440 / 25.4;
+
+// Header photo frame, matching the ATS Corporate template's classes
+// (`h-28 w-28 rounded-full` / `h-28 w-32 rounded-md`) in CSS pixels.
+const PHOTO_FRAME = {
+  circle: { width: 112, height: 112 },
+  square: { width: 128, height: 112 },
+} as const;
+
+/**
+ * Fetch the profile photo and cover-crop it to the template's frame (same
+ * focal point as the preview's `object-position`), rasterised as a PNG so the
+ * circle shape and rounded corners survive in Word. Returns null when there is
+ * no photo or it can't be loaded (the export then simply omits it).
+ */
+async function loadProfilePhotoPng(
+  data: ResumeData
+): Promise<{ bytes: Uint8Array; width: number; height: number } | null> {
+  const src = data.profilePhotoMeta?.driveFileId
+    ? `/api/drive/photos/${data.profilePhotoMeta.driveFileId}`
+    : data.profilePhoto;
+  if (!src || typeof document === "undefined") return null;
+  const shape = data.profilePhotoShape === "circle" ? "circle" : "square";
+  const frame = PHOTO_FRAME[shape];
+  const pos = data.profilePhotoPosition ?? DEFAULT_PROFILE_PHOTO_POSITION;
+  try {
+    const res = await fetch(src);
+    if (!res.ok) return null;
+    const bitmap = await createImageBitmap(await res.blob());
+    // Render at 2× for a crisp print while keeping the frame's CSS size.
+    const scale = 2;
+    const canvas = document.createElement("canvas");
+    canvas.width = frame.width * scale;
+    canvas.height = frame.height * scale;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    const W = canvas.width;
+    const H = canvas.height;
+    const radius = shape === "circle" ? W / 2 : 6 * scale;
+    const clip = () => {
+      ctx.beginPath();
+      if (shape === "circle") ctx.arc(W / 2, H / 2, W / 2, 0, Math.PI * 2);
+      else ctx.roundRect(0, 0, W, H, radius);
+      ctx.closePath();
+    };
+    clip();
+    ctx.save();
+    ctx.clip();
+    // object-fit: cover + object-position: x% y%.
+    const cover = Math.max(W / bitmap.width, H / bitmap.height);
+    const sw = W / cover;
+    const sh = H / cover;
+    const sx = (bitmap.width - sw) * (pos.x / 100);
+    const sy = (bitmap.height - sh) * (pos.y / 100);
+    ctx.drawImage(bitmap, sx, sy, sw, sh, 0, 0, W, H);
+    ctx.restore();
+    // 1px light border, as in the preview (border-gray-200).
+    clip();
+    ctx.lineWidth = scale;
+    ctx.strokeStyle = "#e5e7eb";
+    ctx.stroke();
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/png")
+    );
+    if (!blob) return null;
+    return {
+      bytes: new Uint8Array(await blob.arrayBuffer()),
+      width: frame.width,
+      height: frame.height,
+    };
+  } catch {
+    return null;
+  }
+}
+
 // ---- DOCX ----
 
 export async function exportResumeDocx(
   data: ResumeData,
   style?: TemplateStyleSettings,
   sectionState?: ResumeSectionState[] | null,
-  // ATS-safe mode: render Areas of Expertise and two-column custom bullets as a
-  // single-column list instead of a (parser-unfriendly) two-cell table.
+  // ATS-safe mode: plain single-line header (no photo), and Areas of Expertise
+  // / two-column custom bullets as a single-column list instead of a
+  // (parser-unfriendly) two-cell table. Mirrors the ATS Corporate template.
   atsSafe = false
 ): Promise<void> {
   data = normalizeResumeData(data); // backfill legacy/partial records
@@ -122,6 +201,11 @@ export async function exportResumeDocx(
     TableCell,
     WidthType,
     LineRuleType,
+    PageBreak,
+    ImageRun,
+    AlignmentType,
+    VerticalAlign,
+    TableLayoutType,
   } = await import("docx");
 
   // Map the per-version line-spacing settings to Word units:
@@ -153,37 +237,154 @@ export async function exportResumeDocx(
   const { basics } = data;
   const children: DocxChild[] = [];
 
-  // Candidate name
-  children.push(
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: basics.name || "Your Name",
-          bold: true,
-          size: nameSize,
-          color: primary,
-          font,
-        }),
-      ],
-    })
-  );
-  if (basics.title) {
-    children.push(
-      new Paragraph({
+  // A borderless table cell (used for the header and two-column lists).
+  const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
+  const CELL_BORDERS = {
+    top: NO_BORDER,
+    bottom: NO_BORDER,
+    left: NO_BORDER,
+    right: NO_BORDER,
+  };
+  const NO_TABLE_BORDERS = {
+    ...CELL_BORDERS,
+    insideHorizontal: NO_BORDER,
+    insideVertical: NO_BORDER,
+  };
+
+  // Header — same colors as the template: name in the body color, title in
+  // the primary color, contact details in the muted color.
+  const namePara = new Paragraph({
+    children: [
+      new TextRun({
+        text: basics.name || "Your Name",
+        bold: true,
+        size: nameSize,
+        color: body,
+        font,
+      }),
+    ],
+  });
+  const titlePara = basics.title
+    ? new Paragraph({
+        spacing: { before: 60 },
         children: [
-          new TextRun({ text: basics.title, size: fs(24), color: body, font }),
+          new TextRun({
+            text: basics.title,
+            size: Math.round(fs(20) * 1.08),
+            color: primary,
+            font,
+          }),
         ],
       })
+    : null;
+  const contactEntries = [
+    basics.email,
+    basics.phone,
+    visibleLocation(basics),
+    basics.website,
+    ...extraContactEntries(basics),
+  ].filter(Boolean);
+
+  if (atsSafe) {
+    // ATS-safe header: plain name/title and one contact line — the simplest
+    // block for a parser to read (no photo, no table).
+    children.push(namePara);
+    if (titlePara) children.push(titlePara);
+    if (contactEntries.length) {
+      children.push(
+        new Paragraph({
+          spacing: { before: 60 },
+          children: [
+            new TextRun({
+              text: contactEntries.join("  |  "),
+              size: fs(18),
+              color: muted,
+              font,
+            }),
+          ],
+        })
+      );
+    }
+  } else {
+    // Template header: photo on the left, name + title in the middle, and a
+    // right-aligned contact column — laid out as a borderless table.
+    const photo = await loadProfilePhotoPng(data);
+    const contentWidth = Math.round(
+      (210 - s.pageMargins.left - s.pageMargins.right) * TWIPS_PER_MM
     );
-  }
-  // Contact details
-  const contact = [basics.email, basics.phone, visibleLocation(basics), basics.website, ...extraContactEntries(basics)]
-    .filter(Boolean)
-    .join("  |  ");
-  if (contact) {
+    // Photo column = frame + the template's 1.5rem gap; contact column sized
+    // to its longest entry (≈ 0.55em per character at the contact size).
+    const photoCol = photo ? Math.round((photo.width + 24) * TWIPS_PER_PX) : 0;
+    const longest = contactEntries.reduce((n, e) => Math.max(n, e.length), 0);
+    const contactCol = contactEntries.length
+      ? Math.min(
+          Math.round(contentWidth * 0.4),
+          Math.round(longest * 0.55 * (fs(18) / 2) * 20) + 240
+        )
+      : 0;
+    const nameCol = Math.max(contentWidth - photoCol - contactCol, 1440);
+    const cells = [];
+    if (photo) {
+      cells.push(
+        new TableCell({
+          width: { size: photoCol, type: WidthType.DXA },
+          borders: CELL_BORDERS,
+          verticalAlign: VerticalAlign.CENTER,
+          children: [
+            new Paragraph({
+              children: [
+                new ImageRun({
+                  type: "png",
+                  data: photo.bytes,
+                  transformation: { width: photo.width, height: photo.height },
+                  altText: {
+                    title: "Profile photo",
+                    description: basics.name || "Profile photo",
+                    name: "profile-photo",
+                  },
+                }),
+              ],
+            }),
+          ],
+        })
+      );
+    }
+    cells.push(
+      new TableCell({
+        width: { size: nameCol, type: WidthType.DXA },
+        borders: CELL_BORDERS,
+        verticalAlign: VerticalAlign.CENTER,
+        children: titlePara ? [namePara, titlePara] : [namePara],
+      })
+    );
+    if (contactEntries.length) {
+      cells.push(
+        new TableCell({
+          width: { size: contactCol, type: WidthType.DXA },
+          borders: CELL_BORDERS,
+          verticalAlign: VerticalAlign.CENTER,
+          children: contactEntries.map(
+            (entry) =>
+              new Paragraph({
+                alignment: AlignmentType.RIGHT,
+                spacing: { after: 40 },
+                children: [
+                  new TextRun({ text: entry, size: fs(18), color: body, font }),
+                ],
+              })
+          ),
+        })
+      );
+    }
     children.push(
-      new Paragraph({
-        children: [new TextRun({ text: contact, size: fs(18), color: muted, font })],
+      new Table({
+        width: { size: contentWidth, type: WidthType.DXA },
+        columnWidths: cells.map((_, i) =>
+          photo && i === 0 ? photoCol : i === cells.length - 1 && contactEntries.length ? contactCol : nameCol
+        ),
+        layout: TableLayoutType.FIXED,
+        borders: NO_TABLE_BORDERS,
+        rows: [new TableRow({ children: cells })],
       })
     );
   }
@@ -303,19 +504,9 @@ export async function exportResumeDocx(
   // allows: a native bullet list for "bullet", a plain paragraph for "none",
   // and a glyph-prefixed paragraph (•/–/✓/→) for the other styles.
   function areaItem(text: string) {
-    const style = data.areasOfExpertiseBulletStyle ?? "bullet";
-    if (style === "bullet") return bullet(text);
-    const marker = getBulletSymbol(style);
-    return bodyPara(marker ? `${marker} ${text}` : text, { after: bulletAfter });
+    return markerBullet(text, data.areasOfExpertiseBulletStyle ?? "bullet");
   }
   // A borderless table cell holding one column of Areas of Expertise items.
-  const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
-  const CELL_BORDERS = {
-    top: NO_BORDER,
-    bottom: NO_BORDER,
-    left: NO_BORDER,
-    right: NO_BORDER,
-  };
   function areaColumnCell(col: string[]) {
     return new TableCell({
       width: { size: 50, type: WidthType.PERCENTAGE },
@@ -325,13 +516,21 @@ export async function exportResumeDocx(
     });
   }
 
-  // A bullet honoring an arbitrary marker style (used by custom sections): a
-  // native bullet list for "bullet", a plain paragraph for "none", and a
-  // glyph-prefixed paragraph for the rest. Mirrors `areaItem`.
+  // A bullet honoring an arbitrary marker style (Areas of Expertise and custom
+  // sections): a native bullet list for "bullet", a plain paragraph for "none",
+  // and a glyph-prefixed paragraph (–/✓/→) for the rest, with the glyph in the
+  // primary color exactly like the preview.
   function markerBullet(text: string, style: ResumeBulletStyle) {
     if (style === "bullet") return bullet(text);
     const marker = getBulletSymbol(style);
-    return bodyPara(marker ? `${marker} ${text}` : text, { after: bulletAfter });
+    if (!marker) return bodyPara(text, { after: bulletAfter });
+    return new Paragraph({
+      spacing: itemSpacing,
+      children: [
+        new TextRun({ text: `${marker} `, size: fs(20), color: primary, font }),
+        new TextRun({ text, size: fs(20), color: body, font }),
+      ],
+    });
   }
   function bulletColumnCell(col: string[], style: ResumeBulletStyle) {
     return new TableCell({
@@ -359,11 +558,7 @@ export async function exportResumeDocx(
         // two-column layout is preserved in Word.
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
-          borders: {
-            ...CELL_BORDERS,
-            insideHorizontal: NO_BORDER,
-            insideVertical: NO_BORDER,
-          },
+          borders: NO_TABLE_BORDERS,
           rows: [
             new TableRow({
               children: [areaColumnCell(left), areaColumnCell(right)],
@@ -401,7 +596,7 @@ export async function exportResumeDocx(
         out.push(bodyPara(title || "—", { bold: true }));
         const meta = [exp.location, dateRange(exp.startDate, exp.endDate)]
           .filter(Boolean)
-          .join("  |  ");
+          .join(" | ");
         if (meta) out.push(bodyPara(meta, { color: muted }));
         exp.highlights.forEach((h) => out.push(bulletRich(h)));
       });
@@ -425,7 +620,7 @@ export async function exportResumeDocx(
           dateRange(ed.startDate, ed.endDate),
         ]
           .filter(Boolean)
-          .join("  |  ");
+          .join(" | ");
         if (meta) out.push(bodyPara(meta, { color: muted }));
       });
       return out;
@@ -448,7 +643,10 @@ export async function exportResumeDocx(
       .filter((v) => v?.trim());
     switch (section.layoutType) {
       case "freeText":
-        out.push(bodyPara(section.freeText));
+        // The preview renders this pre-wrap, so keep every line break.
+        (section.freeText ?? "")
+          .split(/\r?\n/)
+          .forEach((line) => out.push(bodyPara(line)));
         break;
       case "bullets":
         texts.forEach((t) => out.push(markerBullet(t, section.bulletStyle)));
@@ -463,11 +661,7 @@ export async function exportResumeDocx(
         out.push(
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
-            borders: {
-              ...CELL_BORDERS,
-              insideHorizontal: NO_BORDER,
-              insideVertical: NO_BORDER,
-            },
+            borders: NO_TABLE_BORDERS,
             rows: [
               new TableRow({
                 children: [
@@ -504,16 +698,41 @@ export async function exportResumeDocx(
     return out;
   }
 
-  for (const entry of orderedVisibleDocSections(data, sectionState)) {
+  const docSections = orderedVisibleDocSections(data, sectionState);
+  docSections.forEach((entry, i) => {
     if (entry.kind === "custom") {
       children.push(...customSectionChildren(entry.section));
     } else {
       children.push(...sectionBuilders[entry.sectionId]());
     }
-  }
+    // Honor "page break after this section" like the preview / PDF (not after
+    // the last section, which would add an empty trailing page).
+    if (entry.pageBreakAfter && i < docSections.length - 1) {
+      children.push(new Paragraph({ children: [new PageBreak()] }));
+    }
+  });
 
+  // A4 with the resume's own page margins, so Word wraps and paginates like
+  // the preview / PDF instead of using its 1-inch default.
+  const m = s.pageMargins;
+  const twips = (mm: number) => Math.round(mm * TWIPS_PER_MM);
   const doc = new Document({
-    sections: [{ properties: {}, children }],
+    sections: [
+      {
+        properties: {
+          page: {
+            size: { width: twips(210), height: twips(297) },
+            margin: {
+              top: twips(m.top),
+              right: twips(m.right),
+              bottom: twips(m.bottom),
+              left: twips(m.left),
+            },
+          },
+        },
+        children,
+      },
+    ],
   });
   const blob = await Packer.toBlob(doc);
   await triggerDownload(blob, `${fileBaseName(data)}.docx`);
