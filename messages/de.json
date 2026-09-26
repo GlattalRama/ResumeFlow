@@ -271,6 +271,7 @@
       "button": "Mit KI verbessern",
       "thinking": "Denkt nach…",
       "addTextFirst": "Füge zuerst etwas Text hinzu und verbessere ihn dann mit KI.",
+      "editHint": "Sie können den Vorschlag unten bearbeiten, bevor Sie ihn übernehmen.",
       "requestFailed": "KI-Anfrage fehlgeschlagen.",
       "network": "Netzwerkfehler bei der Verbindung zum KI-Dienst.",
       "openSettings": "Einstellungen öffnen",

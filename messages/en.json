@@ -271,6 +271,7 @@
       "button": "Improve with AI",
       "thinking": "Thinking…",
       "addTextFirst": "Add some text first, then improve it with AI.",
+      "editHint": "You can edit the suggestion below before accepting it.",
       "requestFailed": "AI request failed.",
       "network": "Network error contacting the AI service.",
       "openSettings": "Open Settings",
