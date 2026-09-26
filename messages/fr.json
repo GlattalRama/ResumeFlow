@@ -271,6 +271,7 @@
       "button": "Améliorer avec l'IA",
       "thinking": "Réflexion…",
       "addTextFirst": "Ajoutez d'abord du texte, puis améliorez-le avec l'IA.",
+      "editHint": "Vous pouvez modifier la suggestion ci-dessous avant de l'accepter.",
       "requestFailed": "La requête IA a échoué.",
       "network": "Erreur réseau lors de la connexion au service d'IA.",
       "openSettings": "Ouvrir les paramètres",

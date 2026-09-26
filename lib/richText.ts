@@ -55,11 +55,13 @@ export function parseSummaryToBlocks(
     ""
   );
 
-  // Legacy plain text (no markup): one paragraph per non-empty line.
+  // Legacy plain text (no markup): one paragraph per non-empty line. Entities
+  // are still decoded: a stored inline-HTML line with no tags (e.g. "R&amp;D")
+  // must round-trip to "R&D", not be escaped a second time.
   if (!/[<]/.test(s)) {
     return s
       .split(/\r?\n+/)
-      .map((line) => line.trim())
+      .map((line) => decodeEntities(line).trim())
       .filter(Boolean)
       .map((line) => ({ type: "paragraph" as const, runs: [{ text: line }] }));
   }

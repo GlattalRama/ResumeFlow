@@ -271,6 +271,7 @@
       "button": "Mejorar con IA",
       "thinking": "Pensando…",
       "addTextFirst": "Añade primero algo de texto y luego mejóralo con IA.",
+      "editHint": "Puedes editar la sugerencia antes de aceptarla.",
       "requestFailed": "La solicitud a la IA falló.",
       "network": "Error de red al contactar con el servicio de IA.",
       "openSettings": "Abrir Ajustes",

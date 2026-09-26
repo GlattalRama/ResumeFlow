@@ -1429,7 +1429,8 @@ export default function ResumeBuilder({
           />
           <ImproveButton
             sectionType="summary"
-            text={htmlToLines(data.basics.summary).join(" ")}
+            format="html"
+            text={data.basics.summary}
             onAccept={(v) => patchBasics("summary", v)}
           />
         </div>
@@ -1508,6 +1509,7 @@ export default function ResumeBuilder({
                 />
                 <ImproveButton
                   sectionType="highlights"
+                  format="lines"
                   text={exp.highlights.join("\n")}
                   onAccept={(v) =>
                     updateExperience(i, {
