@@ -136,7 +136,14 @@
     "notesCount": "{count, plural, one {# nota} other {# notas}}",
     "sent": "enviado",
     "viewPdf": "PDF",
-    "attachResume": "Sin currículum adjunto — añadir"
+    "attachResume": "Sin currículum adjunto — añadir",
+    "changeStatus": "Cambiar estado",
+    "saveFailed": "No se pudo guardar. Inténtalo de nuevo.",
+    "uploadSent": "Subir archivo enviado",
+    "replaceSent": "Reemplazar archivo",
+    "uploading": "Guardando…",
+    "linkVersion": "Vincular una versión…",
+    "changeVersion": "Cambiar versión…"
   },
   "settings": {
     "title": "Ajustes de IA",

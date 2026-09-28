@@ -136,7 +136,14 @@
     "notesCount": "{count, plural, one {# note} other {# notes}}",
     "sent": "envoyé",
     "viewPdf": "PDF",
-    "attachResume": "Aucun CV joint — en ajouter un"
+    "attachResume": "Aucun CV joint — en ajouter un",
+    "changeStatus": "Changer le statut",
+    "saveFailed": "Enregistrement impossible. Réessayez.",
+    "uploadSent": "Téléverser le fichier envoyé",
+    "replaceSent": "Remplacer le fichier",
+    "uploading": "Enregistrement…",
+    "linkVersion": "Lier une version…",
+    "changeVersion": "Changer de version…"
   },
   "settings": {
     "title": "Paramètres IA",

@@ -15,7 +15,9 @@ import {
   type SortKey,
   type Stage,
 } from "@/lib/applicationStages";
-import { EmptyState, PageHeader, StatusBadge, buttonClass } from "@/components/ui";
+import { EmptyState, PageHeader, buttonClass } from "@/components/ui";
+import ApplicationStatusSelect from "@/components/ApplicationStatusSelect";
+import ResumeSentCell from "@/components/ResumeSentCell";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +46,9 @@ export default async function ApplicationsPage({
   ]);
 
   const resumeById = new Map(resumes.map((r) => [r.id, r]));
+  const resumeOptions = [...resumes]
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    .map((r) => ({ id: r.id, label: `${r.versionName} (v${r.versionNumber})` }));
   // Newest uploaded resume file per application.
   const sentFileByApp = new Map<string, DocumentMeta>();
   for (const d of [...documents].sort((a, b) => a.createdAt.localeCompare(b.createdAt))) {
@@ -145,6 +150,7 @@ export default async function ApplicationsPage({
                     resume={a.resumeVersionUsed ? resumeById.get(a.resumeVersionUsed) : undefined}
                     sentFile={sentFileByApp.get(a.id)}
                     notes={noteCount.get(a.id) ?? 0}
+                    resumeOptions={resumeOptions}
                     locale={locale}
                     t={t}
                   />
@@ -163,6 +169,7 @@ function ApplicationRow({
   resume,
   sentFile,
   notes,
+  resumeOptions,
   locale,
   t,
 }: {
@@ -170,6 +177,7 @@ function ApplicationRow({
   resume?: ResumeVersion;
   sentFile?: DocumentMeta;
   notes: number;
+  resumeOptions: { id: string; label: string }[];
   locale: string;
   t: Awaited<ReturnType<typeof getTranslations<"applications">>>;
 }) {
@@ -177,7 +185,6 @@ function ApplicationRow({
   const archived = stageOf(app.status) === "archived";
   const due = !archived && isDue(app.nextActionDate);
   const applied = app.appliedDate ? relativeTime(app.appliedDate, locale) : "";
-  const linkCls = "text-brand-600 dark:text-brand-300 hover:underline";
 
   return (
     <li
@@ -210,40 +217,30 @@ function ApplicationRow({
         </div>
       </div>
 
-      {/* Resume sent */}
-      <div className="min-w-0 text-sm">
-        <span className="mr-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground md:hidden">
-          {t("columns.resume")}:
+      {/* Resume sent — with inline upload / link-a-version actions */}
+      <div className="min-w-0">
+        <span className="mb-0.5 block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground md:hidden">
+          {t("columns.resume")}
         </span>
-        {sentFile ? (
-          <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
-            <a href={`/api/documents/${sentFile.id}/file`} target="_blank" rel="noreferrer" className={`truncate font-medium ${linkCls}`} title={sentFile.name}>
-              {sentFile.name}
-            </a>
-            <span className="shrink-0 rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-green-700 dark:bg-green-950 dark:text-green-300">
-              {t("sent")}
-            </span>
-          </span>
-        ) : resume ? (
-          <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
-            <Link href={`/resumes/${resume.id}`} className={`truncate ${linkCls}`} title={resume.versionName}>
-              {resume.versionName}
-            </Link>
-            <span className="shrink-0 text-xs text-muted-foreground">v{resume.versionNumber}</span>
-            <a href={`/api/resumes/${resume.id}/pdf`} target="_blank" rel="noreferrer" className={`shrink-0 text-xs ${linkCls}`}>
-              {t("viewPdf")}
-            </a>
-          </span>
-        ) : (
-          <Link href={`/applications/${app.id}`} className="text-xs text-amber-700 hover:underline dark:text-amber-300">
-            {t("attachResume")}
-          </Link>
-        )}
+        <ResumeSentCell
+          applicationId={app.id}
+          sentFile={sentFile ? { id: sentFile.id, name: sentFile.name } : null}
+          resume={
+            resume
+              ? { id: resume.id, versionName: resume.versionName, versionNumber: resume.versionNumber }
+              : null
+          }
+          resumeOptions={resumeOptions}
+        />
       </div>
 
-      {/* Status */}
+      {/* Status — change it right here */}
       <div>
-        <StatusBadge status={app.status} />
+        <ApplicationStatusSelect
+          applicationId={app.id}
+          status={app.status}
+          appliedDate={app.appliedDate}
+        />
       </div>
 
       {/* Next action */}

@@ -136,7 +136,14 @@
     "notesCount": "{count, plural, one {# note} other {# notes}}",
     "sent": "sent",
     "viewPdf": "PDF",
-    "attachResume": "No resume attached — add one"
+    "attachResume": "No resume attached — add one",
+    "changeStatus": "Change status",
+    "saveFailed": "Could not save. Try again.",
+    "uploadSent": "Upload sent file",
+    "replaceSent": "Replace file",
+    "uploading": "Saving…",
+    "linkVersion": "Link a version…",
+    "changeVersion": "Change version…"
   },
   "settings": {
     "title": "AI Settings",
