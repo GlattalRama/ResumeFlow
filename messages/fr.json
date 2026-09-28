@@ -103,7 +103,40 @@
     "jobId": "Réf. {id}",
     "noJobId": "Aucune référence",
     "appliedOn": "Envoyée le {date}",
-    "next": "Prochaine étape : {action}"
+    "next": "Prochaine étape : {action}",
+    "dueSubtitle": "{count, plural, one {# prochaine action est due} other {# prochaines actions sont dues}} — triez par prochaine action pour les voir en premier.",
+    "stagesLabel": "Étape du processus",
+    "stages": {
+      "all": "Toutes",
+      "saved": "Enregistrées",
+      "applied": "Envoyées",
+      "interviewing": "En entretien",
+      "offer": "Offre",
+      "archived": "Archivées"
+    },
+    "sortBy": "Trier :",
+    "sorts": {
+      "updated": "Mise à jour",
+      "applied": "Date d'envoi",
+      "company": "Entreprise",
+      "nextAction": "Prochaine action"
+    },
+    "noneInStage": "Rien dans « {stage} » pour l'instant.",
+    "columns": {
+      "job": "Poste",
+      "resume": "CV envoyé",
+      "status": "Statut",
+      "nextAction": "Prochaine action",
+      "updated": "Mis à jour"
+    },
+    "appliedRelative": "Envoyée {when}",
+    "notAppliedYet": "Pas encore envoyée",
+    "hasCoverLetter": "Lettre de motivation présente",
+    "coverLetterShort": "lettre",
+    "notesCount": "{count, plural, one {# note} other {# notes}}",
+    "sent": "envoyé",
+    "viewPdf": "PDF",
+    "attachResume": "Aucun CV joint — en ajouter un"
   },
   "settings": {
     "title": "Paramètres IA",

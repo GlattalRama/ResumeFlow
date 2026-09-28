@@ -103,7 +103,40 @@
     "jobId": "Stellen-ID {id}",
     "noJobId": "Keine Stellen-ID",
     "appliedOn": "Beworben am {date}",
-    "next": "Nächster Schritt: {action}"
+    "next": "Nächster Schritt: {action}",
+    "dueSubtitle": "{count, plural, one {# nächster Schritt ist fällig} other {# nächste Schritte sind fällig}} — nach nächstem Schritt sortieren, um sie zuerst zu sehen.",
+    "stagesLabel": "Pipeline-Phase",
+    "stages": {
+      "all": "Alle",
+      "saved": "Gespeichert",
+      "applied": "Beworben",
+      "interviewing": "Im Gespräch",
+      "offer": "Angebot",
+      "archived": "Archiviert"
+    },
+    "sortBy": "Sortieren:",
+    "sorts": {
+      "updated": "Aktualisiert",
+      "applied": "Bewerbungsdatum",
+      "company": "Firma",
+      "nextAction": "Nächster Schritt"
+    },
+    "noneInStage": "Noch nichts unter „{stage}“.",
+    "columns": {
+      "job": "Stelle",
+      "resume": "Gesendeter Lebenslauf",
+      "status": "Status",
+      "nextAction": "Nächster Schritt",
+      "updated": "Aktualisiert"
+    },
+    "appliedRelative": "Beworben {when}",
+    "notAppliedYet": "Noch nicht beworben",
+    "hasCoverLetter": "Anschreiben vorhanden",
+    "coverLetterShort": "Anschreiben",
+    "notesCount": "{count, plural, one {# Notiz} other {# Notizen}}",
+    "sent": "gesendet",
+    "viewPdf": "PDF",
+    "attachResume": "Kein Lebenslauf verknüpft — hinzufügen"
   },
   "settings": {
     "title": "KI-Einstellungen",
