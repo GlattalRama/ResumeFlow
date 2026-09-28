@@ -18,6 +18,7 @@ import {
 import { EmptyState, PageHeader, buttonClass } from "@/components/ui";
 import ApplicationStatusSelect from "@/components/ApplicationStatusSelect";
 import ResumeSentCell from "@/components/ResumeSentCell";
+import CoverLetterCell from "@/components/CoverLetterCell";
 
 export const dynamic = "force-dynamic";
 
@@ -49,10 +50,13 @@ export default async function ApplicationsPage({
   const resumeOptions = [...resumes]
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     .map((r) => ({ id: r.id, label: `${r.versionName} (v${r.versionNumber})` }));
-  // Newest uploaded resume file per application.
+  // Newest uploaded resume / cover-letter file per application.
   const sentFileByApp = new Map<string, DocumentMeta>();
+  const sentLetterByApp = new Map<string, DocumentMeta>();
   for (const d of [...documents].sort((a, b) => a.createdAt.localeCompare(b.createdAt))) {
-    if (d.type === "Resume" && (d.driveFileId || d.dataUrl)) sentFileByApp.set(d.applicationId, d);
+    if (!(d.driveFileId || d.dataUrl)) continue;
+    if (d.type === "Resume") sentFileByApp.set(d.applicationId, d);
+    else if (d.type === "Cover Letter") sentLetterByApp.set(d.applicationId, d);
   }
   const noteCount = new Map<string, number>();
   for (const n of notes) noteCount.set(n.applicationId, (noteCount.get(n.applicationId) ?? 0) + 1);
@@ -135,9 +139,10 @@ export default async function ApplicationsPage({
           ) : (
             <div className="overflow-hidden rounded-xl border border-border bg-card">
               {/* Header (desktop) */}
-              <div className="hidden grid-cols-[minmax(0,2.2fr)_minmax(0,1.6fr)_auto_minmax(0,1.3fr)_auto] gap-4 border-b border-border bg-muted/50 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground md:grid">
+              <div className="hidden grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1.3fr)_auto_minmax(0,1.2fr)_auto] gap-4 border-b border-border bg-muted/50 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground md:grid">
                 <span>{t("columns.job")}</span>
                 <span>{t("columns.resume")}</span>
+                <span>{t("columns.coverLetter")}</span>
                 <span>{t("columns.status")}</span>
                 <span>{t("columns.nextAction")}</span>
                 <span className="text-right">{t("columns.updated")}</span>
@@ -149,6 +154,7 @@ export default async function ApplicationsPage({
                     app={a}
                     resume={a.resumeVersionUsed ? resumeById.get(a.resumeVersionUsed) : undefined}
                     sentFile={sentFileByApp.get(a.id)}
+                    sentLetter={sentLetterByApp.get(a.id)}
                     notes={noteCount.get(a.id) ?? 0}
                     resumeOptions={resumeOptions}
                     locale={locale}
@@ -168,6 +174,7 @@ function ApplicationRow({
   app,
   resume,
   sentFile,
+  sentLetter,
   notes,
   resumeOptions,
   locale,
@@ -176,6 +183,7 @@ function ApplicationRow({
   app: Application;
   resume?: ResumeVersion;
   sentFile?: DocumentMeta;
+  sentLetter?: DocumentMeta;
   notes: number;
   resumeOptions: { id: string; label: string }[];
   locale: string;
@@ -188,7 +196,7 @@ function ApplicationRow({
 
   return (
     <li
-      className={`grid grid-cols-1 gap-2 px-4 py-3 transition hover:bg-muted/40 md:grid-cols-[minmax(0,2.2fr)_minmax(0,1.6fr)_auto_minmax(0,1.3fr)_auto] md:items-center md:gap-4 ${
+      className={`grid grid-cols-1 gap-2 px-4 py-3 transition hover:bg-muted/40 md:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1.3fr)_auto_minmax(0,1.2fr)_auto] md:items-center md:gap-4 ${
         archived ? "opacity-70" : ""
       }`}
     >
@@ -211,7 +219,6 @@ function ApplicationRow({
           </p>
           <p className="mt-0.5 flex flex-wrap gap-x-2 text-[11px] text-muted-foreground/80">
             {applied ? <span>{t("appliedRelative", { when: applied })}</span> : <span>{t("notAppliedYet")}</span>}
-            {app.coverLetter?.trim() && <span title={t("hasCoverLetter")}>✉ {t("coverLetterShort")}</span>}
             {notes > 0 && <span>✎ {t("notesCount", { count: notes })}</span>}
           </p>
         </div>
@@ -231,6 +238,18 @@ function ApplicationRow({
               : null
           }
           resumeOptions={resumeOptions}
+        />
+      </div>
+
+      {/* Cover letter — the sent file, else the letter written in the app */}
+      <div className="min-w-0">
+        <span className="mb-0.5 block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground md:hidden">
+          {t("columns.coverLetter")}
+        </span>
+        <CoverLetterCell
+          applicationId={app.id}
+          sentFile={sentLetter ? { id: sentLetter.id, name: sentLetter.name } : null}
+          hasSavedLetter={Boolean(app.coverLetter?.trim())}
         />
       </div>
 

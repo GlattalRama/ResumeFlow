@@ -127,7 +127,8 @@
       "resume": "Gesendeter Lebenslauf",
       "status": "Status",
       "nextAction": "Nächster Schritt",
-      "updated": "Aktualisiert"
+      "updated": "Aktualisiert",
+      "coverLetter": "Anschreiben"
     },
     "appliedRelative": "Beworben {when}",
     "notAppliedYet": "Noch nicht beworben",
@@ -143,7 +144,10 @@
     "replaceSent": "Datei ersetzen",
     "uploading": "Wird gespeichert…",
     "linkVersion": "Version verknüpfen…",
-    "changeVersion": "Version ändern…"
+    "changeVersion": "Version ändern…",
+    "generatedLetter": "In der App verfasst",
+    "uploadLetter": "Gesendetes Anschreiben hochladen",
+    "writeLetter": "Verfassen"
   },
   "settings": {
     "title": "KI-Einstellungen",
