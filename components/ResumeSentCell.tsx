@@ -116,7 +116,7 @@ export default function ResumeSentCell({
         </span>
       ) : resume ? (
         <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
-          <Link href={`/resumes/${resume.id}`} className={`truncate ${linkCls}`} title={resume.versionName}>
+          <Link prefetch={false} href={`/resumes/${resume.id}`} className={`truncate ${linkCls}`} title={resume.versionName}>
             {resume.versionName}
           </Link>
           <span className="shrink-0 text-xs text-muted-foreground">v{resume.versionNumber}</span>

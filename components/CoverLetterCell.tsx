@@ -69,7 +69,7 @@ export default function CoverLetterCell({
         </span>
       ) : hasSavedLetter ? (
         <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
-          <Link href={`/applications/${applicationId}#cover-letter`} className={`truncate ${linkCls}`}>
+          <Link prefetch={false} href={`/applications/${applicationId}#cover-letter`} className={`truncate ${linkCls}`}>
             {t("generatedLetter")}
           </Link>
           <a
@@ -105,7 +105,7 @@ export default function CoverLetterCell({
           {busy ? t("uploading") : sentFile ? t("replaceSent") : t("uploadLetter")}
         </button>
         {!sentFile && !hasSavedLetter && (
-          <Link href={`/applications/${applicationId}#cover-letter`} className={`text-[11px] ${linkCls}`}>
+          <Link prefetch={false} href={`/applications/${applicationId}#cover-letter`} className={`text-[11px] ${linkCls}`}>
             {t("writeLetter")}
           </Link>
         )}
