@@ -43,6 +43,13 @@ export default async function ApplicationDetailPage({
     label: `${r.versionName} (v${r.versionNumber})`,
   }));
   const linkedResume = resumes.find((r) => r.id === app.resumeVersionUsed);
+  // The resume actually sent, if a file was uploaded for it (newest first);
+  // otherwise the overview links the PDF generated from the linked version.
+  const uploadedResume = [...documents]
+    .filter((d) => d.type === "Resume" && (d.driveFileId || d.dataUrl))
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+  // Inline file bytes never go to the client component.
+  const documentsForClient = documents.map(({ dataUrl: _omit, ...d }) => d);
   // Tailoring source default: Base Resume → linked version → none (force pick).
   const defaultSourceId =
     baseResumeId ?? (linkedResume ? linkedResume.id : "");
@@ -94,13 +101,43 @@ export default async function ApplicationDetailPage({
           <Row
             label={t("detail.resumeVersion")}
             value={
-              linkedResume ? (
-                <Link
-                  href={`/resumes/${linkedResume.id}`}
-                  className="text-brand-600 dark:text-brand-300 hover:underline"
-                >
-                  {linkedResume.versionName} (v{linkedResume.versionNumber})
-                </Link>
+              uploadedResume || linkedResume ? (
+                <div className="space-y-0.5">
+                  {uploadedResume && (
+                    <p>
+                      <a
+                        href={`/api/documents/${uploadedResume.id}/file`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-medium text-brand-600 dark:text-brand-300 hover:underline"
+                      >
+                        {uploadedResume.name}
+                      </a>
+                      <span className="ml-1.5 text-xs text-muted-foreground">
+                        {t("detail.uploadedFile")}
+                      </span>
+                    </p>
+                  )}
+                  {linkedResume && (
+                    <p>
+                      <Link
+                        href={`/resumes/${linkedResume.id}`}
+                        className="text-brand-600 dark:text-brand-300 hover:underline"
+                      >
+                        {linkedResume.versionName} (v{linkedResume.versionNumber})
+                      </Link>
+                      <span className="text-muted-foreground"> · </span>
+                      <a
+                        href={`/api/resumes/${linkedResume.id}/pdf`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-brand-600 dark:text-brand-300 hover:underline"
+                      >
+                        {t("detail.viewPdf")}
+                      </a>
+                    </p>
+                  )}
+                </div>
               ) : (
                 "—"
               )
@@ -229,7 +266,7 @@ export default async function ApplicationDetailPage({
         <h2 className="mb-3 text-sm font-semibold text-foreground/80">{t("detail.documents")}</h2>
         <DocumentsSection
           applicationId={app.id}
-          documents={documents}
+          documents={documentsForClient}
           resumeOptions={resumeOptions}
         />
       </Card>

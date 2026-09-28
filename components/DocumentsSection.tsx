@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { DocumentMeta } from "@/lib/types";
@@ -24,27 +24,48 @@ export default function DocumentsSection({
   const [link, setLink] = useState("");
   const [resumeVersionId, setResumeVersionId] = useState("");
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
+  // Add a document: with a chosen file it is uploaded (multipart), otherwise
+  // only the metadata + link are stored, as before.
   async function add() {
-    if (!name.trim()) return;
+    const file = fileRef.current?.files?.[0] ?? null;
+    if (!name.trim() && !file) return;
     setBusy(true);
-    const res = await fetch("/api/documents", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        applicationId,
-        name,
-        type,
-        link,
-        resumeVersionId,
-      }),
-    });
-    if (res.ok) {
+    setError(null);
+    try {
+      let res: Response;
+      if (file) {
+        const form = new FormData();
+        form.set("file", file);
+        form.set("applicationId", applicationId);
+        form.set("name", name.trim() || file.name);
+        form.set("type", type);
+        form.set("link", link);
+        form.set("resumeVersionId", resumeVersionId);
+        res = await fetch("/api/documents", { method: "POST", body: form });
+      } else {
+        res = await fetch("/api/documents", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ applicationId, name, type, link, resumeVersionId }),
+        });
+      }
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || t("docs.uploadFailed"));
+        return;
+      }
       setName("");
       setLink("");
+      if (fileRef.current) fileRef.current.value = "";
       router.refresh();
+    } catch {
+      setError(t("docs.uploadFailed"));
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
   }
 
   async function remove(id: string) {
@@ -63,9 +84,16 @@ export default function DocumentsSection({
   return (
     <div>
       <p className="mb-2 text-xs text-muted-foreground/70">
-        {t("docs.metaOnly")}
+        {t("docs.uploadHint")}
       </p>
       <div className="flex flex-wrap gap-2">
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/pdf,.pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          aria-label={t("docs.upload")}
+          className="min-w-[12rem] flex-1 rounded-md border border-input bg-card px-3 py-1.5 text-sm text-foreground file:mr-3 file:rounded file:border-0 file:bg-muted file:px-2 file:py-1 file:text-xs file:font-medium"
+        />
         <input
           className="min-w-[10rem] flex-1 rounded-md border border-input bg-card text-foreground px-3 py-2 text-sm"
           placeholder={t("docs.namePlaceholder")}
@@ -106,9 +134,12 @@ export default function DocumentsSection({
           disabled={busy}
           className="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
         >
-          {t("docs.add")}
+          {busy ? t("docs.uploading") : t("docs.add")}
         </button>
       </div>
+      {error && (
+        <p className="mt-2 text-xs text-red-600 dark:text-red-400">{error}</p>
+      )}
 
       <ul className="mt-4 space-y-2">
         {documents.length === 0 && (
@@ -128,6 +159,16 @@ export default function DocumentsSection({
                 <span className="ml-2 text-xs text-muted-foreground/70">
                   · {resumeLabel(d.resumeVersionId)}
                 </span>
+              )}
+              {(d.driveFileId || d.dataUrl || d.mimeType) && (
+                <a
+                  href={`/api/documents/${d.id}/file`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="ml-2 text-xs text-brand-600 dark:text-brand-300 hover:underline"
+                >
+                  {t("docs.view")}
+                </a>
               )}
               {d.link && (
                 <a

@@ -770,6 +770,14 @@ export interface DocumentMeta {
   type: string; // e.g. "Resume", "Cover Letter", "Portfolio"
   link: string;
   createdAt: string;
+  // Optional uploaded file (PDF / Word). Stored like certificate files: in
+  // Google Drive appDataFolder (`driveFileId`) when Drive storage is active,
+  // inline as a Base64 `dataUrl` in local development mode. Served by
+  // /api/documents/[id]/file. Absent on link-only documents.
+  mimeType?: string;
+  size?: number;
+  driveFileId?: string;
+  dataUrl?: string;
 }
 
 // ---- AI / user settings ----
