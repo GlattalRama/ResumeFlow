@@ -202,7 +202,11 @@ async function TrackerRows({
     `applications tracker: ${timings.join(" | ")} | total ${Date.now() - pageStart}ms | resumes ${Math.round(JSON.stringify(resumes).length / 1024)} KB`
   );
 
-  const resumeById = new Map(resumes.map((r) => [r.id, r]));
+  // Only what the row needs — never the full ResumeVersion (its resumeData is
+  // the bulk of the payload and would otherwise ride along in the RSC stream).
+  const resumeById = new Map(
+    resumes.map((r) => [r.id, { id: r.id, versionName: r.versionName, versionNumber: r.versionNumber }])
+  );
   const resumeOptions = [...resumes]
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     .map((r) => ({ id: r.id, label: `${r.versionName} (v${r.versionNumber})` }));
@@ -224,8 +228,8 @@ async function TrackerRows({
           key={a.id}
           app={a}
           resume={a.resumeVersionUsed ? resumeById.get(a.resumeVersionUsed) : undefined}
-          sentFile={sentFileByApp.get(a.id)}
-          sentLetter={sentLetterByApp.get(a.id)}
+          sentFile={sentFileByApp.get(a.id) && { ...sentFileByApp.get(a.id)!, dataUrl: undefined }}
+          sentLetter={sentLetterByApp.get(a.id) && { ...sentLetterByApp.get(a.id)!, dataUrl: undefined }}
           notes={noteCount.get(a.id) ?? 0}
           resumeOptions={resumeOptions}
           locale={locale}
@@ -247,7 +251,7 @@ function ApplicationRow({
   t,
 }: {
   app: Application;
-  resume?: ResumeVersion;
+  resume?: Pick<ResumeVersion, "id" | "versionName" | "versionNumber">;
   sentFile?: DocumentMeta;
   sentLetter?: DocumentMeta;
   notes: number;
