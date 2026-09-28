@@ -45,6 +45,20 @@ function letterHtml(letter: string): string {
 </html>`;
 }
 
+// GET: the SAVED letter, shown inline (used by the applications tracker's
+// "view" link). POST: the letter from the request body (unsaved editor text),
+// falling back to the saved one, as a download.
+export async function GET(_req: Request, { params }: Ctx) {
+  const { id } = await params;
+  const app = await getItem("applications", id);
+  if (!app) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const letter = (app.coverLetter || "").trim();
+  if (!letter) {
+    return NextResponse.json({ error: "No cover letter" }, { status: 404 });
+  }
+  return renderLetterPdf(app.company, letter, "inline");
+}
+
 export async function POST(req: Request, { params }: Ctx) {
   const { id } = await params;
   const app = await getItem("applications", id);
@@ -57,7 +71,14 @@ export async function POST(req: Request, { params }: Ctx) {
   if (!letter) {
     return NextResponse.json({ error: "No cover letter" }, { status: 400 });
   }
+  return renderLetterPdf(app.company, letter, "attachment");
+}
 
+async function renderLetterPdf(
+  company: string,
+  letter: string,
+  disposition: "inline" | "attachment"
+) {
   const browser = await launchPdfBrowser();
   try {
     const page = await browser.newPage();
@@ -69,13 +90,13 @@ export async function POST(req: Request, { params }: Ctx) {
     });
 
     const base =
-      (app.company || "application")
+      (company || "application")
         .replace(/[^a-z0-9]+/gi, "_")
         .replace(/^_+|_+$/g, "") || "application";
     return new NextResponse(new Uint8Array(pdf), {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="Cover_Letter_${base}.pdf"`,
+        "Content-Disposition": `${disposition}; filename="Cover_Letter_${base}.pdf"`,
         "Cache-Control": "no-store",
       },
     });

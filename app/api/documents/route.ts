@@ -12,6 +12,7 @@ const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED_TYPES = new Set([
   "application/pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "text/plain",
 ]);
 
 export async function GET(req: Request) {
@@ -59,7 +60,7 @@ export async function POST(req: Request) {
   const mimeType = file.type || "application/octet-stream";
   if (!ALLOWED_TYPES.has(mimeType)) {
     return NextResponse.json(
-      { error: "Unsupported file type. Upload a PDF or a Word (.docx) file." },
+      { error: "Unsupported file type. Upload a PDF, Word (.docx) or text (.txt) file." },
       { status: 415 }
     );
   }

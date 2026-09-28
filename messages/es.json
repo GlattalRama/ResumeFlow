@@ -127,7 +127,8 @@
       "resume": "Currículum enviado",
       "status": "Estado",
       "nextAction": "Próxima acción",
-      "updated": "Actualizado"
+      "updated": "Actualizado",
+      "coverLetter": "Carta"
     },
     "appliedRelative": "Enviada {when}",
     "notAppliedYet": "Aún no enviada",
@@ -143,7 +144,10 @@
     "replaceSent": "Reemplazar archivo",
     "uploading": "Guardando…",
     "linkVersion": "Vincular una versión…",
-    "changeVersion": "Cambiar versión…"
+    "changeVersion": "Cambiar versión…",
+    "generatedLetter": "Escrita en la app",
+    "uploadLetter": "Subir carta enviada",
+    "writeLetter": "Escribir una"
   },
   "settings": {
     "title": "Ajustes de IA",

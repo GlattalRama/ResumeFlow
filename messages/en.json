@@ -127,7 +127,8 @@
       "resume": "Resume sent",
       "status": "Status",
       "nextAction": "Next action",
-      "updated": "Updated"
+      "updated": "Updated",
+      "coverLetter": "Cover letter"
     },
     "appliedRelative": "Applied {when}",
     "notAppliedYet": "Not applied yet",
@@ -143,7 +144,10 @@
     "replaceSent": "Replace file",
     "uploading": "Saving…",
     "linkVersion": "Link a version…",
-    "changeVersion": "Change version…"
+    "changeVersion": "Change version…",
+    "generatedLetter": "Written in app",
+    "uploadLetter": "Upload sent letter",
+    "writeLetter": "Write one"
   },
   "settings": {
     "title": "AI Settings",

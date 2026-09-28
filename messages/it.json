@@ -127,7 +127,8 @@
       "resume": "CV inviato",
       "status": "Stato",
       "nextAction": "Prossima azione",
-      "updated": "Aggiornato"
+      "updated": "Aggiornato",
+      "coverLetter": "Lettera"
     },
     "appliedRelative": "Inviata {when}",
     "notAppliedYet": "Non ancora inviata",
@@ -143,7 +144,10 @@
     "replaceSent": "Sostituisci file",
     "uploading": "Salvataggio…",
     "linkVersion": "Collega una versione…",
-    "changeVersion": "Cambia versione…"
+    "changeVersion": "Cambia versione…",
+    "generatedLetter": "Scritta nell'app",
+    "uploadLetter": "Carica lettera inviata",
+    "writeLetter": "Scrivine una"
   },
   "settings": {
     "title": "Impostazioni IA",

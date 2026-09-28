@@ -223,7 +223,7 @@ export default async function ApplicationDetailPage({
       {/* Cover letter */}
       <Card>
         <h2 className="mb-3 text-sm font-semibold text-foreground/80">
-          {t("detail.coverLetter")}
+          <span id="cover-letter" className="scroll-mt-24">{t("detail.coverLetter")}</span>
         </h2>
         <CoverLetterSection
           applicationId={app.id}
