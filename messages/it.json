@@ -103,7 +103,40 @@
     "jobId": "ID posizione {id}",
     "noJobId": "Nessun ID posizione",
     "appliedOn": "Inviata il {date}",
-    "next": "Prossimo passo: {action}"
+    "next": "Prossimo passo: {action}",
+    "dueSubtitle": "{count, plural, one {# prossima azione in scadenza} other {# prossime azioni in scadenza}} — ordina per prossima azione per vederle prima.",
+    "stagesLabel": "Fase del processo",
+    "stages": {
+      "all": "Tutte",
+      "saved": "Salvate",
+      "applied": "Inviate",
+      "interviewing": "In colloquio",
+      "offer": "Offerta",
+      "archived": "Archiviate"
+    },
+    "sortBy": "Ordina:",
+    "sorts": {
+      "updated": "Aggiornamento",
+      "applied": "Data di invio",
+      "company": "Azienda",
+      "nextAction": "Prossima azione"
+    },
+    "noneInStage": "Ancora nulla in “{stage}”.",
+    "columns": {
+      "job": "Posizione",
+      "resume": "CV inviato",
+      "status": "Stato",
+      "nextAction": "Prossima azione",
+      "updated": "Aggiornato"
+    },
+    "appliedRelative": "Inviata {when}",
+    "notAppliedYet": "Non ancora inviata",
+    "hasCoverLetter": "Lettera di presentazione presente",
+    "coverLetterShort": "lettera",
+    "notesCount": "{count, plural, one {# nota} other {# note}}",
+    "sent": "inviato",
+    "viewPdf": "PDF",
+    "attachResume": "Nessun CV allegato — aggiungilo"
   },
   "settings": {
     "title": "Impostazioni IA",

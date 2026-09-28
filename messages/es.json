@@ -103,7 +103,40 @@
     "jobId": "ID de puesto {id}",
     "noJobId": "Sin ID de puesto",
     "appliedOn": "Enviada el {date}",
-    "next": "Siguiente paso: {action}"
+    "next": "Siguiente paso: {action}",
+    "dueSubtitle": "{count, plural, one {# próxima acción vence} other {# próximas acciones vencen}} — ordena por próxima acción para verlas primero.",
+    "stagesLabel": "Etapa del proceso",
+    "stages": {
+      "all": "Todas",
+      "saved": "Guardadas",
+      "applied": "Enviadas",
+      "interviewing": "En entrevistas",
+      "offer": "Oferta",
+      "archived": "Archivadas"
+    },
+    "sortBy": "Ordenar:",
+    "sorts": {
+      "updated": "Actualización",
+      "applied": "Fecha de envío",
+      "company": "Empresa",
+      "nextAction": "Próxima acción"
+    },
+    "noneInStage": "Nada en “{stage}” todavía.",
+    "columns": {
+      "job": "Puesto",
+      "resume": "Currículum enviado",
+      "status": "Estado",
+      "nextAction": "Próxima acción",
+      "updated": "Actualizado"
+    },
+    "appliedRelative": "Enviada {when}",
+    "notAppliedYet": "Aún no enviada",
+    "hasCoverLetter": "Tiene carta de presentación",
+    "coverLetterShort": "carta",
+    "notesCount": "{count, plural, one {# nota} other {# notas}}",
+    "sent": "enviado",
+    "viewPdf": "PDF",
+    "attachResume": "Sin currículum adjunto — añadir"
   },
   "settings": {
     "title": "Ajustes de IA",

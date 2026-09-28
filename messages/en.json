@@ -103,7 +103,40 @@
     "jobId": "Job ID {id}",
     "noJobId": "No job ID",
     "appliedOn": "Applied {date}",
-    "next": "Next: {action}"
+    "next": "Next: {action}",
+    "dueSubtitle": "{count, plural, one {# next action is due} other {# next actions are due}} — sorted by next action to see them first.",
+    "stagesLabel": "Pipeline stage",
+    "stages": {
+      "all": "All",
+      "saved": "Saved",
+      "applied": "Applied",
+      "interviewing": "Interviewing",
+      "offer": "Offer",
+      "archived": "Archived"
+    },
+    "sortBy": "Sort:",
+    "sorts": {
+      "updated": "Updated",
+      "applied": "Applied date",
+      "company": "Company",
+      "nextAction": "Next action"
+    },
+    "noneInStage": "Nothing in “{stage}” yet.",
+    "columns": {
+      "job": "Job",
+      "resume": "Resume sent",
+      "status": "Status",
+      "nextAction": "Next action",
+      "updated": "Updated"
+    },
+    "appliedRelative": "Applied {when}",
+    "notAppliedYet": "Not applied yet",
+    "hasCoverLetter": "Has a cover letter",
+    "coverLetterShort": "cover letter",
+    "notesCount": "{count, plural, one {# note} other {# notes}}",
+    "sent": "sent",
+    "viewPdf": "PDF",
+    "attachResume": "No resume attached — add one"
   },
   "settings": {
     "title": "AI Settings",
