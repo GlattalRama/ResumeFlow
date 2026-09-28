@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { readAll } from "@/lib/store";
 import type { Application, DocumentMeta, ResumeVersion } from "@/lib/types";
@@ -26,6 +27,22 @@ export const dynamic = "force-dynamic";
 // part a job board can't give you — the exact resume that went out with each
 // application (the uploaded file, or the app-generated PDF of the linked
 // version), plus next actions with overdue highlighting.
+//
+// Rendering is staged for speed on Drive storage: the header and tabs need
+// only the applications collection (one Drive read) and paint first; the rows
+// also need resumes, documents and notes and stream in under a Suspense
+// boundary. Each read is timed and logged so slow visits can be diagnosed
+// from the runtime logs.
+
+// Time a collection read; logs one line per page render (see below).
+async function timed<T>(label: string, fn: () => Promise<T>, timings: string[]): Promise<T> {
+  const start = Date.now();
+  const result = await fn();
+  const size = Array.isArray(result) ? ` n=${result.length}` : "";
+  timings.push(`${label} ${Date.now() - start}ms${size}`);
+  return result;
+}
+
 export default async function ApplicationsPage({
   searchParams,
 }: {
@@ -39,27 +56,9 @@ export default async function ApplicationsPage({
   const stage: Stage = isStage(stageParam) ? stageParam : "all";
   const sort: SortKey = isSortKey(sortParam) ? sortParam : "updated";
 
-  const [apps, resumes, documents, notes] = await Promise.all([
-    readAll("applications"),
-    readAll("resumes"),
-    readAll("documents"),
-    readAll("notes"),
-  ]);
-
-  const resumeById = new Map(resumes.map((r) => [r.id, r]));
-  const resumeOptions = [...resumes]
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-    .map((r) => ({ id: r.id, label: `${r.versionName} (v${r.versionNumber})` }));
-  // Newest uploaded resume / cover-letter file per application.
-  const sentFileByApp = new Map<string, DocumentMeta>();
-  const sentLetterByApp = new Map<string, DocumentMeta>();
-  for (const d of [...documents].sort((a, b) => a.createdAt.localeCompare(b.createdAt))) {
-    if (!(d.driveFileId || d.dataUrl)) continue;
-    if (d.type === "Resume") sentFileByApp.set(d.applicationId, d);
-    else if (d.type === "Cover Letter") sentLetterByApp.set(d.applicationId, d);
-  }
-  const noteCount = new Map<string, number>();
-  for (const n of notes) noteCount.set(n.applicationId, (noteCount.get(n.applicationId) ?? 0) + 1);
+  const timings: string[] = [];
+  const pageStart = Date.now();
+  const apps = await timed("applications", () => readAll("applications"), timings);
 
   const counts: Record<Stage, number> = { all: apps.length, saved: 0, applied: 0, interviewing: 0, offer: 0, archived: 0 };
   for (const a of apps) counts[stageOf(a.status)]++;
@@ -147,26 +146,97 @@ export default async function ApplicationsPage({
                 <span>{t("columns.nextAction")}</span>
                 <span className="text-right">{t("columns.updated")}</span>
               </div>
-              <ul className="divide-y divide-border">
-                {visible.map((a) => (
-                  <ApplicationRow
-                    key={a.id}
-                    app={a}
-                    resume={a.resumeVersionUsed ? resumeById.get(a.resumeVersionUsed) : undefined}
-                    sentFile={sentFileByApp.get(a.id)}
-                    sentLetter={sentLetterByApp.get(a.id)}
-                    notes={noteCount.get(a.id) ?? 0}
-                    resumeOptions={resumeOptions}
-                    locale={locale}
-                    t={t}
-                  />
-                ))}
-              </ul>
+              <Suspense fallback={<RowsSkeleton count={visible.length} />}>
+                <TrackerRows
+                  apps={visible}
+                  locale={locale}
+                  timings={timings}
+                  pageStart={pageStart}
+                />
+              </Suspense>
             </div>
           )}
         </>
       )}
     </div>
+  );
+}
+
+// Placeholder rows shown while the resumes / documents / notes reads stream in.
+function RowsSkeleton({ count }: { count: number }) {
+  return (
+    <ul className="divide-y divide-border" aria-busy="true">
+      {Array.from({ length: Math.min(count, 8) }).map((_, i) => (
+        <li key={i} className="flex animate-pulse items-center gap-3 px-4 py-4">
+          <span className="h-9 w-9 rounded-lg bg-muted" />
+          <span className="h-3 w-1/3 rounded bg-muted" />
+          <span className="ml-auto h-3 w-24 rounded bg-muted" />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// The rows: needs the three secondary collections, read in parallel here so
+// the page above them has already painted.
+async function TrackerRows({
+  apps,
+  locale,
+  timings,
+  pageStart,
+}: {
+  apps: Application[];
+  locale: string;
+  timings: string[];
+  pageStart: number;
+}) {
+  const t = await getTranslations("applications");
+  const [resumes, documents, notes] = await Promise.all([
+    timed("resumes", () => readAll("resumes"), timings),
+    timed("documents", () => readAll("documents"), timings),
+    timed("notes", () => readAll("notes"), timings),
+  ]);
+  // One line per render in the runtime logs, e.g.
+  // "applications tracker: applications 310ms n=11 | resumes 1420ms n=11 | … total 1800ms"
+  console.info(
+    `applications tracker: ${timings.join(" | ")} | total ${Date.now() - pageStart}ms | resumes ${Math.round(JSON.stringify(resumes).length / 1024)} KB`
+  );
+
+  // Only what the row needs — never the full ResumeVersion (its resumeData is
+  // the bulk of the payload and would otherwise ride along in the RSC stream).
+  const resumeById = new Map(
+    resumes.map((r) => [r.id, { id: r.id, versionName: r.versionName, versionNumber: r.versionNumber }])
+  );
+  const resumeOptions = [...resumes]
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    .map((r) => ({ id: r.id, label: `${r.versionName} (v${r.versionNumber})` }));
+  // Newest uploaded resume / cover-letter file per application.
+  const sentFileByApp = new Map<string, DocumentMeta>();
+  const sentLetterByApp = new Map<string, DocumentMeta>();
+  for (const d of [...documents].sort((a, b) => a.createdAt.localeCompare(b.createdAt))) {
+    if (!(d.driveFileId || d.dataUrl)) continue;
+    if (d.type === "Resume") sentFileByApp.set(d.applicationId, d);
+    else if (d.type === "Cover Letter") sentLetterByApp.set(d.applicationId, d);
+  }
+  const noteCount = new Map<string, number>();
+  for (const n of notes) noteCount.set(n.applicationId, (noteCount.get(n.applicationId) ?? 0) + 1);
+
+  return (
+    <ul className="divide-y divide-border">
+      {apps.map((a) => (
+        <ApplicationRow
+          key={a.id}
+          app={a}
+          resume={a.resumeVersionUsed ? resumeById.get(a.resumeVersionUsed) : undefined}
+          sentFile={sentFileByApp.get(a.id) && { ...sentFileByApp.get(a.id)!, dataUrl: undefined }}
+          sentLetter={sentLetterByApp.get(a.id) && { ...sentLetterByApp.get(a.id)!, dataUrl: undefined }}
+          notes={noteCount.get(a.id) ?? 0}
+          resumeOptions={resumeOptions}
+          locale={locale}
+          t={t}
+        />
+      ))}
+    </ul>
   );
 }
 
@@ -181,7 +251,7 @@ function ApplicationRow({
   t,
 }: {
   app: Application;
-  resume?: ResumeVersion;
+  resume?: Pick<ResumeVersion, "id" | "versionName" | "versionNumber">;
   sentFile?: DocumentMeta;
   sentLetter?: DocumentMeta;
   notes: number;
@@ -210,7 +280,7 @@ function ApplicationRow({
           {initials}
         </span>
         <div className="min-w-0">
-          <Link href={`/applications/${app.id}`} className="block truncate font-semibold text-foreground hover:underline">
+          <Link prefetch={false} href={`/applications/${app.id}`} className="block truncate font-semibold text-foreground hover:underline">
             {app.jobTitle || t("untitledRole")}
           </Link>
           <p className="truncate text-xs text-muted-foreground">
