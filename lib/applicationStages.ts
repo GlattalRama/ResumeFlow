@@ -86,8 +86,13 @@ export function relativeTime(
   if (!d) return "";
   const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
   const dayMs = 86_400_000;
-  const days = Math.round((d.getTime() - now.getTime()) / dayMs);
+  // Date-only values ("2026-09-28") are calendar days: compare against today's
+  // midnight so today reads "today", not "12 hours ago".
+  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value ?? "");
+  const from = dateOnly ? new Date(now.getFullYear(), now.getMonth(), now.getDate()) : now;
+  const days = Math.round((d.getTime() - from.getTime()) / dayMs);
   if (Math.abs(days) < 1) {
+    if (dateOnly) return rtf.format(0, "day");
     const hours = Math.round((d.getTime() - now.getTime()) / 3_600_000);
     return Math.abs(hours) < 1 ? rtf.format(0, "day") : rtf.format(hours, "hour");
   }

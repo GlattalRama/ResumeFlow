@@ -136,7 +136,14 @@
     "notesCount": "{count, plural, one {# Notiz} other {# Notizen}}",
     "sent": "gesendet",
     "viewPdf": "PDF",
-    "attachResume": "Kein Lebenslauf verknüpft — hinzufügen"
+    "attachResume": "Kein Lebenslauf verknüpft — hinzufügen",
+    "changeStatus": "Status ändern",
+    "saveFailed": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "uploadSent": "Gesendete Datei hochladen",
+    "replaceSent": "Datei ersetzen",
+    "uploading": "Wird gespeichert…",
+    "linkVersion": "Version verknüpfen…",
+    "changeVersion": "Version ändern…"
   },
   "settings": {
     "title": "KI-Einstellungen",

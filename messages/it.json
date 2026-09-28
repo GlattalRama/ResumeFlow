@@ -136,7 +136,14 @@
     "notesCount": "{count, plural, one {# nota} other {# note}}",
     "sent": "inviato",
     "viewPdf": "PDF",
-    "attachResume": "Nessun CV allegato — aggiungilo"
+    "attachResume": "Nessun CV allegato — aggiungilo",
+    "changeStatus": "Cambia stato",
+    "saveFailed": "Salvataggio non riuscito. Riprova.",
+    "uploadSent": "Carica file inviato",
+    "replaceSent": "Sostituisci file",
+    "uploading": "Salvataggio…",
+    "linkVersion": "Collega una versione…",
+    "changeVersion": "Cambia versione…"
   },
   "settings": {
     "title": "Impostazioni IA",
