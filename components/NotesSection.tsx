@@ -84,7 +84,7 @@ export default function NotesSection({
             key={n.id}
             className="flex items-start justify-between gap-3 rounded-lg border border-border bg-muted/50 p-3"
           >
-            <div>
+            <div className="min-w-0 [overflow-wrap:anywhere]">
               <span className="mr-2 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                 {t(`noteType.${n.type}`)}
               </span>
@@ -95,7 +95,7 @@ export default function NotesSection({
             </div>
             <button
               onClick={() => remove(n.id)}
-              className="text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
+              className="shrink-0 text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
             >
               {t("notes.delete")}
             </button>

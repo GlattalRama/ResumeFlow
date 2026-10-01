@@ -140,7 +140,7 @@ export default function A4Preview({
 
   const pageStyle = `@media print {
   @page { margin: ${margins.top}mm ${margins.right}mm ${margins.bottom}mm ${margins.left}mm; }
-  .a4-frame { width: auto !important; height: auto !important; }
+  .a4-frame { width: auto !important; height: auto !important; overflow: visible !important; }
   .a4-screen-pages { display: none !important; }
   .a4-print-flow { position: static !important; visibility: visible !important; width: auto !important; padding: 0 !important; }
 }`;
@@ -150,9 +150,11 @@ export default function A4Preview({
       {/* eslint-disable-next-line react/no-danger */}
       <style dangerouslySetInnerHTML={{ __html: pageStyle }} />
       <div ref={outerRef} className="w-full">
-        {/* Reserves the scaled footprint so surrounding layout flows correctly. */}
+        {/* Reserves the scaled footprint so surrounding layout flows correctly.
+            overflow-hidden clips the full-width hidden print flow, which would
+            otherwise widen the page on phones (and push fixed bars off-screen). */}
         <div
-          className="a4-frame relative mx-auto"
+          className="a4-frame relative mx-auto overflow-hidden"
           style={{ width: A4_WIDTH_PX * scale, height: columnHeight * scale }}
         >
           {/* Hidden continuous flow: measurement source and the print DOM.

@@ -115,7 +115,7 @@ export default async function ApplicationsPage({
                 );
               })}
             </nav>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
               <span>{t("sortBy")}</span>
               {SORTS.map((k) => (
                 <Link

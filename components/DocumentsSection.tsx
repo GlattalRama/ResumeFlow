@@ -150,7 +150,7 @@ export default function DocumentsSection({
             key={d.id}
             className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/50 p-3"
           >
-            <div>
+            <div className="min-w-0 [overflow-wrap:anywhere]">
               <span className="mr-2 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
                 {docTypeLabel(d.type)}
               </span>
@@ -183,7 +183,7 @@ export default function DocumentsSection({
             </div>
             <button
               onClick={() => remove(d.id)}
-              className="text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
+              className="shrink-0 text-xs text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400"
             >
               {t("docs.delete")}
             </button>
