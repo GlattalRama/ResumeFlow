@@ -1,0 +1,187 @@
+[
+  {
+    "id": "wj-1",
+    "title": "Grew governed self-serve analytics from 12% to 68% of queries",
+    "company": "Yokoy",
+    "client": "",
+    "project": "Analytics Platform",
+    "role": "Senior Product Manager",
+    "period": "Jan 2025 – Dec 2025",
+    "whatIDid": "Ran discovery with 14 finance leads, shipped a self-serve query builder with governance baked in, launched a lighthouse programme with the two highest-pain teams, and published a monthly governed-query-share dashboard.",
+    "toolsTechnologies": "SQL, Looker, dbt, Amplitude, Jira",
+    "problemSolved": "Finance teams built their own spreadsheets and pipelines; only 12% of analytics queries ran through the governed platform, and audit findings were piling up.",
+    "impactResult": "Governed share rose from 12% to 68% in 11 months; audit findings dropped to zero; two enterprise renewals cited the platform explicitly.",
+    "metrics": "Governed query share 12% → 68%; Audit findings 0; Enterprise renewals citing platform 2",
+    "tags": [],
+    "resumeReady": true,
+    "linkedResumeId": "res-base",
+    "linkedSection": "experience:0",
+    "generatedResumeBullets": [
+      "Grew governed self-serve analytics adoption from 12% to 68% of all queries in 11 months by shipping a governance-by-default query builder and a lighthouse rollout across 14 finance teams."
+    ],
+    "starStory": "When I took over the analytics area at Yokoy, only 12% of queries ran through the governed platform... (STAR story continues)",
+    "createdAt": "2026-08-01T09:00:00.000Z",
+    "updatedAt": "2026-08-01T09:00:00.000Z",
+    "star": {
+      "situation": "Finance teams built their own spreadsheets and pipelines; only 12% of analytics queries ran through the governed platform, and audit findings were piling up.",
+      "task": "Own the analytics product area and make the governed path the default for every customer-facing team.",
+      "action": "Ran discovery with 14 finance leads, shipped a self-serve query builder with governance baked in, launched a lighthouse programme with the two highest-pain teams, and published a monthly governed-query-share dashboard.",
+      "result": "Governed share rose from 12% to 68% in 11 months; audit findings dropped to zero; two enterprise renewals cited the platform explicitly."
+    },
+    "category": "customer-impact",
+    "schemaVersion": 2,
+    "metricsList": [
+      {
+        "type": "custom",
+        "label": "Governed query share",
+        "value": "12% → 68%",
+        "unit": ""
+      },
+      {
+        "type": "defects-prevented",
+        "label": "Audit findings",
+        "value": "0",
+        "unit": ""
+      },
+      {
+        "type": "customers-impacted",
+        "label": "Enterprise renewals citing platform",
+        "value": "2",
+        "unit": ""
+      }
+    ],
+    "evidence": [
+      {
+        "type": "jira",
+        "label": "ANL-1420 epic",
+        "url": "https://yokoy.atlassian.net/browse/ANL-1420"
+      },
+      {
+        "type": "confluence",
+        "label": "Lighthouse programme retro",
+        "url": "https://yokoy.atlassian.net/wiki/lighthouse"
+      }
+    ],
+    "outputs": {
+      "resumeBullet": "Grew governed self-serve analytics adoption from 12% to 68% of all queries in 11 months by shipping a governance-by-default query builder and a lighthouse rollout across 14 finance teams.",
+      "starStory": "When I took over the analytics area at Yokoy, only 12% of queries ran through the governed platform... (STAR story continues)",
+      "linkedinPost": "Governance doesn't have to be a gate. Here's how we made the compliant path the easy path and took adoption from 12% to 68%.",
+      "perfReviewBlurb": "Maya transformed analytics adoption this year, moving governed usage from 12% to 68% while eliminating open audit findings.",
+      "generatedAt": "2026-08-02T10:00:00.000Z",
+      "model": "openai/gpt-4o-mini"
+    }
+  },
+  {
+    "id": "wj-2",
+    "title": "Cut onboarding time for new payments customers by 40%",
+    "company": "Yokoy",
+    "client": "",
+    "project": "Payments Onboarding",
+    "role": "Senior Product Manager",
+    "period": "Mar 2024 – Sep 2024",
+    "whatIDid": "Mapped the 41-step onboarding flow, removed 17 manual checks through automated KYC integration, and introduced an in-app progress tracker with proactive nudges.",
+    "toolsTechnologies": "Figma, Amplitude, Zendesk, SQL",
+    "problemSolved": "New payments customers took 6 weeks on average to go live, and 30% churned before their first transaction.",
+    "impactResult": "Average time-to-first-transaction fell 40% to 3.6 weeks; pre-transaction churn dropped from 30% to 11%.",
+    "metrics": "Time to first transaction -40%; Pre-transaction churn 30% → 11%",
+    "tags": [],
+    "resumeReady": true,
+    "linkedResumeId": "res-base",
+    "linkedSection": "experience:0",
+    "generatedResumeBullets": [
+      "Cut payments onboarding time by 40% and pre-transaction churn from 30% to 11% by automating KYC checks and redesigning a 41-step flow."
+    ],
+    "starStory": "Payments onboarding was our biggest leak...",
+    "createdAt": "2026-07-20T09:00:00.000Z",
+    "updatedAt": "2026-07-20T09:00:00.000Z",
+    "star": {
+      "situation": "New payments customers took 6 weeks on average to go live, and 30% churned before their first transaction.",
+      "task": "Redesign onboarding so customers transact within 3 weeks.",
+      "action": "Mapped the 41-step onboarding flow, removed 17 manual checks through automated KYC integration, and introduced an in-app progress tracker with proactive nudges.",
+      "result": "Average time-to-first-transaction fell 40% to 3.6 weeks; pre-transaction churn dropped from 30% to 11%."
+    },
+    "category": "process-improvement",
+    "schemaVersion": 2,
+    "metricsList": [
+      {
+        "type": "time-saved",
+        "label": "Time to first transaction",
+        "value": "-40%",
+        "unit": ""
+      },
+      {
+        "type": "customers-impacted",
+        "label": "Pre-transaction churn",
+        "value": "30% → 11%",
+        "unit": ""
+      }
+    ],
+    "evidence": [
+      {
+        "type": "jira",
+        "label": "PAY-880",
+        "url": "https://yokoy.atlassian.net/browse/PAY-880"
+      }
+    ],
+    "outputs": {
+      "resumeBullet": "Cut payments onboarding time by 40% and pre-transaction churn from 30% to 11% by automating KYC checks and redesigning a 41-step flow.",
+      "starStory": "Payments onboarding was our biggest leak...",
+      "linkedinPost": "Onboarding is a product, not a checklist.",
+      "perfReviewBlurb": "Maya's onboarding redesign directly reduced early churn by two thirds.",
+      "generatedAt": "2026-08-02T10:00:00.000Z",
+      "model": "openai/gpt-4o-mini"
+    }
+  },
+  {
+    "id": "wj-3",
+    "title": "Led cross-functional launch of Scandit SDK pricing tiers",
+    "company": "Scandit",
+    "client": "",
+    "project": "Pricing & Packaging",
+    "role": "Product Manager",
+    "period": "Sep 2022 – Feb 2023",
+    "whatIDid": "Led a working group across sales, legal and finance; ran willingness-to-pay research with 22 customers; sequenced a grandfathering plan and trained the sales team.",
+    "toolsTechnologies": "Salesforce, Excel, Miro",
+    "problemSolved": "A single flat licence made it hard to land mid-market customers and left enterprise value on the table.",
+    "impactResult": "New tiers lifted average contract value 18% and mid-market win rate 9 points within two quarters.",
+    "metrics": "Average contract value +18%; Sales reps trained 35",
+    "tags": [],
+    "resumeReady": false,
+    "linkedResumeId": "",
+    "linkedSection": "",
+    "generatedResumeBullets": [],
+    "starStory": "",
+    "createdAt": "2026-06-15T09:00:00.000Z",
+    "updatedAt": "2026-06-15T09:00:00.000Z",
+    "star": {
+      "situation": "A single flat licence made it hard to land mid-market customers and left enterprise value on the table.",
+      "task": "Design and launch three pricing tiers without disrupting existing contracts.",
+      "action": "Led a working group across sales, legal and finance; ran willingness-to-pay research with 22 customers; sequenced a grandfathering plan and trained the sales team.",
+      "result": "New tiers lifted average contract value 18% and mid-market win rate 9 points within two quarters."
+    },
+    "category": "leadership",
+    "schemaVersion": 2,
+    "metricsList": [
+      {
+        "type": "revenue-impact",
+        "label": "Average contract value",
+        "value": "+18%",
+        "unit": ""
+      },
+      {
+        "type": "people-influenced",
+        "label": "Sales reps trained",
+        "value": "35",
+        "unit": ""
+      }
+    ],
+    "evidence": [
+      {
+        "type": "document",
+        "label": "Pricing decision memo",
+        "url": "https://drive.google.com/pricing-memo"
+      }
+    ],
+    "outputs": null
+  }
+]

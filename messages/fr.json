@@ -207,7 +207,9 @@
     "privacy": "Politique de confidentialité",
     "terms": "Conditions d'utilisation",
     "support": "Assistance",
-    "getApp": "Télécharger l'app"
+    "getApp": "Télécharger l'app",
+    "watchTour": "Voir la visite de 3 minutes",
+    "tour": "Visite"
   },
   "ai": {
     "tailor": {
@@ -1298,5 +1300,27 @@
     "allow": "Autoriser",
     "cancel": "Pas maintenant",
     "declined": "Annulé — rien n'a été envoyé. Vous pouvez autoriser les fonctions IA à tout moment en réessayant."
+  },
+  "tour": {
+    "title": "Visite guidée",
+    "intro": "Découvre Resumeflow-ATS en trois minutes environ : CV, adaptation aux offres, candidatures, préparation aux entretiens et journal de travail.",
+    "chapters": {
+      "start": "Bienvenue",
+      "resumes": "CV",
+      "applications": "Candidatures",
+      "interviews": "Entretiens",
+      "journal": "Journal de travail",
+      "end": "Commencer"
+    },
+    "chaptersLabel": "Chapitres",
+    "play": "Lecture",
+    "pause": "Pause",
+    "skip": "Chapitre suivant",
+    "exit": "Quitter la visite",
+    "restart": "Revoir",
+    "keys": "Espace : lecture/pause · → : chapitre suivant · ← : chapitre précédent · Échap : quitter",
+    "finishedTitle": "Fin de la visite",
+    "finishedText": "Tout ce que tu as vu est gratuit. Connecte-toi avec Google ou Apple, tes données restent dans ton propre Google Drive.",
+    "getStarted": "Commencer gratuitement"
   }
 }

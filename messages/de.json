@@ -207,7 +207,9 @@
     "privacy": "Datenschutzerklärung",
     "terms": "Nutzungsbedingungen",
     "support": "Support",
-    "getApp": "App holen"
+    "getApp": "App holen",
+    "watchTour": "3-Minuten-Tour ansehen",
+    "tour": "Tour"
   },
   "ai": {
     "tailor": {
@@ -1298,5 +1300,27 @@
     "allow": "Erlauben",
     "cancel": "Jetzt nicht",
     "declined": "Abgebrochen — es wurde nichts gesendet. Sie können KI-Funktionen jederzeit erlauben, indem Sie es erneut versuchen."
+  },
+  "tour": {
+    "title": "Produkt-Tour",
+    "intro": "So funktioniert Resumeflow-ATS in rund drei Minuten: Lebensläufe, Anpassung an Stellen, Bewerbungen, Interview-Vorbereitung und dein Arbeitsjournal.",
+    "chapters": {
+      "start": "Willkommen",
+      "resumes": "Lebensläufe",
+      "applications": "Bewerbungen",
+      "interviews": "Interview-Vorbereitung",
+      "journal": "Arbeitsjournal",
+      "end": "Loslegen"
+    },
+    "chaptersLabel": "Kapitel",
+    "play": "Abspielen",
+    "pause": "Pause",
+    "skip": "Nächstes Kapitel",
+    "exit": "Tour beenden",
+    "restart": "Nochmals ansehen",
+    "keys": "Leertaste: Abspielen/Pause · →: nächstes Kapitel · ←: vorheriges Kapitel · Esc: beenden",
+    "finishedTitle": "Das war die Tour",
+    "finishedText": "Alles, was du gesehen hast, ist kostenlos. Melde dich mit Google oder Apple an, deine Daten bleiben in deinem eigenen Google Drive.",
+    "getStarted": "Kostenlos starten"
   }
 }

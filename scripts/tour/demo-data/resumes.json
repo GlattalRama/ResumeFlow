@@ -1,0 +1,468 @@
+[
+  {
+    "id": "res-base",
+    "versionName": "Product Manager (Base)",
+    "versionNumber": 1,
+    "targetRole": "Senior Product Manager",
+    "selectedTemplate": "ats-corporate",
+    "origin": "manual",
+    "createdAt": "2026-06-12T08:30:00.000Z",
+    "updatedAt": "2026-07-02T17:45:00.000Z",
+    "resumeData": {
+      "basics": {
+        "name": "Maya Schneider",
+        "title": "Senior Product Manager",
+        "email": "maya.schneider@example.com",
+        "phone": "+41 79 412 88 30",
+        "location": "Zürich, Switzerland",
+        "website": "mayaschneider.ch",
+        "summary": "Product manager with 8+ years shipping B2B SaaS in Swiss and European tech. I turn messy customer problems into focused roadmaps, run tight discovery-to-delivery loops, and pair qualitative research with hard data to make bets I can defend. Fluent in German and English, comfortable owning a product area end to end.",
+        "nationality": "Swiss / German",
+        "residencePermit": ""
+      },
+      "profilePhoto": "",
+      "areasOfExpertise": [
+        "Product Discovery & Strategy",
+        "B2B SaaS & Payments",
+        "Go-to-Market",
+        "Data-Driven Decision Making",
+        "Stakeholder Management"
+      ],
+      "areasOfExpertiseBulletStyle": "bullet",
+      "experience": [
+        {
+          "company": "Yokoy",
+          "role": "Senior Product Manager",
+          "location": "Zürich, Switzerland",
+          "startDate": "2022",
+          "endDate": "Present",
+          "highlights": [
+            "Own the spend-management platform (cards + invoices), a €4M+ ARR product area serving 500+ mid-market customers across DACH.",
+            "Led discovery and launch of an AI invoice-capture flow that cut manual entry time by 62% and became the top driver of new-logo conversion.",
+            "Rebuilt the quarterly roadmap process around opportunity-solution trees, lifting on-time delivery from 55% to 88% across three squads.",
+            "Partnered with sales and CS to define a usage-based expansion motion that grew net revenue retention from 104% to 121%."
+          ]
+        },
+        {
+          "company": "Scandit",
+          "role": "Product Manager",
+          "location": "Zürich, Switzerland",
+          "startDate": "2019",
+          "endDate": "2022",
+          "highlights": [
+            "Managed the developer SDK for smart data capture used by 20k+ developers, owning API design and the pricing/packaging redesign.",
+            "Ran a continuous interview cadence (5 users/week) that reshaped the onboarding flow and cut time-to-first-scan from 3 days to under 2 hours.",
+            "Shipped the self-serve trial funnel, adding CHF 1.8M in self-serve pipeline in its first year."
+          ]
+        },
+        {
+          "company": "Digitec Galaxus",
+          "role": "Associate Product Manager",
+          "location": "Zürich, Switzerland",
+          "startDate": "2017",
+          "endDate": "2019",
+          "highlights": [
+            "Owned checkout and payments for Switzerland's largest online retailer, running A/B tests that lifted checkout conversion 9%.",
+            "Coordinated a cross-functional squad of 6 engineers and 1 designer through a full basket redesign."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "school": "University of St. Gallen (HSG)",
+          "degree": "M.A.",
+          "field": "Business Management",
+          "startDate": "2014",
+          "endDate": "2016"
+        },
+        {
+          "school": "University of Zürich",
+          "degree": "B.A.",
+          "field": "Economics",
+          "startDate": "2010",
+          "endDate": "2013"
+        }
+      ],
+      "skills": [
+        "Product Strategy",
+        "Roadmapping",
+        "Continuous Discovery",
+        "A/B Testing",
+        "SQL",
+        "Amplitude",
+        "Figma",
+        "Jira",
+        "OKRs",
+        "Agile / Scrum"
+      ],
+      "skillCategories": [
+        {
+          "category": "Discovery & Research",
+          "value": "Continuous interviewing, JTBD, opportunity-solution trees, usability testing"
+        },
+        {
+          "category": "Data & Analytics",
+          "value": "SQL, Amplitude, Mixpanel, A/B testing, funnel analysis"
+        },
+        {
+          "category": "Delivery",
+          "value": "Jira, Agile/Scrum, roadmap planning, OKRs"
+        },
+        {
+          "category": "Design & Prototyping",
+          "value": "Figma, FigJam, prototyping"
+        }
+      ],
+      "projects": [
+        {
+          "name": "PM Guild Zürich",
+          "description": "Co-organizer of a 400-member product community running monthly meetups on discovery and B2B growth.",
+          "link": "pmguild.ch"
+        }
+      ],
+      "certifications": [
+        "Reforge — Product Strategy",
+        "Pragmatic Institute — PMC Level III"
+      ],
+      "languages": [
+        "German (Native)",
+        "English (Fluent)",
+        "French (Intermediate)"
+      ],
+      "customSections": [],
+      "certificationFiles": [
+        {
+          "id": "cf-1",
+          "name": "Reforge — Product Strategy.pdf",
+          "mimeType": "application/pdf",
+          "size": 184320,
+          "uploadedAt": "2026-08-22T10:12:00.000Z",
+          "dataUrl": "data:application/pdf;base64,JVBERi0xLjQK"
+        },
+        {
+          "id": "cf-2",
+          "name": "Pragmatic Institute — PMC III.pdf",
+          "mimeType": "application/pdf",
+          "size": 96210,
+          "uploadedAt": "2026-08-22T10:14:00.000Z",
+          "dataUrl": "data:application/pdf;base64,JVBERi0xLjQK"
+        }
+      ]
+    }
+  },
+  {
+    "id": "res-tailored-swissre",
+    "versionName": "Swiss Re — Senior PM (Tailored)",
+    "versionNumber": 3,
+    "targetRole": "Senior Product Manager, Data Platform",
+    "selectedTemplate": "modern",
+    "origin": "tailored",
+    "sourceResumeId": "res-base",
+    "tailoredMetadata": {
+      "sourceResumeId": "res-base",
+      "applicationId": "app-swissre",
+      "company": "Swiss Re",
+      "jobTitle": "Senior Product Manager, Data Platform",
+      "jobId": "SR-2026-8842",
+      "jobDescriptionSnapshot": "Swiss Re is hiring a Senior Product Manager to own our internal Data Platform. You will define the product vision for self-serve data access, partner with data engineering and actuarial teams, and drive adoption of governed data products across the organization. We are looking for someone with strong stakeholder management, a data-driven approach to prioritization, experience with B2B or internal enterprise platforms, and the ability to translate regulatory and compliance requirements into clear roadmaps. Experience with SQL, analytics tooling, API/platform product management, and OKRs is expected. German is a plus.",
+      "model": "openai/gpt-4o-mini",
+      "generatedAt": "2026-07-05T14:10:00.000Z",
+      "sectionChanges": [
+        {
+          "section": "summary",
+          "changeType": "rephrased",
+          "note": "Reframed the summary around enterprise/data-platform product management and stakeholder alignment to mirror the job description."
+        },
+        {
+          "section": "experience",
+          "changeType": "emphasized",
+          "note": "Surfaced platform, API, and governed-data-access highlights and moved the SDK/platform work up; quantified metrics preserved verbatim."
+        },
+        {
+          "section": "areasOfExpertise",
+          "changeType": "reordered",
+          "note": "Promoted 'Data-Driven Decision Making' and 'Stakeholder Management' to the top to match the role's emphasis."
+        },
+        {
+          "section": "skills",
+          "changeType": "emphasized",
+          "note": "Kept SQL, Amplitude, and OKRs prominent; no new skills invented."
+        },
+        {
+          "section": "education",
+          "changeType": "unchanged",
+          "note": "No change needed."
+        }
+      ]
+    },
+    "createdAt": "2026-07-05T14:10:00.000Z",
+    "updatedAt": "2026-07-05T14:22:00.000Z",
+    "resumeData": {
+      "basics": {
+        "name": "Maya Schneider",
+        "title": "Senior Product Manager, Data Platform",
+        "email": "maya.schneider@example.com",
+        "phone": "+41 79 412 88 30",
+        "location": "Zürich, Switzerland",
+        "website": "mayaschneider.ch",
+        "summary": "Senior product manager with 8+ years owning enterprise and platform products in Swiss B2B SaaS. I build governed, self-serve platforms that internal teams actually adopt — aligning engineering, business, and compliance stakeholders, and prioritizing with data. Fluent in German and English."
+      },
+      "profilePhoto": "",
+      "areasOfExpertise": [
+        "Data-Driven Decision Making",
+        "Stakeholder Management",
+        "Platform & API Product Management",
+        "Governed Data Access",
+        "Go-to-Market"
+      ],
+      "areasOfExpertiseBulletStyle": "bullet",
+      "experience": [
+        {
+          "company": "Yokoy",
+          "role": "Senior Product Manager",
+          "location": "Zürich, Switzerland",
+          "startDate": "2022",
+          "endDate": "Present",
+          "highlights": [
+            "Own a €4M+ ARR platform area serving 500+ mid-market customers, aligning engineering, business, and compliance stakeholders on one roadmap.",
+            "Rebuilt the quarterly roadmap process around opportunity-solution trees, lifting on-time delivery from 55% to 88% across three squads.",
+            "Led discovery and launch of an AI invoice-capture flow that cut manual entry time by 62%.",
+            "Partnered with sales and CS on a usage-based motion that grew net revenue retention from 104% to 121%."
+          ]
+        },
+        {
+          "company": "Scandit",
+          "role": "Product Manager",
+          "location": "Zürich, Switzerland",
+          "startDate": "2019",
+          "endDate": "2022",
+          "highlights": [
+            "Managed a developer SDK / platform used by 20k+ developers, owning API design and self-serve data access patterns.",
+            "Ran a continuous interview cadence that reshaped onboarding and cut time-to-first-value from 3 days to under 2 hours.",
+            "Shipped the self-serve trial funnel, adding CHF 1.8M in self-serve pipeline in its first year."
+          ]
+        },
+        {
+          "company": "Digitec Galaxus",
+          "role": "Associate Product Manager",
+          "location": "Zürich, Switzerland",
+          "startDate": "2017",
+          "endDate": "2019",
+          "highlights": [
+            "Owned checkout and payments for Switzerland's largest online retailer, running A/B tests that lifted conversion 9%.",
+            "Coordinated a cross-functional squad of 6 engineers and 1 designer through a basket redesign."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "school": "University of St. Gallen (HSG)",
+          "degree": "M.A.",
+          "field": "Business Management",
+          "startDate": "2014",
+          "endDate": "2016"
+        },
+        {
+          "school": "University of Zürich",
+          "degree": "B.A.",
+          "field": "Economics",
+          "startDate": "2010",
+          "endDate": "2013"
+        }
+      ],
+      "skills": [
+        "Platform Product Management",
+        "SQL",
+        "Amplitude",
+        "API Design",
+        "Data Governance",
+        "Stakeholder Management",
+        "OKRs",
+        "Agile / Scrum",
+        "Roadmapping"
+      ],
+      "skillCategories": [
+        {
+          "category": "Platform & Data",
+          "value": "API/platform PM, governed data access, SQL, data modeling basics"
+        },
+        {
+          "category": "Analytics",
+          "value": "Amplitude, Mixpanel, A/B testing, funnel analysis"
+        },
+        {
+          "category": "Delivery",
+          "value": "Jira, Agile/Scrum, roadmap planning, OKRs"
+        }
+      ],
+      "projects": [
+        {
+          "name": "PM Guild Zürich",
+          "description": "Co-organizer of a 400-member product community running monthly meetups on discovery and B2B growth.",
+          "link": "pmguild.ch"
+        }
+      ],
+      "certifications": [
+        "Reforge — Product Strategy",
+        "Pragmatic Institute — PMC Level III"
+      ],
+      "languages": [
+        "German (Native)",
+        "English (Fluent)",
+        "French (Intermediate)"
+      ],
+      "customSections": []
+    }
+  },
+  {
+    "id": "res-growth",
+    "versionName": "Head of Product — Growth focus",
+    "versionNumber": 2,
+    "targetRole": "Head of Product",
+    "selectedTemplate": "ats-corporate",
+    "origin": "manual",
+    "createdAt": "2026-08-30T09:10:00.000Z",
+    "updatedAt": "2026-09-12T15:20:00.000Z",
+    "resumeData": {
+      "basics": {
+        "name": "Maya Schneider",
+        "title": "Head of Product (Growth)",
+        "email": "maya.schneider@example.com",
+        "phone": "+41 79 412 88 30",
+        "location": "Zürich, Switzerland",
+        "website": "mayaschneider.ch",
+        "summary": "Product manager with 8+ years shipping B2B SaaS in Swiss and European tech. I turn messy customer problems into focused roadmaps, run tight discovery-to-delivery loops, and pair qualitative research with hard data to make bets I can defend. Fluent in German and English, comfortable owning a product area end to end.",
+        "nationality": "Swiss / German",
+        "residencePermit": ""
+      },
+      "profilePhoto": "",
+      "areasOfExpertise": [
+        "Product Discovery & Strategy",
+        "B2B SaaS & Payments",
+        "Go-to-Market",
+        "Data-Driven Decision Making",
+        "Stakeholder Management"
+      ],
+      "areasOfExpertiseBulletStyle": "bullet",
+      "experience": [
+        {
+          "company": "Yokoy",
+          "role": "Senior Product Manager",
+          "location": "Zürich, Switzerland",
+          "startDate": "2022",
+          "endDate": "Present",
+          "highlights": [
+            "Own the spend-management platform (cards + invoices), a €4M+ ARR product area serving 500+ mid-market customers across DACH.",
+            "Led discovery and launch of an AI invoice-capture flow that cut manual entry time by 62% and became the top driver of new-logo conversion.",
+            "Rebuilt the quarterly roadmap process around opportunity-solution trees, lifting on-time delivery from 55% to 88% across three squads.",
+            "Partnered with sales and CS to define a usage-based expansion motion that grew net revenue retention from 104% to 121%."
+          ]
+        },
+        {
+          "company": "Scandit",
+          "role": "Product Manager",
+          "location": "Zürich, Switzerland",
+          "startDate": "2019",
+          "endDate": "2022",
+          "highlights": [
+            "Managed the developer SDK for smart data capture used by 20k+ developers, owning API design and the pricing/packaging redesign.",
+            "Ran a continuous interview cadence (5 users/week) that reshaped the onboarding flow and cut time-to-first-scan from 3 days to under 2 hours.",
+            "Shipped the self-serve trial funnel, adding CHF 1.8M in self-serve pipeline in its first year."
+          ]
+        },
+        {
+          "company": "Digitec Galaxus",
+          "role": "Associate Product Manager",
+          "location": "Zürich, Switzerland",
+          "startDate": "2017",
+          "endDate": "2019",
+          "highlights": [
+            "Owned checkout and payments for Switzerland's largest online retailer, running A/B tests that lifted checkout conversion 9%.",
+            "Coordinated a cross-functional squad of 6 engineers and 1 designer through a full basket redesign."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "school": "University of St. Gallen (HSG)",
+          "degree": "M.A.",
+          "field": "Business Management",
+          "startDate": "2014",
+          "endDate": "2016"
+        },
+        {
+          "school": "University of Zürich",
+          "degree": "B.A.",
+          "field": "Economics",
+          "startDate": "2010",
+          "endDate": "2013"
+        }
+      ],
+      "skills": [
+        "Product Strategy",
+        "Roadmapping",
+        "Continuous Discovery",
+        "A/B Testing",
+        "SQL",
+        "Amplitude",
+        "Figma",
+        "Jira",
+        "OKRs",
+        "Agile / Scrum"
+      ],
+      "skillCategories": [
+        {
+          "category": "Discovery & Research",
+          "value": "Continuous interviewing, JTBD, opportunity-solution trees, usability testing"
+        },
+        {
+          "category": "Data & Analytics",
+          "value": "SQL, Amplitude, Mixpanel, A/B testing, funnel analysis"
+        },
+        {
+          "category": "Delivery",
+          "value": "Jira, Agile/Scrum, roadmap planning, OKRs"
+        },
+        {
+          "category": "Design & Prototyping",
+          "value": "Figma, FigJam, prototyping"
+        }
+      ],
+      "projects": [
+        {
+          "name": "PM Guild Zürich",
+          "description": "Co-organizer of a 400-member product community running monthly meetups on discovery and B2B growth.",
+          "link": "pmguild.ch"
+        }
+      ],
+      "certifications": [
+        "Reforge — Product Strategy",
+        "Pragmatic Institute — PMC Level III"
+      ],
+      "languages": [
+        "German (Native)",
+        "English (Fluent)",
+        "French (Intermediate)"
+      ],
+      "customSections": [],
+      "certificationFiles": [
+        {
+          "id": "cf-1",
+          "name": "Reforge — Product Strategy.pdf",
+          "mimeType": "application/pdf",
+          "size": 184320,
+          "uploadedAt": "2026-08-22T10:12:00.000Z",
+          "dataUrl": "data:application/pdf;base64,JVBERi0xLjQK"
+        },
+        {
+          "id": "cf-2",
+          "name": "Pragmatic Institute — PMC III.pdf",
+          "mimeType": "application/pdf",
+          "size": 96210,
+          "uploadedAt": "2026-08-22T10:14:00.000Z",
+          "dataUrl": "data:application/pdf;base64,JVBERi0xLjQK"
+        }
+      ]
+    }
+  }
+]

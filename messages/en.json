@@ -207,7 +207,9 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "support": "Support",
-    "getApp": "Get the app"
+    "getApp": "Get the app",
+    "watchTour": "Watch the 3-minute tour",
+    "tour": "Tour"
   },
   "ai": {
     "tailor": {
@@ -1298,5 +1300,27 @@
     "allow": "Allow",
     "cancel": "Not now",
     "declined": "Cancelled — nothing was sent. You can allow AI features anytime by trying again."
+  },
+  "tour": {
+    "title": "Product tour",
+    "intro": "See how Resumeflow-ATS works in about three minutes: resumes, tailoring, applications, interview prep and your work journal.",
+    "chapters": {
+      "start": "Welcome",
+      "resumes": "Resumes",
+      "applications": "Applications",
+      "interviews": "Interview prep",
+      "journal": "Work journal",
+      "end": "Get started"
+    },
+    "chaptersLabel": "Chapters",
+    "play": "Play",
+    "pause": "Pause",
+    "skip": "Next chapter",
+    "exit": "Exit tour",
+    "restart": "Watch again",
+    "keys": "Space: play/pause · →: next chapter · ←: previous chapter · Esc: exit",
+    "finishedTitle": "That's the tour",
+    "finishedText": "Everything you saw is free. Sign in with Google or Apple and your data stays in your own Google Drive.",
+    "getStarted": "Get started free"
   }
 }

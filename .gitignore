@@ -23,3 +23,6 @@ play-store-assets/
 .evfevent
 .itest
 .env
+# product tour recorder (scripts/tour/record-tour.mjs)
+.tour-tmp/
+data.tour-backup/

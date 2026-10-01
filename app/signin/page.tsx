@@ -86,6 +86,14 @@ export default async function SignInPage({
             {t("sub")}
           </p>
 
+          <Link
+            href="/tour"
+            className="mt-6 inline-flex items-center gap-2 rounded-lg border border-[#0033a0]/25 bg-card px-4 py-2 text-sm font-semibold text-[#0033a0] shadow-sm transition hover:bg-[#0033a0]/5 dark:border-blue-400/30 dark:text-blue-300 dark:hover:bg-blue-400/10"
+          >
+            <PlayIcon />
+            {t("watchTour")}
+          </Link>
+
           <ul className="mt-8 grid gap-4 sm:grid-cols-2">
             {FEATURE_KEYS.map((n) => (
               <li key={n} className="flex gap-3">
@@ -147,6 +155,10 @@ export default async function SignInPage({
             </p>
 
             <p className="mt-3 text-center text-[11px] text-muted-foreground/70">
+              <Link href="/tour" className="hover:underline">
+                {t("tour")}
+              </Link>
+              <span className="mx-1.5">·</span>
               <Link href="/privacy" className="hover:underline">
                 {t("privacy")}
               </Link>
@@ -196,6 +208,14 @@ function CheckIcon() {
         d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 1 1 1.4-1.4l3.3 3.29 6.8-6.8a1 1 0 0 1 1.4 0Z"
         clipRule="evenodd"
       />
+    </svg>
+  );
+}
+
+function PlayIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l11-6.86a1 1 0 0 0 0-1.7l-11-6.86A1 1 0 0 0 8 5.14Z" />
     </svg>
   );
 }

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "singleton",
+    "provider": "openrouter",
+    "model": "openai/gpt-4o-mini",
+    "apiKeyEnc": "",
+    "usage": {
+      "day": "2026-01-01",
+      "count": 0
+    },
+    "baseResumeId": "res-base",
+    "aiConsentAt": "2026-07-24T12:39:32.354Z",
+    "updatedAt": "2026-09-26T17:52:46.416Z",
+    "careerInsights": {
+      "summary": "Your strongest evidence is in customer impact and process improvement, with measurable adoption and churn results. Leadership stories exist but are thinner on people outcomes.",
+      "strengths": [
+        "Adoption and outcome metrics on every major project",
+        "Turning compliance constraints into product wins",
+        "Cross-functional launches (pricing, onboarding)"
+      ],
+      "gaps": [
+        "Few stories about growing or mentoring people",
+        "No entry yet on handling a failed bet or a cut scope"
+      ],
+      "suggestions": [
+        "Capture one mentoring or hiring story from Yokoy",
+        "Add the roadmap you deliberately did not build in 2025 and why"
+      ],
+      "generatedAt": "2026-09-14T09:00:00.000Z",
+      "noteCount": 3
+    },
+    "promotionReadiness": {
+      "targetLevel": "Senior PM → Head of Product",
+      "scores": [
+        {
+          "dimension": "technical-excellence",
+          "score": 7,
+          "evidenceCount": 2,
+          "note": "Hands-on with SQL and analytics tooling on two projects"
+        },
+        {
+          "dimension": "leadership",
+          "score": 6,
+          "evidenceCount": 1,
+          "note": "Led one cross-functional working group; few people-growth stories"
+        },
+        {
+          "dimension": "stakeholder-management",
+          "score": 8,
+          "evidenceCount": 3,
+          "note": "Finance, legal, sales and compliance stakeholders across all entries"
+        },
+        {
+          "dimension": "delivery",
+          "score": 8,
+          "evidenceCount": 3,
+          "note": "Every entry ends in a shipped, measured outcome"
+        },
+        {
+          "dimension": "innovation",
+          "score": 6,
+          "evidenceCount": 1,
+          "note": "Governance-by-default is a genuine reframing"
+        },
+        {
+          "dimension": "mentoring",
+          "score": 3,
+          "evidenceCount": 0,
+          "note": "No evidence captured yet"
+        },
+        {
+          "dimension": "communication",
+          "score": 7,
+          "evidenceCount": 2,
+          "note": "Published dashboards and trained 35 sales reps"
+        }
+      ],
+      "recommendations": [
+        "Capture two mentoring or hiring stories",
+        "Add a strategy narrative that ties the three projects together"
+      ],
+      "generatedAt": "2026-09-14T09:05:00.000Z",
+      "noteCount": 3
+    }
+  }
+]
