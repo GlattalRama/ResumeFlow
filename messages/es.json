@@ -207,7 +207,9 @@
     "privacy": "Política de privacidad",
     "terms": "Términos del servicio",
     "support": "Soporte",
-    "getApp": "Descarga la app"
+    "getApp": "Descarga la app",
+    "watchTour": "Ver el recorrido de 3 minutos",
+    "tour": "Recorrido"
   },
   "ai": {
     "tailor": {
@@ -1298,5 +1300,27 @@
     "allow": "Permitir",
     "cancel": "Ahora no",
     "declined": "Cancelado — no se envió nada. Puedes permitir las funciones de IA en cualquier momento intentándolo de nuevo."
+  },
+  "tour": {
+    "title": "Recorrido del producto",
+    "intro": "Descubre cómo funciona Resumeflow-ATS en unos tres minutos: currículums, adaptación a ofertas, candidaturas, preparación de entrevistas y tu diario de trabajo.",
+    "chapters": {
+      "start": "Bienvenida",
+      "resumes": "Currículums",
+      "applications": "Candidaturas",
+      "interviews": "Entrevistas",
+      "journal": "Diario de trabajo",
+      "end": "Empezar"
+    },
+    "chaptersLabel": "Capítulos",
+    "play": "Reproducir",
+    "pause": "Pausa",
+    "skip": "Siguiente capítulo",
+    "exit": "Salir del recorrido",
+    "restart": "Ver de nuevo",
+    "keys": "Espacio: reproducir/pausa · →: siguiente capítulo · ←: capítulo anterior · Esc: salir",
+    "finishedTitle": "Fin del recorrido",
+    "finishedText": "Todo lo que has visto es gratis. Inicia sesión con Google o Apple y tus datos se quedan en tu propio Google Drive.",
+    "getStarted": "Empieza gratis"
   }
 }

@@ -40,13 +40,14 @@ export default function Nav() {
     return pathname.startsWith(href);
   }
 
-  // On the sign-in page, show only the brand mark.
-  const onSignIn = pathname === "/signin";
-
   const isAdmin = Boolean((session as { isAdmin?: boolean } | null)?.isAdmin);
 
   const user = session?.user;
   const authed = status === "authenticated" && !!user;
+
+  // On the sign-in page (and the public tour, for signed-out visitors), show
+  // only the brand mark — the app links would just bounce to sign-in.
+  const onSignIn = pathname === "/signin" || (pathname === "/tour" && !authed);
 
   return (
     <header className="no-print sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">

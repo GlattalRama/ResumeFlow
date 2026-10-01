@@ -1,0 +1,35 @@
+[
+  {
+    "id": "d-1",
+    "applicationId": "app-swissre",
+    "resumeVersionId": "res-tailored-swissre",
+    "name": "Maya_Schneider_SwissRe.pdf",
+    "type": "Resume",
+    "link": "",
+    "createdAt": "2026-09-08T09:12:00.000Z",
+    "mimeType": "application/pdf",
+    "size": 118285,
+    "dataUrl": "data:application/pdf;base64,JVBERi0xLjQK"
+  },
+  {
+    "id": "d-2",
+    "applicationId": "app-swissre",
+    "resumeVersionId": "",
+    "name": "Cover letter — Swiss Re.pdf",
+    "type": "Cover Letter",
+    "link": "",
+    "createdAt": "2026-09-08T09:13:00.000Z",
+    "mimeType": "application/pdf",
+    "size": 45210,
+    "dataUrl": "data:application/pdf;base64,JVBERi0xLjQK"
+  },
+  {
+    "id": "d-3",
+    "applicationId": "app-ledgy",
+    "resumeVersionId": "res-base",
+    "name": "Portfolio — case studies",
+    "type": "Portfolio",
+    "link": "https://mayaschneider.ch/work",
+    "createdAt": "2026-08-26T10:05:00.000Z"
+  }
+]

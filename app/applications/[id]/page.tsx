@@ -282,9 +282,10 @@ function Row({
   value: React.ReactNode;
 }) {
   return (
-    <div className="flex gap-2">
+    <div className="flex min-w-0 gap-2">
       <dt className="w-24 shrink-0 text-muted-foreground sm:w-28">{label}</dt>
-      <dd className="text-foreground">{value}</dd>
+      {/* min-w-0 + anywhere-wrap: long job links must wrap, not widen the page on phones. */}
+      <dd className="min-w-0 text-foreground [overflow-wrap:anywhere]">{value}</dd>
     </div>
   );
 }

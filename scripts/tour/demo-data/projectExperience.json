@@ -1,0 +1,43 @@
+[
+  {
+    "id": "pe-1",
+    "name": "Yokoy Analytics Platform",
+    "client": "Yokoy",
+    "domain": "Spend management / Fintech",
+    "description": "Self-serve, governed analytics for finance teams on top of Yokoy's expense and invoice data.",
+    "techStack": "Looker, dbt, BigQuery, SQL, Amplitude",
+    "role": "Senior Product Manager",
+    "responsibilities": [
+      "Owned roadmap and OKRs for the analytics area",
+      "Ran quarterly discovery with 14 finance leads",
+      "Partnered with data engineering on governance model"
+    ],
+    "achievements": [
+      "Governed query share 12% → 68%",
+      "Zero open audit findings"
+    ],
+    "period": "2025",
+    "createdAt": "2026-07-28T10:00:00.000Z",
+    "updatedAt": "2026-07-28T10:00:00.000Z"
+  },
+  {
+    "id": "pe-2",
+    "name": "Scandit SDK Pricing Tiers",
+    "client": "Scandit",
+    "domain": "Computer vision / B2B SaaS",
+    "description": "Three-tier pricing and packaging for the barcode scanning SDK.",
+    "techStack": "Salesforce, Excel, Miro",
+    "role": "Product Manager",
+    "responsibilities": [
+      "Led pricing working group",
+      "Ran willingness-to-pay research"
+    ],
+    "achievements": [
+      "ACV +18%",
+      "Mid-market win rate +9 pts"
+    ],
+    "period": "2022 – 2023",
+    "createdAt": "2026-07-28T10:05:00.000Z",
+    "updatedAt": "2026-07-28T10:05:00.000Z"
+  }
+]
