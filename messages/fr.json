@@ -909,7 +909,12 @@
       "coverTitle": "Préparation d'entretien",
       "preparedBy": "Préparé par {name}",
       "questionCount": "{count, plural, one {# question} other {# questions}}",
-      "noAnswer": "Pas encore de réponse."
+      "noAnswer": "Pas encore de réponse.",
+      "draftMissing": "Rédiger {count, plural, one {# réponse manquante} other {# réponses manquantes}} avec l’IA",
+      "draftMissingHint": "Rédigées à partir de votre CV et de votre journal de travail, puis enregistrées sur chaque question pour que vous puissiez les modifier ensuite.",
+      "drafting": "Rédaction des réponses… {done} sur {total}",
+      "draftStopped": "Rédaction interrompue : {error} L’export contient les réponses rédigées jusqu’ici.",
+      "draftAndSavePdf": "Rédiger les réponses et enregistrer le PDF"
     },
     "revise": {
       "improve": "Améliorer",

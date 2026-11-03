@@ -909,7 +909,12 @@
       "coverTitle": "Preparazione al colloquio",
       "preparedBy": "Preparato da {name}",
       "questionCount": "{count, plural, one {# domanda} other {# domande}}",
-      "noAnswer": "Ancora nessuna risposta."
+      "noAnswer": "Ancora nessuna risposta.",
+      "draftMissing": "Scrivi {count, plural, one {# risposta mancante} other {# risposte mancanti}} con l’IA",
+      "draftMissingHint": "Redatte dal tuo curriculum e diario di lavoro e salvate in ogni domanda, così puoi modificarle in seguito.",
+      "drafting": "Scrittura delle risposte… {done} di {total}",
+      "draftStopped": "Redazione interrotta: {error} L’esportazione include le risposte scritte finora.",
+      "draftAndSavePdf": "Scrivi risposte e salva PDF"
     },
     "revise": {
       "improve": "Migliora",

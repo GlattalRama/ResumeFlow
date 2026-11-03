@@ -909,7 +909,12 @@
       "coverTitle": "Interview-Vorbereitung",
       "preparedBy": "Erstellt von {name}",
       "questionCount": "{count, plural, one {# Frage} other {# Fragen}}",
-      "noAnswer": "Noch keine Antwort."
+      "noAnswer": "Noch keine Antwort.",
+      "draftMissing": "{count, plural, one {# fehlende Antwort} other {# fehlende Antworten}} mit KI schreiben",
+      "draftMissingHint": "Entworfen aus deinem Lebenslauf und Arbeitsjournal und bei jeder Frage gespeichert, damit du sie später bearbeiten kannst.",
+      "drafting": "Antworten werden geschrieben… {done} von {total}",
+      "draftStopped": "Entwurf gestoppt: {error} Der Export enthält die bisher geschriebenen Antworten.",
+      "draftAndSavePdf": "Antworten schreiben & PDF speichern"
     },
     "revise": {
       "improve": "Verbessern",

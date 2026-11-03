@@ -909,7 +909,12 @@
       "coverTitle": "Preparación de entrevista",
       "preparedBy": "Preparado por {name}",
       "questionCount": "{count, plural, one {# pregunta} other {# preguntas}}",
-      "noAnswer": "Aún sin respuesta."
+      "noAnswer": "Aún sin respuesta.",
+      "draftMissing": "Escribir {count, plural, one {# respuesta que falta} other {# respuestas que faltan}} con IA",
+      "draftMissingHint": "Redactadas a partir de tu currículum y diario de trabajo, y guardadas en cada pregunta para que puedas editarlas después.",
+      "drafting": "Escribiendo respuestas… {done} de {total}",
+      "draftStopped": "Redacción detenida: {error} La exportación incluye las respuestas escritas hasta ahora.",
+      "draftAndSavePdf": "Escribir respuestas y guardar PDF"
     },
     "revise": {
       "improve": "Mejorar",
