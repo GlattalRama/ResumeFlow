@@ -30,6 +30,7 @@ export default function SettingsForm({
   const [builtIn, setBuiltIn] = useState(false);
   const [dailyLimit, setDailyLimit] = useState(30);
   const [usedToday, setUsedToday] = useState(0);
+  const [unlimited, setUnlimited] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [aiConsent, setAiConsent] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,6 +48,7 @@ export default function SettingsForm({
         setBuiltIn(!!s.builtInAvailable);
         if (typeof s.dailyLimit === "number") setDailyLimit(s.dailyLimit);
         if (typeof s.usedToday === "number") setUsedToday(s.usedToday);
+        setUnlimited(!!s.unlimited);
         if (s.hasKey) setShowAdvanced(true);
       })
       .catch(() => {})
@@ -125,7 +127,7 @@ export default function SettingsForm({
         <div className="rounded-md border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/40 p-4 text-sm text-emerald-900 dark:text-emerald-200">
           <p className="font-medium">{t("builtInHeading")}</p>
           <p className="mt-1">
-            {t.rich("builtInBody", {
+            {t.rich(unlimited ? "builtInBodyUnlimited" : "builtInBody", {
               b: (chunks) => <strong>{chunks}</strong>,
               limit: dailyLimit,
               used: usedToday > 0 ? t("usedToday", { used: usedToday }) : "",

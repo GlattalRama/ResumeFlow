@@ -156,6 +156,7 @@
     "loading": "Cargando ajustes…",
     "builtInHeading": "✓ Las sugerencias de IA están integradas — sin configuración necesaria.",
     "builtInBody": "Abre un currículum y haz clic en <b>✦ Mejorar con IA</b> en el resumen o en una experiencia laboral. Tienes <b>{limit} sugerencias gratis al día</b>{used}.",
+    "builtInBodyUnlimited": "Abre un currículum y haz clic en <b>✦ Mejorar con IA</b> en el resumen o en una experiencia laboral. Como administrador tienes <b>sugerencias ilimitadas</b>{used}.",
     "usedToday": " ({used} usadas hoy)",
     "notConfigured": "La IA integrada aún no está configurada en esta instalación. Puedes usar la IA igualmente añadiendo tu propia clave abajo.",
     "notConfiguredIos": "La IA integrada aún no está configurada en esta instalación. Las sugerencias de IA no están disponibles temporalmente.",

@@ -14,6 +14,8 @@ import {
   DAILY_LIMIT,
 } from "./aiSettings";
 import { isNativeIOSRequest } from "./nativeApp";
+import { getSession } from "./serverSession";
+import { isAdminSession } from "./admin";
 
 export type AiAccess =
   | { ok: true; apiKey: string; model: string; usingUserKey: boolean }
@@ -55,7 +57,10 @@ export async function resolveAiAccess(): Promise<AiAccess> {
   }
 
   if (!usingUserKey) {
-    const cap = await checkAndBumpDailyUsage(DAILY_LIMIT);
+    // Admins (ADMIN_EMAILS) are exempt from the daily cap; their calls are
+    // still counted so Settings can show today's usage.
+    const admin = isAdminSession(await getSession());
+    const cap = await checkAndBumpDailyUsage(admin ? Infinity : DAILY_LIMIT);
     if (!cap.ok) {
       // The BYOK suggestion is omitted on iOS, where that option is hidden
       // (App Store guideline 3.1.1 — externally billed services read as

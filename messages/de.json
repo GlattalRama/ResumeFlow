@@ -156,6 +156,7 @@
     "loading": "Einstellungen werden geladen…",
     "builtInHeading": "✓ KI-Vorschläge sind integriert — keine Einrichtung nötig.",
     "builtInBody": "Öffne einen Lebenslauf und klicke auf <b>✦ Mit KI verbessern</b> bei der Zusammenfassung oder einem Berufserfahrungs-Eintrag. Du erhältst <b>{limit} kostenlose Vorschläge pro Tag</b>{used}.",
+    "builtInBodyUnlimited": "Öffne einen Lebenslauf und klicke auf <b>✦ Mit KI verbessern</b> bei der Zusammenfassung oder einem Berufserfahrungs-Eintrag. Als Admin hast du <b>unbegrenzte Vorschläge</b>{used}.",
     "usedToday": " ({used} heute verwendet)",
     "notConfigured": "Die integrierte KI ist in dieser Installation noch nicht konfiguriert. Du kannst KI trotzdem nutzen, indem du unten deinen eigenen Schlüssel hinzufügst.",
     "notConfiguredIos": "Die integrierte KI ist in dieser Installation noch nicht konfiguriert. KI-Vorschläge sind vorübergehend nicht verfügbar.",
