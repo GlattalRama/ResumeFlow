@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   INTERVIEW_DIFFICULTIES,
@@ -40,6 +40,12 @@ export default function ResumeTopicBank({
   const [newTopic, setNewTopic] = useState("");
   const [extracting, setExtracting] = useState(false);
   const [genTopic, setGenTopic] = useState<string | null>(null);
+  // Generation requests run one at a time: the store rewrites the whole
+  // collection per save, so parallel requests could drop each other's
+  // questions. Clicks while busy join this queue instead of being blocked.
+  const queueRef = useRef<{ topic: string; difficulty: InterviewDifficulty; resumeId: string }[]>([]);
+  const runningRef = useRef(false);
+  const [queued, setQueued] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
 
@@ -110,37 +116,64 @@ export default function ResumeTopicBank({
     setTopics((prev) => prev.filter((x) => x !== topic));
   }
 
-  async function generate(topic: string) {
-    setGenTopic(topic);
+  function generate(topicList: string[]) {
+    const pending = new Set(queueRef.current.map((q) => q.topic));
+    if (genTopic) pending.add(genTopic);
+    for (const topic of topicList) {
+      if (pending.has(topic)) continue;
+      pending.add(topic);
+      queueRef.current.push({ topic, difficulty: diffFor(topic), resumeId });
+    }
+    setQueued(queueRef.current.map((q) => q.topic));
+    if (!runningRef.current) void runQueue();
+  }
+
+  async function runQueue() {
+    runningRef.current = true;
     setError(null);
     setNote(null);
-    try {
-      const res = await aiFetch("/api/ai/interview-coach", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mode: "topic-questions",
-          topic,
-          difficulty: diffFor(topic),
-          resumeId,
-          count: 8,
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || t("requestFailed"));
-      const created: InterviewCoachEntry[] = data.created ?? [];
-      if (created.length > 0) onCreated(created);
-      setNote(
-        data.skipped > 0
-          ? t("created", { n: created.length, skipped: data.skipped })
-          : t("createdNoSkip", { n: created.length })
-      );
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("requestFailed"));
-    } finally {
-      setGenTopic(null);
+    let added = 0;
+    let skipped = 0;
+    while (queueRef.current.length > 0) {
+      const job = queueRef.current.shift()!;
+      setQueued(queueRef.current.map((q) => q.topic));
+      setGenTopic(job.topic);
+      try {
+        const res = await aiFetch("/api/ai/interview-coach", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mode: "topic-questions",
+            topic: job.topic,
+            difficulty: job.difficulty,
+            resumeId: job.resumeId,
+            count: 8,
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || t("requestFailed"));
+        const created: InterviewCoachEntry[] = data.created ?? [];
+        if (created.length > 0) onCreated(created);
+        added += created.length;
+        skipped += data.skipped ?? 0;
+        setNote(
+          skipped > 0
+            ? t("created", { n: added, skipped })
+            : t("createdNoSkip", { n: added })
+        );
+      } catch (err) {
+        setError(`${job.topic}: ${err instanceof Error ? err.message : t("requestFailed")}`);
+      }
     }
+    setGenTopic(null);
+    runningRef.current = false;
   }
+
+  // "Generate all" covers topics that have no questions yet and aren't
+  // already running or queued.
+  const ungenerated = allTopics.filter(
+    (tp) => (counts.get(tp.toLowerCase()) ?? 0) === 0 && tp !== genTopic && !queued.includes(tp)
+  );
 
   return (
     <Card className="mb-4">
@@ -187,6 +220,11 @@ export default function ResumeTopicBank({
             <button type="button" onClick={extract} disabled={extracting} className={buttonClass("primary")}>
               {extracting ? t("extracting") : allTopics.length > 0 ? t("reExtract") : t("extract")}
             </button>
+            {ungenerated.length > 0 && (
+              <button type="button" onClick={() => generate(ungenerated)} className={buttonClass("secondary")}>
+                {t("generateAll", { n: ungenerated.length })}
+              </button>
+            )}
           </div>
 
           {allTopics.length === 0 ? (
@@ -198,6 +236,7 @@ export default function ResumeTopicBank({
               {allTopics.map((topic) => {
                 const n = counts.get(topic.toLowerCase()) ?? 0;
                 const busy = genTopic === topic;
+                const isQueued = queued.includes(topic);
                 return (
                   <li
                     key={topic}
@@ -226,11 +265,11 @@ export default function ResumeTopicBank({
                     </select>
                     <button
                       type="button"
-                      onClick={() => generate(topic)}
-                      disabled={genTopic !== null}
+                      onClick={() => generate([topic])}
+                      disabled={busy || isQueued}
                       className={buttonClass("secondary")}
                     >
-                      {busy ? t("generating") : n > 0 ? t("more") : t("generate")}
+                      {busy ? t("generating") : isQueued ? t("queued") : n > 0 ? t("more") : t("generate")}
                     </button>
                     {topics.includes(topic) && (
                       <button

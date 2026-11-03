@@ -823,6 +823,8 @@
       "diff_expert": "Esperto",
       "generate": "Genera",
       "more": "Chiedi di più",
+      "generateAll": "Genera tutto ({n})",
+      "queued": "In coda",
       "generating": "Generazione…",
       "count": "{n} domande",
       "created": "{n} aggiunte ({skipped} duplicati saltati)",

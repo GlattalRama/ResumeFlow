@@ -823,6 +823,8 @@
       "diff_expert": "Expert",
       "generate": "Generate",
       "more": "Ask for more",
+      "generateAll": "Generate all ({n})",
+      "queued": "Queued",
       "generating": "Generating…",
       "count": "{n} Qs",
       "created": "Added {n} ({skipped} duplicates skipped)",
