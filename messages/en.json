@@ -909,7 +909,12 @@
       "coverTitle": "Interview Prep",
       "preparedBy": "Prepared by {name}",
       "questionCount": "{count, plural, one {# question} other {# questions}}",
-      "noAnswer": "No answer yet."
+      "noAnswer": "No answer yet.",
+      "draftMissing": "Write the {count, plural, one {# missing answer} other {# missing answers}} with AI",
+      "draftMissingHint": "Drafted from your résumé and work journal, and saved to each question so you can edit them later.",
+      "drafting": "Writing answers… {done} of {total}",
+      "draftStopped": "Stopped drafting: {error} The export includes the answers written so far.",
+      "draftAndSavePdf": "Write answers & save PDF"
     },
     "revise": {
       "improve": "Improve",

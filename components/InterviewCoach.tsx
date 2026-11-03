@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { INTERVIEW_QUESTION_CATEGORIES } from "@/lib/constants";
@@ -90,6 +90,11 @@ export default function InterviewCoach({
   const [exportOpen, setExportOpen] = useState(false);
   const [includeAnswers, setIncludeAnswers] = useState(true);
   const [docxBusy, setDocxBusy] = useState(false);
+  // AI-drafting of unanswered questions before export (one at a time).
+  const [draftMissing, setDraftMissing] = useState(true);
+  const [drafting, setDrafting] = useState<{ done: number; total: number } | null>(null);
+  const [draftError, setDraftError] = useState<string | null>(null);
+  const [printPending, setPrintPending] = useState(false);
   const [manualQ, setManualQ] = useState("");
   const [manualBusy, setManualBusy] = useState(false);
   const [genBusy, setGenBusy] = useState(false);
@@ -152,6 +157,58 @@ export default function InterviewCoach({
         .filter((g) => g.items.length > 0),
     [grouped, selected]
   );
+  const missingAnswers = useMemo(
+    () => selectedVisible.filter((e) => !e.answer.trim()),
+    [selectedVisible]
+  );
+  const willDraft = includeAnswers && draftMissing && missingAnswers.length > 0;
+
+  // Print only after the drafted answers have rendered into the print copy.
+  useEffect(() => {
+    if (!printPending) return;
+    setPrintPending(false);
+    window.print();
+  }, [printPending]);
+
+  // Draft answers for the selected questions that have none. Runs one
+  // request at a time (each save rewrites the whole collection) and stops
+  // at the first failure, e.g. the daily AI limit, so the export still goes
+  // out with whatever was drafted.
+  async function draftMissingAnswers(): Promise<Map<string, InterviewCoachEntry>> {
+    const drafted = new Map<string, InterviewCoachEntry>();
+    if (!willDraft) return drafted;
+    const todo = missingAnswers;
+    setDraftError(null);
+    setDrafting({ done: 0, total: todo.length });
+    try {
+      for (let i = 0; i < todo.length; i++) {
+        const res = await aiFetch("/api/ai/interview-coach", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "answer", entryId: todo[i].id }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setDraftError(data?.error || t("errors.answerGeneration"));
+          break;
+        }
+        replaceEntry(data);
+        drafted.set(data.id, data);
+        setDrafting({ done: i + 1, total: todo.length });
+      }
+    } catch (err) {
+      setDraftError(err instanceof Error ? err.message : t("errors.answerGeneration"));
+    } finally {
+      setDrafting(null);
+    }
+    return drafted;
+  }
+
+  async function savePdf() {
+    await draftMissingAnswers();
+    setPrintPending(true);
+  }
+
   const preparedBy = session?.user?.name ?? "";
   const exportContext = selectedApp
     ? [selectedApp.jobTitle, selectedApp.company].filter(Boolean).join(" · ")
@@ -178,12 +235,15 @@ export default function InterviewCoach({
   }
 
   async function downloadDocx() {
+    // exportGroups in this closure predates the drafting, so read the
+    // drafted answers from the returned map.
+    const drafted = await draftMissingAnswers();
     setDocxBusy(true);
     try {
       await exportInterviewDocx({
         groups: exportGroups.map(({ category, items }) => ({
           label: t(`category.${category}` as never),
-          items: items.map((e) => ({
+          items: items.map((e) => drafted.get(e.id) ?? e).map((e) => ({
             question: e.question,
             answer: e.answer,
             topic: e.topic,
@@ -595,6 +655,33 @@ export default function InterviewCoach({
             <p className="px-5 pt-2 text-xs text-muted-foreground">
               {t("export.questionsOnlyHint")}
             </p>
+            {includeAnswers && missingAnswers.length > 0 && !drafting && (
+              <label className="mx-5 mt-3 flex items-start gap-2 rounded-md border border-brand-500/30 bg-brand-500/5 px-3 py-2 text-sm text-foreground">
+                <input
+                  type="checkbox"
+                  checked={draftMissing}
+                  onChange={(e) => setDraftMissing(e.target.checked)}
+                  disabled={drafting !== null}
+                  className="mt-0.5 h-4 w-4 accent-brand-600"
+                />
+                <span>
+                  {t("export.draftMissing", { count: missingAnswers.length })}
+                  <span className="block text-xs text-muted-foreground">
+                    {t("export.draftMissingHint")}
+                  </span>
+                </span>
+              </label>
+            )}
+            {drafting && (
+              <p className="mx-5 mt-2 text-sm text-brand-700 dark:text-brand-200" aria-live="polite">
+                {t("export.drafting", { done: drafting.done, total: drafting.total })}
+              </p>
+            )}
+            {draftError && (
+              <p className="mx-5 mt-2 text-sm text-red-600 dark:text-red-400">
+                {t("export.draftStopped", { error: draftError })}
+              </p>
+            )}
             <div className="m-5 flex-1 overflow-auto rounded-lg border border-border bg-white p-6">
               <InterviewPrintDoc
                 groups={exportGroups}
@@ -607,6 +694,7 @@ export default function InterviewCoach({
               <button
                 type="button"
                 onClick={() => setExportOpen(false)}
+                disabled={drafting !== null}
                 className={buttonClass("secondary")}
               >
                 {t("export.close")}
@@ -614,18 +702,22 @@ export default function InterviewCoach({
               <button
                 type="button"
                 onClick={downloadDocx}
-                disabled={docxBusy || exportGroups.length === 0}
+                disabled={docxBusy || drafting !== null || exportGroups.length === 0}
                 className={buttonClass("secondary")}
               >
                 {docxBusy ? t("export.working") : t("export.downloadDocx")}
               </button>
               <button
                 type="button"
-                onClick={() => window.print()}
-                disabled={exportGroups.length === 0}
+                onClick={savePdf}
+                disabled={drafting !== null || exportGroups.length === 0}
                 className={buttonClass("primary")}
               >
-                {t("export.savePdf")}
+                {drafting
+                  ? t("export.working")
+                  : willDraft
+                    ? t("export.draftAndSavePdf")
+                    : t("export.savePdf")}
               </button>
             </div>
           </div>
