@@ -156,6 +156,7 @@
     "loading": "Loading settings…",
     "builtInHeading": "✓ AI suggestions are built in — no setup needed.",
     "builtInBody": "Open any resume, then click <b>✦ Improve with AI</b> on the Summary or a Work Experience entry. You get <b>{limit} free suggestions per day</b>{used}.",
+    "builtInBodyUnlimited": "Open any resume, then click <b>✦ Improve with AI</b> on the Summary or a Work Experience entry. As an admin you have <b>unlimited suggestions</b>{used}.",
     "usedToday": " ({used} used today)",
     "notConfigured": "Built-in AI isn’t configured on this deployment yet. You can still use AI by adding your own key below.",
     "notConfiguredIos": "Built-in AI isn’t configured on this deployment yet. AI suggestions are temporarily unavailable.",

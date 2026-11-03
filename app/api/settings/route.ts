@@ -7,6 +7,8 @@ import {
   DAILY_LIMIT,
 } from "@/lib/aiSettings";
 import type { AiProvider } from "@/lib/types";
+import { getSession } from "@/lib/serverSession";
+import { isAdminSession } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +28,8 @@ export async function GET() {
     // Whether the app provides a shared key, so AI works with zero setup.
     builtInAvailable: !!process.env.OPENROUTER_API_KEY,
     dailyLimit: DAILY_LIMIT,
+    // Admins have no daily cap (see resolveAiAccess).
+    unlimited: isAdminSession(await getSession()),
     usedToday,
   });
 }
