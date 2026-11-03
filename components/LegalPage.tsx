@@ -31,6 +31,9 @@ export function LegalPage({
           ← Back to Resumeflow-ATS
         </Link>
         <span className="mx-2">·</span>
+        <Link href="/tour" className="hover:underline">
+          Tour
+        </Link>        <span className="mx-2">·</span>
         <Link href="/privacy" className="hover:underline">
           Privacy
         </Link>

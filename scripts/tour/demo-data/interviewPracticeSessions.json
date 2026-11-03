@@ -1,0 +1,169 @@
+[
+  {
+    "id": "ps-1",
+    "setId": "set-1",
+    "name": "Behavioral round — Swiss Re",
+    "source": "Weak areas",
+    "entryIds": [
+      "ic-1",
+      "ic-2",
+      "ic-5"
+    ],
+    "attempts": [
+      {
+        "entryId": "ic-1",
+        "question": "How would you drive adoption of a governed data platform across teams used to building their own pipelines?",
+        "practiceAnswer": "I'd start with the teams that hurt the most, make the governed path easier than what they do today, and publish adoption every month so it becomes a shared goal.",
+        "answeredAt": "2026-09-22T18:10:00.000Z",
+        "feedback": {
+          "overall": 7,
+          "clarity": 8,
+          "relevance": 8,
+          "structure": 6,
+          "starQuality": 6,
+          "confidence": 8,
+          "goodPoints": [
+            "Clear lighthouse strategy",
+            "Names a concrete metric"
+          ],
+          "improvementPoints": [
+            "Add the 12% → 68% result explicitly",
+            "Name the audit outcome"
+          ],
+          "missingPoints": [
+            "Timeframe (11 months)"
+          ],
+          "suggestedAnswer": "At Yokoy I inherited a platform with 12% governed usage...",
+          "matched": {
+            "baseResume": true,
+            "workJournal": true,
+            "selectedResume": true,
+            "application": true,
+            "jobDescription": true
+          },
+          "journalEvidenceToStrengthen": [
+            "Grew governed self-serve analytics from 12% to 68% of queries"
+          ],
+          "modelAnswerMatch": {
+            "score": 72,
+            "covered": [
+              "Lighthouse teams",
+              "Published adoption metric"
+            ],
+            "missed": [
+              "Zero audit findings",
+              "11-month timeframe"
+            ]
+          },
+          "gradedAt": "2026-09-22T18:11:00.000Z"
+        }
+      },
+      {
+        "entryId": "ic-2",
+        "question": "Tell me about a time you translated a compliance requirement into a roadmap.",
+        "practiceAnswer": "We had to add lineage for audits; I turned it into a feature and shipped it inside the query builder.",
+        "answeredAt": "2026-09-22T18:16:00.000Z",
+        "feedback": {
+          "overall": 6,
+          "clarity": 7,
+          "relevance": 8,
+          "structure": 5,
+          "starQuality": 5,
+          "confidence": 6,
+          "goodPoints": [
+            "Reframing compliance as a feature"
+          ],
+          "improvementPoints": [
+            "Describe the situation before the action",
+            "Quantify the result"
+          ],
+          "missingPoints": [
+            "Renewals that cited the feature"
+          ],
+          "suggestedAnswer": "New audit rules required lineage...",
+          "matched": {
+            "baseResume": true,
+            "workJournal": true,
+            "selectedResume": true,
+            "application": true,
+            "jobDescription": true
+          },
+          "journalEvidenceToStrengthen": [],
+          "gradedAt": "2026-09-22T18:17:00.000Z"
+        }
+      },
+      {
+        "entryId": "ic-5",
+        "question": "What would you do in your first 90 days on the Swiss Re Data Platform?",
+        "practiceAnswer": "",
+        "answeredAt": ""
+      }
+    ],
+    "status": "completed",
+    "mode": "full",
+    "order": "weakestFirst",
+    "overallScore": 6.5,
+    "selectedApplicationId": "app-swissre",
+    "selectedResumeId": "res-base",
+    "createdAt": "2026-09-22T18:05:00.000Z",
+    "updatedAt": "2026-09-22T18:30:00.000Z"
+  },
+  {
+    "id": "ps-2",
+    "setId": "set-2",
+    "name": "Flash cards — all questions",
+    "source": "Filtered",
+    "entryIds": [
+      "ic-1",
+      "ic-2",
+      "ic-3",
+      "ic-5",
+      "ic-6"
+    ],
+    "attempts": [
+      {
+        "entryId": "ic-1",
+        "question": "How would you drive adoption...",
+        "practiceAnswer": "",
+        "answeredAt": "2026-09-24T07:00:00.000Z",
+        "selfGrade": "gotIt"
+      },
+      {
+        "entryId": "ic-2",
+        "question": "Tell me about a time you translated a compliance requirement...",
+        "practiceAnswer": "",
+        "answeredAt": "2026-09-24T07:00:00.000Z",
+        "selfGrade": "almost"
+      },
+      {
+        "entryId": "ic-3",
+        "question": "How do you decide what to measure...",
+        "practiceAnswer": "",
+        "answeredAt": "2026-09-24T07:00:00.000Z",
+        "selfGrade": "gotIt"
+      },
+      {
+        "entryId": "ic-5",
+        "question": "What would you do in your first 90 days...",
+        "practiceAnswer": "",
+        "answeredAt": "2026-09-24T07:00:00.000Z",
+        "selfGrade": "missed"
+      },
+      {
+        "entryId": "ic-6",
+        "question": "Why are you leaving Yokoy?",
+        "practiceAnswer": "",
+        "answeredAt": "2026-09-24T07:00:00.000Z",
+        "selfGrade": "gotIt"
+      }
+    ],
+    "status": "completed",
+    "mode": "flashcards",
+    "order": "shuffle",
+    "overallScore": 0,
+    "selectedApplicationId": "app-swissre",
+    "selectedResumeId": "res-base",
+    "createdAt": "2026-09-24T06:55:00.000Z",
+    "updatedAt": "2026-09-24T07:10:00.000Z"
+  }
+]

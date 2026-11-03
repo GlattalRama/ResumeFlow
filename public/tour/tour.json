@@ -1,0 +1,449 @@
+{
+  "duration": 168,
+  "chapters": [
+    {
+      "id": "start",
+      "start": 1
+    },
+    {
+      "id": "resumes",
+      "start": 13
+    },
+    {
+      "id": "applications",
+      "start": 62
+    },
+    {
+      "id": "interviews",
+      "start": 114
+    },
+    {
+      "id": "journal",
+      "start": 140
+    },
+    {
+      "id": "end",
+      "start": 163
+    }
+  ],
+  "cues": [
+    {
+      "start": 1.54,
+      "end": 6.62,
+      "chapter": "start",
+      "title": {
+        "en": "Welcome to Resumeflow-ATS",
+        "de": "Willkommen bei Resumeflow-ATS",
+        "es": "Bienvenido a Resumeflow-ATS",
+        "fr": "Bienvenue sur Resumeflow-ATS",
+        "it": "Benvenuto in Resumeflow-ATS"
+      },
+      "text": {
+        "en": "Resumes, job applications and interview prep in one place. Here is the whole flow in about three minutes.",
+        "de": "Lebensläufe, Bewerbungen und Interview-Vorbereitung an einem Ort. Hier ist der ganze Ablauf in rund drei Minuten.",
+        "es": "Currículums, candidaturas y preparación de entrevistas en un solo lugar. Aquí tienes todo el flujo en unos tres minutos.",
+        "fr": "CV, candidatures et préparation aux entretiens au même endroit. Voici tout le parcours en trois minutes environ.",
+        "it": "Curriculum, candidature e preparazione ai colloqui in un unico posto. Ecco tutto il flusso in circa tre minuti."
+      }
+    },
+    {
+      "start": 6.62,
+      "end": 13.66,
+      "chapter": "start",
+      "title": {
+        "en": "Your dashboard",
+        "de": "Deine Übersicht",
+        "es": "Tu panel",
+        "fr": "Ton tableau de bord",
+        "it": "La tua dashboard"
+      },
+      "text": {
+        "en": "Every resume, open application and next step at a glance. Everything is stored in your own Google Drive, not on our servers.",
+        "de": "Alle Lebensläufe, offenen Bewerbungen und nächsten Schritte auf einen Blick. Alles liegt in deinem eigenen Google Drive, nicht auf unseren Servern.",
+        "es": "Todos tus currículums, candidaturas abiertas y próximos pasos de un vistazo. Todo se guarda en tu propio Google Drive, no en nuestros servidores.",
+        "fr": "Tous tes CV, candidatures en cours et prochaines étapes en un coup d'œil. Tout est stocké dans ton propre Google Drive, pas sur nos serveurs.",
+        "it": "Tutti i curriculum, le candidature aperte e i prossimi passi a colpo d'occhio. Tutto è salvato nel tuo Google Drive, non sui nostri server."
+      }
+    },
+    {
+      "start": 13.66,
+      "end": 20.18,
+      "chapter": "resumes",
+      "title": {
+        "en": "Resume versions",
+        "de": "Lebenslauf-Versionen",
+        "es": "Versiones del currículum",
+        "fr": "Versions du CV",
+        "it": "Versioni del curriculum"
+      },
+      "text": {
+        "en": "Keep one base resume and as many tailored versions as you need, each with its own ATS score.",
+        "de": "Ein Basis-Lebenslauf und so viele angepasste Versionen wie nötig, jede mit eigenem ATS-Score.",
+        "es": "Un currículum base y tantas versiones adaptadas como necesites, cada una con su propia puntuación ATS.",
+        "fr": "Un CV de base et autant de versions adaptées que nécessaire, chacune avec son propre score ATS.",
+        "it": "Un curriculum base e tutte le versioni personalizzate che ti servono, ognuna con il proprio punteggio ATS."
+      }
+    },
+    {
+      "start": 20.18,
+      "end": 26.37,
+      "chapter": "resumes",
+      "title": {
+        "en": "One resume, everything around it",
+        "de": "Ein Lebenslauf, alles drumherum",
+        "es": "Un currículum y todo lo que lo rodea",
+        "fr": "Un CV et tout ce qui l'entoure",
+        "it": "Un curriculum e tutto il resto"
+      },
+      "text": {
+        "en": "Preview, download as PDF or Word, and see which applications used this version.",
+        "de": "Vorschau, Download als PDF oder Word, und welche Bewerbungen diese Version verwendet haben.",
+        "es": "Vista previa, descarga en PDF o Word y qué candidaturas usaron esta versión.",
+        "fr": "Aperçu, téléchargement en PDF ou Word, et les candidatures qui ont utilisé cette version.",
+        "it": "Anteprima, download in PDF o Word e quali candidature hanno usato questa versione."
+      }
+    },
+    {
+      "start": 26.37,
+      "end": 32.17,
+      "chapter": "resumes",
+      "title": {
+        "en": "The editor",
+        "de": "Der Editor",
+        "es": "El editor",
+        "fr": "L'éditeur",
+        "it": "L'editor"
+      },
+      "text": {
+        "en": "Sections on the left, a live preview on the right. What you see is exactly what the PDF will look like.",
+        "de": "Links die Abschnitte, rechts die Live-Vorschau. Was du siehst, ist genau das, was im PDF steht.",
+        "es": "Secciones a la izquierda y vista previa en vivo a la derecha. Lo que ves es exactamente cómo quedará el PDF.",
+        "fr": "Les sections à gauche, l'aperçu en direct à droite. Ce que tu vois est exactement ce que contiendra le PDF.",
+        "it": "Sezioni a sinistra, anteprima dal vivo a destra. Quello che vedi è esattamente come sarà il PDF."
+      }
+    },
+    {
+      "start": 32.17,
+      "end": 40.62,
+      "chapter": "resumes",
+      "title": {
+        "en": "Edit any section",
+        "de": "Jeden Abschnitt bearbeiten",
+        "es": "Edita cualquier sección",
+        "fr": "Modifier chaque section",
+        "it": "Modifica ogni sezione"
+      },
+      "text": {
+        "en": "Work experience, skills, certificates, custom sections: reorder, hide or rewrite them and the preview follows.",
+        "de": "Berufserfahrung, Skills, Zertifikate, eigene Abschnitte: umsortieren, ausblenden oder umschreiben, die Vorschau zieht mit.",
+        "es": "Experiencia, habilidades, certificados, secciones propias: reordénalas, ocúltalas o reescríbelas y la vista previa se actualiza.",
+        "fr": "Expérience, compétences, certificats, sections personnalisées : réordonne, masque ou réécris, l'aperçu suit.",
+        "it": "Esperienza, competenze, certificati, sezioni personalizzate: riordina, nascondi o riscrivi e l'anteprima si aggiorna."
+      }
+    },
+    {
+      "start": 40.62,
+      "end": 53.08,
+      "chapter": "resumes",
+      "title": {
+        "en": "Improve with AI",
+        "de": "Mit KI verbessern",
+        "es": "Mejorar con IA",
+        "fr": "Améliorer avec l'IA",
+        "it": "Migliora con l'IA"
+      },
+      "text": {
+        "en": "One click rewrites a section to be sharper and more measurable. You review the suggestion and keep only what you like.",
+        "de": "Ein Klick formuliert einen Abschnitt prägnanter und messbarer. Du prüfst den Vorschlag und übernimmst nur, was dir gefällt.",
+        "es": "Un clic reescribe una sección para que sea más clara y medible. Revisas la sugerencia y te quedas solo con lo que te gusta.",
+        "fr": "Un clic réécrit une section de façon plus précise et mesurable. Tu relis la proposition et ne gardes que ce qui te plaît.",
+        "it": "Un clic riscrive una sezione in modo più incisivo e misurabile. Rivedi il suggerimento e tieni solo ciò che ti piace."
+      }
+    },
+    {
+      "start": 53.08,
+      "end": 62.19,
+      "chapter": "resumes",
+      "title": {
+        "en": "ATS match score",
+        "de": "ATS-Match-Score",
+        "es": "Puntuación ATS",
+        "fr": "Score de correspondance ATS",
+        "it": "Punteggio ATS"
+      },
+      "text": {
+        "en": "Paste a job description to see how well the resume matches and which keywords are missing.",
+        "de": "Füge eine Stellenbeschreibung ein und sieh, wie gut der Lebenslauf passt und welche Schlüsselwörter fehlen.",
+        "es": "Pega una oferta de empleo para ver cuánto encaja el currículum y qué palabras clave faltan.",
+        "fr": "Colle une offre d'emploi pour voir à quel point le CV correspond et quels mots-clés manquent.",
+        "it": "Incolla un annuncio di lavoro per vedere quanto il curriculum corrisponde e quali parole chiave mancano."
+      }
+    },
+    {
+      "start": 62.19,
+      "end": 73.5,
+      "chapter": "applications",
+      "title": {
+        "en": "Application tracker",
+        "de": "Bewerbungs-Tracker",
+        "es": "Seguimiento de candidaturas",
+        "fr": "Suivi des candidatures",
+        "it": "Tracker delle candidature"
+      },
+      "text": {
+        "en": "Every job you're after, grouped by stage, with the resume you sent and the next action due.",
+        "de": "Jede Stelle, auf die du dich bewirbst, nach Phase geordnet, mit dem gesendeten Lebenslauf und dem nächsten Schritt.",
+        "es": "Cada puesto que te interesa, agrupado por fase, con el currículum enviado y la próxima acción pendiente.",
+        "fr": "Chaque poste visé, classé par étape, avec le CV envoyé et la prochaine action à faire.",
+        "it": "Ogni posizione che ti interessa, raggruppata per fase, con il curriculum inviato e la prossima azione."
+      }
+    },
+    {
+      "start": 73.5,
+      "end": 79.9,
+      "chapter": "applications",
+      "title": {
+        "en": "Add a job",
+        "de": "Stelle hinzufügen",
+        "es": "Añadir un puesto",
+        "fr": "Ajouter un poste",
+        "it": "Aggiungi una posizione"
+      },
+      "text": {
+        "en": "Paste the job link and Autofill reads the posting for you, or type the details yourself.",
+        "de": "Link einfügen und Autofill liest die Ausschreibung für dich, oder die Details selbst eintippen.",
+        "es": "Pega el enlace y Autofill lee la oferta por ti, o escribe los detalles tú mismo.",
+        "fr": "Colle le lien et Autofill lit l'annonce pour toi, ou saisis les détails toi-même.",
+        "it": "Incolla il link e Autofill legge l'annuncio per te, oppure inserisci i dettagli a mano."
+      }
+    },
+    {
+      "start": 79.9,
+      "end": 87.74,
+      "chapter": "applications",
+      "title": {
+        "en": "One page per application",
+        "de": "Eine Seite pro Bewerbung",
+        "es": "Una página por candidatura",
+        "fr": "Une page par candidature",
+        "it": "Una pagina per candidatura"
+      },
+      "text": {
+        "en": "The job description, the resume you sent, notes, documents and the full status history stay together.",
+        "de": "Stellenbeschreibung, gesendeter Lebenslauf, Notizen, Dokumente und der ganze Statusverlauf bleiben zusammen.",
+        "es": "La oferta, el currículum enviado, notas, documentos y todo el historial de estados, juntos.",
+        "fr": "L'offre, le CV envoyé, les notes, les documents et tout l'historique des statuts restent ensemble.",
+        "it": "L'annuncio, il curriculum inviato, note, documenti e tutta la cronologia degli stati restano insieme."
+      }
+    },
+    {
+      "start": 87.74,
+      "end": 94.96,
+      "chapter": "applications",
+      "title": {
+        "en": "Tailor the resume to the job",
+        "de": "Lebenslauf auf die Stelle zuschneiden",
+        "es": "Adaptar el currículum al puesto",
+        "fr": "Adapter le CV au poste",
+        "it": "Adatta il curriculum al lavoro"
+      },
+      "text": {
+        "en": "AI rewrites your resume for this job description. It never invents experience, it only reframes what you have.",
+        "de": "Die KI passt deinen Lebenslauf an diese Stelle an. Sie erfindet keine Erfahrung, sie formuliert nur um, was du hast.",
+        "es": "La IA adapta tu currículum a esta oferta. Nunca inventa experiencia, solo reformula lo que ya tienes.",
+        "fr": "L'IA adapte ton CV à cette offre. Elle n'invente jamais d'expérience, elle reformule seulement ce que tu as.",
+        "it": "L'IA adatta il curriculum a questo annuncio. Non inventa esperienze, riformula solo ciò che hai."
+      }
+    },
+    {
+      "start": 94.96,
+      "end": 102.44,
+      "chapter": "applications",
+      "title": {
+        "en": "Review every change",
+        "de": "Jede Änderung prüfen",
+        "es": "Revisa cada cambio",
+        "fr": "Vérifier chaque modification",
+        "it": "Controlla ogni modifica"
+      },
+      "text": {
+        "en": "Accept or keep the original bullet by bullet, then save it as a new version linked to this application.",
+        "de": "Punkt für Punkt übernehmen oder das Original behalten, dann als neue Version zu dieser Bewerbung speichern.",
+        "es": "Acepta o conserva el original punto por punto y guárdalo como nueva versión vinculada a esta candidatura.",
+        "fr": "Accepte ou garde l'original point par point, puis enregistre une nouvelle version liée à cette candidature.",
+        "it": "Accetta o mantieni l'originale punto per punto, poi salvalo come nuova versione collegata alla candidatura."
+      }
+    },
+    {
+      "start": 102.44,
+      "end": 108.47,
+      "chapter": "applications",
+      "title": {
+        "en": "Side by side",
+        "de": "Nebeneinander",
+        "es": "Lado a lado",
+        "fr": "Côte à côte",
+        "it": "Fianco a fianco"
+      },
+      "text": {
+        "en": "Compare the original and the tailored resume before you commit to anything.",
+        "de": "Vergleiche Original und angepassten Lebenslauf, bevor du etwas übernimmst.",
+        "es": "Compara el original y la versión adaptada antes de decidir nada.",
+        "fr": "Compare l'original et la version adaptée avant de valider quoi que ce soit.",
+        "it": "Confronta l'originale e la versione adattata prima di confermare qualsiasi cosa."
+      }
+    },
+    {
+      "start": 108.47,
+      "end": 114.99,
+      "chapter": "applications",
+      "title": {
+        "en": "Cover letter",
+        "de": "Anschreiben",
+        "es": "Carta de presentación",
+        "fr": "Lettre de motivation",
+        "it": "Lettera di presentazione"
+      },
+      "text": {
+        "en": "Generate a cover letter from the tailored resume and the job, then edit it right here.",
+        "de": "Erstelle ein Anschreiben aus dem angepassten Lebenslauf und der Stelle und bearbeite es direkt hier.",
+        "es": "Genera una carta a partir del currículum adaptado y la oferta, y edítala aquí mismo.",
+        "fr": "Génère une lettre à partir du CV adapté et de l'offre, puis modifie-la directement ici.",
+        "it": "Genera una lettera dal curriculum adattato e dall'annuncio, poi modificala qui."
+      }
+    },
+    {
+      "start": 114.99,
+      "end": 121.82,
+      "chapter": "interviews",
+      "title": {
+        "en": "Interview Coach",
+        "de": "Interview-Coach",
+        "es": "Coach de entrevistas",
+        "fr": "Coach d'entretien",
+        "it": "Coach per colloqui"
+      },
+      "text": {
+        "en": "Likely questions from the job description and your resume: behavioural, technical and the tricky ones.",
+        "de": "Wahrscheinliche Fragen aus Stellenbeschreibung und Lebenslauf: Verhalten, Fachliches und die heiklen.",
+        "es": "Preguntas probables a partir de la oferta y tu currículum: de comportamiento, técnicas y las difíciles.",
+        "fr": "Les questions probables d'après l'offre et ton CV : comportementales, techniques et les plus délicates.",
+        "it": "Le domande probabili dall'annuncio e dal curriculum: comportamentali, tecniche e quelle difficili."
+      }
+    },
+    {
+      "start": 121.82,
+      "end": 131.26,
+      "chapter": "interviews",
+      "title": {
+        "en": "Answers from your real experience",
+        "de": "Antworten aus echter Erfahrung",
+        "es": "Respuestas con tu experiencia real",
+        "fr": "Des réponses tirées de ton expérience",
+        "it": "Risposte dalla tua esperienza reale"
+      },
+      "text": {
+        "en": "Each answer is built in STAR format from your resume and work journal, with the evidence it used.",
+        "de": "Jede Antwort entsteht im STAR-Format aus Lebenslauf und Arbeitsjournal, mit den verwendeten Belegen.",
+        "es": "Cada respuesta se construye en formato STAR con tu currículum y tu diario de trabajo, citando las pruebas usadas.",
+        "fr": "Chaque réponse est construite au format STAR depuis ton CV et ton journal de travail, avec les preuves utilisées.",
+        "it": "Ogni risposta è costruita in formato STAR da curriculum e diario di lavoro, con le prove utilizzate."
+      }
+    },
+    {
+      "start": 131.26,
+      "end": 140.27,
+      "chapter": "interviews",
+      "title": {
+        "en": "Practice and get feedback",
+        "de": "Üben mit Feedback",
+        "es": "Practica y recibe feedback",
+        "fr": "S'entraîner avec retour",
+        "it": "Esercitati con feedback"
+      },
+      "text": {
+        "en": "Rehearse a full round or flash cards. Each answer is scored on clarity, structure and relevance, with tips to improve.",
+        "de": "Übe eine ganze Runde oder mit Karteikarten. Jede Antwort wird nach Klarheit, Struktur und Relevanz bewertet, mit Tipps.",
+        "es": "Ensaya una ronda completa o con tarjetas. Cada respuesta se puntúa por claridad, estructura y relevancia, con consejos.",
+        "fr": "Répète un entretien complet ou en cartes mémo. Chaque réponse est notée sur la clarté, la structure et la pertinence, avec des conseils.",
+        "it": "Prova un colloquio completo o con flashcard. Ogni risposta riceve un punteggio su chiarezza, struttura e pertinenza, con consigli."
+      }
+    },
+    {
+      "start": 140.27,
+      "end": 147.12,
+      "chapter": "journal",
+      "title": {
+        "en": "Work journal",
+        "de": "Arbeitsjournal",
+        "es": "Diario de trabajo",
+        "fr": "Journal de travail",
+        "it": "Diario di lavoro"
+      },
+      "text": {
+        "en": "Log wins as they happen: situation, action, result, metrics and evidence. Future you will thank you at review time.",
+        "de": "Halte Erfolge fest, wenn sie passieren: Situation, Handlung, Ergebnis, Kennzahlen und Belege.",
+        "es": "Registra tus logros cuando ocurren: situación, acción, resultado, métricas y pruebas.",
+        "fr": "Note tes réussites au fil de l'eau : situation, action, résultat, chiffres et preuves.",
+        "it": "Annota i successi quando accadono: situazione, azione, risultato, metriche e prove."
+      }
+    },
+    {
+      "start": 147.12,
+      "end": 155.28,
+      "chapter": "journal",
+      "title": {
+        "en": "Ready-to-use outputs",
+        "de": "Sofort verwendbar",
+        "es": "Listo para usar",
+        "fr": "Prêt à l'emploi",
+        "it": "Pronto all'uso"
+      },
+      "text": {
+        "en": "Each entry becomes a resume bullet, a STAR story, a LinkedIn post and a performance-review blurb.",
+        "de": "Jeder Eintrag wird zu einem Lebenslauf-Punkt, einer STAR-Geschichte, einem LinkedIn-Post und einem Text fürs Mitarbeitergespräch.",
+        "es": "Cada entrada se convierte en un punto del currículum, una historia STAR, un post de LinkedIn y un texto para tu evaluación.",
+        "fr": "Chaque entrée devient une ligne de CV, une histoire STAR, un post LinkedIn et un texte pour l'entretien annuel.",
+        "it": "Ogni voce diventa un punto del curriculum, una storia STAR, un post LinkedIn e un testo per la valutazione annuale."
+      }
+    },
+    {
+      "start": 155.28,
+      "end": 163.31,
+      "chapter": "journal",
+      "title": {
+        "en": "Career insights",
+        "de": "Karriere-Einblicke",
+        "es": "Visión de carrera",
+        "fr": "Vue de carrière",
+        "it": "Panoramica di carriera"
+      },
+      "text": {
+        "en": "See your strengths, the gaps in your story and how ready you are for the next level.",
+        "de": "Sieh deine Stärken, die Lücken in deiner Geschichte und wie bereit du für den nächsten Schritt bist.",
+        "es": "Descubre tus fortalezas, los huecos en tu historia y lo preparado que estás para el siguiente nivel.",
+        "fr": "Vois tes forces, les manques dans ton parcours et ton niveau de préparation pour l'étape suivante.",
+        "it": "Scopri i tuoi punti di forza, le lacune nel tuo percorso e quanto sei pronto per il livello successivo."
+      }
+    },
+    {
+      "start": 163.31,
+      "end": 167.81,
+      "chapter": "end",
+      "title": {
+        "en": "Try it yourself",
+        "de": "Probier es selbst",
+        "es": "Pruébalo tú mismo",
+        "fr": "Essaie par toi-même",
+        "it": "Provalo tu stesso"
+      },
+      "text": {
+        "en": "Sign in with Google or Apple. It's free, and your data stays in your own Google Drive.",
+        "de": "Melde dich mit Google oder Apple an. Kostenlos, und deine Daten bleiben in deinem eigenen Google Drive.",
+        "es": "Inicia sesión con Google o Apple. Es gratis y tus datos se quedan en tu propio Google Drive.",
+        "fr": "Connecte-toi avec Google ou Apple. C'est gratuit, et tes données restent dans ton propre Google Drive.",
+        "it": "Accedi con Google o Apple. È gratuito e i tuoi dati restano nel tuo Google Drive."
+      }
+    }
+  ]
+}

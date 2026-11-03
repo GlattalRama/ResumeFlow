@@ -1,0 +1,90 @@
+[
+  {
+    "id": "sh-1",
+    "applicationId": "app-swissre",
+    "oldStatus": "",
+    "newStatus": "Saved",
+    "changedAt": "2026-09-05T08:00:00.000Z",
+    "comment": ""
+  },
+  {
+    "id": "sh-2",
+    "applicationId": "app-swissre",
+    "oldStatus": "Saved",
+    "newStatus": "Applied",
+    "changedAt": "2026-09-08T09:10:00.000Z",
+    "comment": "Applied via careers portal with tailored resume"
+  },
+  {
+    "id": "sh-3",
+    "applicationId": "app-swissre",
+    "oldStatus": "Applied",
+    "newStatus": "Phone Screen",
+    "changedAt": "2026-09-16T13:00:00.000Z",
+    "comment": "30 min with recruiter (Anna)"
+  },
+  {
+    "id": "sh-4",
+    "applicationId": "app-swissre",
+    "oldStatus": "Phone Screen",
+    "newStatus": "Interview",
+    "changedAt": "2026-09-27T16:30:00.000Z",
+    "comment": "Panel round scheduled 3 Oct"
+  },
+  {
+    "id": "sh-5",
+    "applicationId": "app-ledgy",
+    "oldStatus": "",
+    "newStatus": "Applied",
+    "changedAt": "2026-08-26T10:00:00.000Z",
+    "comment": ""
+  },
+  {
+    "id": "sh-6",
+    "applicationId": "app-ledgy",
+    "oldStatus": "Applied",
+    "newStatus": "Interview",
+    "changedAt": "2026-09-09T10:00:00.000Z",
+    "comment": ""
+  },
+  {
+    "id": "sh-7",
+    "applicationId": "app-ledgy",
+    "oldStatus": "Interview",
+    "newStatus": "Offer",
+    "changedAt": "2026-09-26T09:15:00.000Z",
+    "comment": "Verbal offer, letter to follow"
+  },
+  {
+    "id": "sh-8",
+    "applicationId": "app-on",
+    "oldStatus": "",
+    "newStatus": "Applied",
+    "changedAt": "2026-09-20T12:40:00.000Z",
+    "comment": ""
+  },
+  {
+    "id": "sh-9",
+    "applicationId": "app-sbb",
+    "oldStatus": "",
+    "newStatus": "Saved",
+    "changedAt": "2026-09-25T18:00:00.000Z",
+    "comment": ""
+  },
+  {
+    "id": "sh-10",
+    "applicationId": "app-google",
+    "oldStatus": "",
+    "newStatus": "Applied",
+    "changedAt": "2026-08-12T09:00:00.000Z",
+    "comment": ""
+  },
+  {
+    "id": "sh-11",
+    "applicationId": "app-google",
+    "oldStatus": "Applied",
+    "newStatus": "Rejected",
+    "changedAt": "2026-09-02T11:00:00.000Z",
+    "comment": "Role filled internally"
+  }
+]

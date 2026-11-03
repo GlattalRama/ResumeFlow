@@ -1,0 +1,150 @@
+[
+  {
+    "id": "ic-1",
+    "selectedApplicationId": "app-swissre",
+    "selectedResumeId": "res-base",
+    "question": "How would you drive adoption of a governed data platform across teams used to building their own pipelines?",
+    "answer": "Situation: At Yokoy only 12% of analytics ran through the governed platform. Task: make governance the default. Action: I picked the two highest-pain teams as lighthouses, shipped a self-serve path that was genuinely easier than their spreadsheets, and published governed-query share monthly. Result: 68% adoption in 11 months and zero audit findings.",
+    "originalAiAnswer": "Situation: At Yokoy only 12% of analytics ran through the governed platform. Task: make governance the default. Action: I picked the two highest-pain teams as lighthouses, shipped a self-serve path that was genuinely easier than their spreadsheets, and published governed-query share monthly. Result: 68% adoption in 11 months and zero audit findings.",
+    "answerFormat": "star",
+    "tone": "confident",
+    "status": "final",
+    "source": "jobDescription",
+    "category": "Job Description Based",
+    "usedBaseResume": true,
+    "usedWorkJournal": true,
+    "evidenceUsed": [
+      "Grew governed self-serve analytics from 12% to 68% of queries"
+    ],
+    "journalStoriesUsed": [
+      "Grew governed self-serve analytics from 12% to 68% of queries"
+    ],
+    "gaps": [],
+    "aiRevisionHistory": [],
+    "createdAt": "2026-09-17T10:00:00.000Z",
+    "updatedAt": "2026-09-20T10:00:00.000Z"
+  },
+  {
+    "id": "ic-2",
+    "selectedApplicationId": "app-swissre",
+    "selectedResumeId": "res-base",
+    "question": "Tell me about a time you translated a compliance requirement into a roadmap.",
+    "answer": "Situation: New audit rules required lineage on every finance report. Task: deliver lineage without stalling the roadmap. Action: I reframed it as a product feature, shipped automatic lineage in the query builder, and used it as a selling point with enterprise customers. Result: two renewals cited it explicitly.",
+    "originalAiAnswer": "Situation: New audit rules required lineage on every finance report. Task: deliver lineage without stalling the roadmap. Action: I reframed it as a product feature, shipped automatic lineage in the query builder, and used it as a selling point with enterprise customers. Result: two renewals cited it explicitly.",
+    "answerFormat": "star",
+    "tone": "confident",
+    "status": "final",
+    "source": "jobDescription",
+    "category": "Behavioral",
+    "usedBaseResume": true,
+    "usedWorkJournal": true,
+    "evidenceUsed": [
+      "Grew governed self-serve analytics from 12% to 68% of queries"
+    ],
+    "journalStoriesUsed": [
+      "Grew governed self-serve analytics from 12% to 68% of queries"
+    ],
+    "gaps": [],
+    "aiRevisionHistory": [],
+    "createdAt": "2026-09-17T10:00:00.000Z",
+    "updatedAt": "2026-09-20T10:00:00.000Z"
+  },
+  {
+    "id": "ic-3",
+    "selectedApplicationId": "app-swissre",
+    "selectedResumeId": "res-base",
+    "question": "How do you decide what to measure for an internal platform?",
+    "answer": "I measure outcomes, not seats: for a data platform that means governed query share, time-to-insight for a new question, and the number of decisions that reference platform data. Seat counts flatter you; usage share tells the truth.",
+    "originalAiAnswer": "I measure outcomes, not seats: for a data platform that means governed query share, time-to-insight for a new question, and the number of decisions that reference platform data. Seat counts flatter you; usage share tells the truth.",
+    "answerFormat": "star",
+    "tone": "confident",
+    "status": "final",
+    "source": "baseResume",
+    "category": "Resume Based",
+    "topic": "Platform metrics & OKRs",
+    "difficulty": "senior",
+    "usedBaseResume": true,
+    "usedWorkJournal": false,
+    "evidenceUsed": [
+      "Base resume: Yokoy — analytics area"
+    ],
+    "journalStoriesUsed": [],
+    "gaps": [],
+    "aiRevisionHistory": [],
+    "createdAt": "2026-09-17T10:00:00.000Z",
+    "updatedAt": "2026-09-20T10:00:00.000Z"
+  },
+  {
+    "id": "ic-4",
+    "selectedApplicationId": "app-swissre",
+    "selectedResumeId": "res-base",
+    "question": "Walk me through how you would write SQL to find teams whose governed usage dropped month over month.",
+    "answer": "",
+    "originalAiAnswer": "",
+    "answerFormat": "star",
+    "tone": "confident",
+    "status": "draft",
+    "source": "baseResume",
+    "category": "Technical",
+    "topic": "SQL & analytics tooling",
+    "difficulty": "senior",
+    "usedBaseResume": true,
+    "usedWorkJournal": false,
+    "evidenceUsed": [
+      "Base resume: Yokoy — analytics area"
+    ],
+    "journalStoriesUsed": [],
+    "gaps": [
+      "No saved answer yet"
+    ],
+    "aiRevisionHistory": [],
+    "createdAt": "2026-09-17T10:00:00.000Z",
+    "updatedAt": "2026-09-20T10:00:00.000Z"
+  },
+  {
+    "id": "ic-5",
+    "selectedApplicationId": "app-swissre",
+    "selectedResumeId": "res-base",
+    "question": "What would you do in your first 90 days on the Swiss Re Data Platform?",
+    "answer": "Weeks 1–4: listen — 20 conversations across engineering, actuarial and compliance, and a usage baseline. Weeks 5–8: pick one lighthouse team and one painful workflow. Weeks 9–12: ship a visible improvement, publish the adoption metric, and propose the H1 roadmap.",
+    "originalAiAnswer": "Weeks 1–4: listen — 20 conversations across engineering, actuarial and compliance, and a usage baseline. Weeks 5–8: pick one lighthouse team and one painful workflow. Weeks 9–12: ship a visible improvement, publish the adoption metric, and propose the H1 roadmap.",
+    "answerFormat": "star",
+    "tone": "confident",
+    "status": "userEdited",
+    "source": "jobDescription",
+    "category": "HR",
+    "usedBaseResume": true,
+    "usedWorkJournal": false,
+    "evidenceUsed": [
+      "Base resume: Yokoy — analytics area"
+    ],
+    "journalStoriesUsed": [],
+    "gaps": [],
+    "aiRevisionHistory": [],
+    "createdAt": "2026-09-17T10:00:00.000Z",
+    "updatedAt": "2026-09-20T10:00:00.000Z"
+  },
+  {
+    "id": "ic-6",
+    "selectedApplicationId": "",
+    "selectedResumeId": "res-base",
+    "question": "Why are you leaving Yokoy?",
+    "answer": "I've taken the analytics area from an experiment to the default for most customers; the next chapter for me is a platform with a bigger regulatory surface and more teams to serve, which is exactly what this role is.",
+    "originalAiAnswer": "I've taken the analytics area from an experiment to the default for most customers; the next chapter for me is a platform with a bigger regulatory surface and more teams to serve, which is exactly what this role is.",
+    "answerFormat": "star",
+    "tone": "confident",
+    "status": "final",
+    "source": "manual",
+    "category": "Gap / Risk",
+    "usedBaseResume": true,
+    "usedWorkJournal": false,
+    "evidenceUsed": [
+      "Base resume: Yokoy — analytics area"
+    ],
+    "journalStoriesUsed": [],
+    "gaps": [],
+    "aiRevisionHistory": [],
+    "createdAt": "2026-09-17T10:00:00.000Z",
+    "updatedAt": "2026-09-20T10:00:00.000Z"
+  }
+]

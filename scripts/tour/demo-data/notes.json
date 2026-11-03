@@ -1,0 +1,30 @@
+[
+  {
+    "id": "n-1",
+    "applicationId": "app-swissre",
+    "type": "recruiter",
+    "text": "Recruiter: Anna Keller. Panel = Head of Data Platform + 2 senior engineers + actuarial lead. 60 min case study, 30 min Q&A.",
+    "createdAt": "2026-09-16T13:40:00.000Z"
+  },
+  {
+    "id": "n-2",
+    "applicationId": "app-swissre",
+    "type": "interview",
+    "text": "Phone screen went well. They care most about adoption metrics and how I handle compliance pushback.",
+    "createdAt": "2026-09-16T14:05:00.000Z"
+  },
+  {
+    "id": "n-3",
+    "applicationId": "app-swissre",
+    "type": "todo",
+    "text": "Prepare 3 slides: adoption strategy, governance-as-default, first 90 days.",
+    "createdAt": "2026-09-27T17:00:00.000Z"
+  },
+  {
+    "id": "n-4",
+    "applicationId": "app-ledgy",
+    "type": "general",
+    "text": "Offer: CHF 165k base + equity. Deadline to respond 30 Sept.",
+    "createdAt": "2026-09-26T09:20:00.000Z"
+  }
+]
